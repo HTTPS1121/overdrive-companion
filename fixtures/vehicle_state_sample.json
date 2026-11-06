@@ -1,0 +1,91 @@
+{
+  "success": true,
+  "dilink5": false,
+  "iviRebootAvailable": true,
+  "doors": {
+    "lf": 1,
+    "rf": 1,
+    "lr": 1,
+    "rr": 1,
+    "trunk": 1,
+    "hood": -1,
+    "overall": 1,
+    "scope": "vehicle",
+    "source": "cloud"
+  },
+  "doorOpen": {
+    "lf": false,
+    "rf": false,
+    "lr": false,
+    "rr": false,
+    "trunk": false
+  },
+  "windows": {
+    "lf": 0,
+    "rf": 0,
+    "lr": 0,
+    "rr": 0,
+    "sunroof": 0,
+    "sunshade": -1
+  },
+  "windowOpen": {
+    "lf": false,
+    "rf": false,
+    "lr": false,
+    "rr": false
+  },
+  "trunk": {
+    "lockStatus": 1,
+    "open": false
+  },
+  "battery": {
+    "soc": 68.5,
+    "rangeKm": 312,
+    "bodyworkRangeKm": 310
+  },
+  "climate": {
+    "acOn": false,
+    "insideTempC": 24.0,
+    "fanLevel": 2,
+    "setpointDriver": 22.0,
+    "remoteClimateActive": false
+  },
+  "seats": {
+    "heat": [0, 0],
+    "cool": [0, 0],
+    "steeringHeat": false,
+    "ventilatedSupported": true
+  },
+  "lights": {
+    "readingLight": false,
+    "ambientEnabled": false
+  },
+  "tyres": {
+    "available": true,
+    "fl": {
+      "kPa": 250,
+      "psi": 36.3,
+      "temperatureC": 28,
+      "available": true
+    },
+    "fr": {
+      "kPa": 248,
+      "psi": 36.0,
+      "temperatureC": 27,
+      "available": true
+    },
+    "rl": {
+      "kPa": 252,
+      "psi": 36.5,
+      "temperatureC": 27,
+      "available": true
+    },
+    "rr": {
+      "kPa": 251,
+      "psi": 36.4,
+      "temperatureC": 28,
+      "available": true
+    }
+  },
+  "timestamp": 1730851200
+}
