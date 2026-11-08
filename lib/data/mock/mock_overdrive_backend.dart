@@ -55,6 +55,7 @@ class MockOverdriveBackend {
   }
 
   Map<String, dynamic> authStatus() => {
+        'status': 'ok',
         'success': true,
         'deviceId': 'mock-atto3-demo',
         'authRequired': authRequired,
@@ -65,7 +66,13 @@ class MockOverdriveBackend {
       return {'success': false, 'error': 'invalid token'};
     }
     _jwt = 'mock.jwt.$token';
-    return {'success': true, 'token': _jwt, 'deviceId': 'mock-atto3-demo'};
+    return {
+      'success': true,
+      'jwt': _jwt,
+      'token': _jwt,
+      'deviceId': 'mock-atto3-demo',
+      'expiresIn': 86400,
+    };
   }
 
   bool authorize(String? bearer) {
@@ -99,10 +106,10 @@ class MockOverdriveBackend {
     switch (path) {
       case '/api/vehicle/lock':
         _setOverallLock(locked: true);
-        return _ok('lock');
+        return _ok('lock', message: 'נעילה אושרה (סימולציה)', confirmation: 'local');
       case '/api/vehicle/unlock':
         _setOverallLock(locked: false);
-        return _ok('unlock');
+        return _ok('unlock', message: 'פתיחה אושרה (סימולציה)', confirmation: 'local');
       case '/api/vehicle/trunk':
         final action = body['action'] as String? ?? 'open';
         final open = action == 'open';
@@ -214,10 +221,18 @@ class MockOverdriveBackend {
   Map<String, dynamic> _map(String key) =>
       Map<String, dynamic>.from(_state[key] as Map<String, dynamic>? ?? {});
 
-  Map<String, dynamic> _ok(String path, {String? message}) => {
+  Map<String, dynamic> _ok(
+    String path, {
+    String? message,
+    String confirmation = 'local',
+  }) =>
+      {
         'success': true,
+        'commandSuccess': true,
         'path': 'local',
         'latencyMs': 42,
+        'outcome': 'success',
+        'confirmation': confirmation,
         ...? (message == null ? null : {'message': message}),
       };
 }

@@ -16,12 +16,28 @@ final appSettingsProvider =
 
 class AppSettingsNotifier extends Notifier<AppSettings> {
   @override
-  AppSettings build() => ref.read(settingsRepositoryProvider).load();
+  AppSettings build() {
+    final repo = ref.read(settingsRepositoryProvider);
+    return repo.load();
+  }
 
-  Future<void> persist(AppSettings settings) async {
+  void applyInitial(AppSettings settings) => state = settings;
+
+  Future<void> bootstrap() async {
+    final repo = ref.read(settingsRepositoryProvider);
+    final jwt = await repo.loadJwt();
+    if (jwt != null && jwt.isNotEmpty) {
+      ref.read(vehicleRepositoryProvider).setJwt(jwt);
+    }
+  }
+
+  Future<void> persist(AppSettings settings, {String? jwt}) async {
     state = settings;
-    await ref.read(settingsRepositoryProvider).save(settings);
+    await ref.read(settingsRepositoryProvider).saveFull(settings, jwt: jwt);
     ref.read(vehicleRepositoryProvider.notifier).rebind(settings);
+    if (jwt != null) {
+      ref.read(vehicleRepositoryProvider).setJwt(jwt);
+    }
   }
 }
 
@@ -39,11 +55,21 @@ class VehicleRepositoryNotifier extends Notifier<VehicleRepository> {
   VehicleRepository build() {
     final settings = ref.watch(appSettingsProvider);
     final mock = ref.watch(mockBackendProvider);
-    return VehicleRepository(settings: settings, mockBackend: mock);
+    final repo = VehicleRepository(settings: settings, mockBackend: mock);
+    ref.read(settingsRepositoryProvider).loadJwt().then(repo.setJwt);
+    return repo;
   }
 
   void rebind(AppSettings settings) {
     state.updateSettings(settings);
+  }
+
+  Future<void> authenticateAndStoreJwt() async {
+    await state.ensureAuthenticated();
+    final token = state.sessionJwt;
+    if (token != null && token.isNotEmpty) {
+      await ref.read(settingsRepositoryProvider).saveJwt(token);
+    }
   }
 }
 

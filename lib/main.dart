@@ -8,13 +8,14 @@ import 'providers/settings_repository.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final settingsRepo = await SettingsRepository.create();
+  final initialSettings = await settingsRepo.loadFull();
 
   runApp(
     ProviderScope(
       overrides: [
         settingsRepositoryProvider.overrideWithValue(settingsRepo),
       ],
-      child: const OverdriveApp(),
+      child: OverdriveApp(initialSettings: initialSettings),
     ),
   );
 }

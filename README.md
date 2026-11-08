@@ -8,10 +8,11 @@ Flutter Android companion for **Overdrive** (BYD Atto 3 and other BYD models). T
 
 ### Stage 1 (this repo)
 
-- Hebrew **RTL** Material 3 UI
-- Onboarding: base URL, device token, connection test, persisted settings
-- **Status**: polled `GET /api/vehicle/state` (+ optional `GET /api/vehicle/cloud-status`, `GET /api/gps` for motion)
-- **Control**: only real Overdrive endpoints (lock, climate, windows, etc.)
+- Hebrew **RTL** dark automotive dashboard (לוח מחוונים / שליטה / הגדרות)
+- Explicit **דמו** banner when not in live mode — never masquerades as real car data
+- Onboarding: base URL, device token (encrypted storage), JWT session persistence, connection test
+- **Status**: `GET /api/vehicle/state` + optional cloud/gps; stale-data warning from server `timestamp`
+- **Control**: grouped actions (access, windows, climate); lock/unlock uses server `confirmation` + state readback
 - **Embedded mock** (default) + optional **local HTTP mock** (`dart run tool/mock_server.dart`)
 
 ### Real Overdrive endpoints wired
@@ -19,7 +20,7 @@ Flutter Android companion for **Overdrive** (BYD Atto 3 and other BYD models). T
 | Method | Path | Use in app |
 |--------|------|------------|
 | GET | `/auth/status` | Connection test (public) |
-| POST | `/auth/token` | `{ "token": "<device-secret>" }` -> JWT (`Authorization: Bearer …`) |
+| POST | `/auth/token` | `{ "token": "<device-secret>" }` -> response field **`jwt`** (not `token`) |
 | GET | `/api/vehicle/state` | Status screen (SOC, range, doors, windows, climate, tyres, …) |
 | GET | `/api/vehicle/cloud-status` | BYD Cloud / local remote-key health |
 | GET | `/api/gps` | `location.canSpeedKmh` -> parked vs driving hint |
@@ -31,7 +32,13 @@ Flutter Android companion for **Overdrive** (BYD Atto 3 and other BYD models). T
 | POST | `/api/vehicle/climate` | `power_on`, `power_off`, `set_temp`, `set_fan`, steering heat actions |
 | POST | `/api/vehicle/lights` | `{ "target": "readingLight", "enable": true\|false }` |
 
-Source of truth: [yash-srivastava/Overdrive-release](https://github.com/yash-srivastava/Overdrive-release) (`VehicleControlApiHandler.java`, web `vehicle-control.js`).
+Source of truth: [HTTPS1121/Overdrive-release](https://github.com/HTTPS1121/Overdrive-release) `main` (`VehicleControlApiHandler.java`, `AuthApiHandler.java`, web `login.html`).
+
+**Version:** `1.1.0+2` (`com.https1121.overdrive.companion`). Release APK is signed with **debug keystore** until you add a release signing config (see `android/app/build.gradle.kts`).
+
+**Screenshots (Flutter goldens, embedded mock):** `test/screenshot/goldens/*.png` — also copied to artifacts during `flutter test test/screenshot/`.
+
+**Live car:** compile/tests and mock integration do **not** verify end-to-end operation on a real Atto 3 without your vehicle and tunnel.
 
 **Not in stage 1** (roadmap): `find-car`, charging schedule, seat memory, streaming `/api/stream/*`, recordings, surveillance, trips, MQTT, push.
 

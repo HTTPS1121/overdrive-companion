@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "commandSuccess": true,
+  "path": "local",
+  "message": "נעילה אושרה על ידי הרכב",
+  "outcome": "success",
+  "action": "lock",
+  "latencyMs": 1240,
+  "confirmation": "local"
+}

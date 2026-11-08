@@ -67,7 +67,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     repo.updateSettings(draft);
     try {
       final status = await repo.testConnection();
-      final deviceId = status['deviceId'] as String? ?? '—';
+      final deviceId = status.deviceId ?? '—';
       setState(() {
         _testOk = true;
         _testMessage = 'מחובר. מזהה מכשיר: $deviceId';

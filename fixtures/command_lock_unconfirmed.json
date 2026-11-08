@@ -1,0 +1,11 @@
+{
+  "success": false,
+  "commandSuccess": false,
+  "path": "local",
+  "message": "פקודת נעילה נשלחה אך לא אושרה ברכב",
+  "outcome": "unconfirmed",
+  "action": "lock",
+  "error": "פקודת נעילה נשלחה אך לא אושרה ברכב",
+  "latencyMs": 8200,
+  "confirmation": "none"
+}

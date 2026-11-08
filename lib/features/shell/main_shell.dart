@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../control/control_screen.dart';
-import '../onboarding/setup_screen.dart';
-import '../status/status_screen.dart';
+import '../../core/config/app_settings.dart';
 import '../../providers/app_providers.dart';
+import '../controls/controls_screen.dart';
+import '../dashboard/dashboard_screen.dart';
+import '../settings/settings_screen.dart';
 
 class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key});
@@ -19,14 +20,25 @@ class _MainShellState extends ConsumerState<MainShell> {
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(appSettingsProvider);
-    if (!settings.isConfigured) {
-      return SetupScreen(onComplete: () => setState(() {}));
+    final needsSetup =
+        !settings.isConfigured ||
+        (settings.connectionMode == ConnectionMode.live && settings.baseUrl.trim().isEmpty);
+
+    if (needsSetup) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: Scaffold(
+          body: SettingsScreen(
+            onComplete: () => setState(() => _index = 0),
+          ),
+        ),
+      );
     }
 
     final pages = [
-      const StatusScreen(),
-      const ControlScreen(),
-      SetupScreen(onComplete: () => setState(() {})),
+      const DashboardScreen(),
+      const ControlsScreen(),
+      SettingsScreen(onComplete: () => setState(() {})),
     ];
 
     return Directionality(
@@ -35,11 +47,14 @@ class _MainShellState extends ConsumerState<MainShell> {
         appBar: AppBar(
           title: const Text('Overdrive Companion'),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () =>
-                  ref.read(vehicleSnapshotProvider.notifier).refresh(),
-            ),
+            if (settings.connectionMode != ConnectionMode.live)
+              const Padding(
+                padding: EdgeInsetsDirectional.only(end: 4),
+                child: Chip(
+                  label: Text('דמו'),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
           ],
         ),
         body: pages[_index],
@@ -47,18 +62,9 @@ class _MainShellState extends ConsumerState<MainShell> {
           selectedIndex: _index,
           onDestinationSelected: (i) => setState(() => _index = i),
           destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.dashboard),
-              label: 'סטטוס',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.tune),
-              label: 'שליטה',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.settings),
-              label: 'הגדרות',
-            ),
+            NavigationDestination(icon: Icon(Icons.speed), label: 'לוח מחוונים'),
+            NavigationDestination(icon: Icon(Icons.touch_app), label: 'שליטה'),
+            NavigationDestination(icon: Icon(Icons.settings), label: 'הגדרות'),
           ],
         ),
       ),

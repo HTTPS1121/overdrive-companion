@@ -95,16 +95,35 @@ class OverdriveApiClient {
     if (result['success'] != true) {
       throw OverdriveApiException(result['error'] as String? ?? 'אימות נכשל');
     }
-    final session = result['token'] as String?;
+    // Overdrive AuthApiHandler returns `jwt` (web login.html); older mocks used `token`.
+    final session = (result['jwt'] ?? result['token']) as String?;
     if (session == null || session.isEmpty) {
       throw OverdriveApiException('לא התקבל JWT');
     }
     jwt = session;
   }
 
-  Future<Map<String, dynamic>> testConnection() async {
-    return getJson(OverdriveEndpoints.authStatus);
+  Future<AuthStatusResult> testConnection() async {
+    final json = await getJson(OverdriveEndpoints.authStatus);
+    return AuthStatusResult.fromJson(json);
   }
+}
+
+class AuthStatusResult {
+  AuthStatusResult({required this.ok, this.deviceId, this.raw = const {}});
+
+  factory AuthStatusResult.fromJson(Map<String, dynamic> json) {
+    final ok = json['status'] == 'ok' || json['success'] == true;
+    return AuthStatusResult(
+      ok: ok,
+      deviceId: json['deviceId'] as String?,
+      raw: json,
+    );
+  }
+
+  final bool ok;
+  final String? deviceId;
+  final Map<String, dynamic> raw;
 }
 
 /// Normalize user-entered base URL (add scheme, strip trailing slash).
