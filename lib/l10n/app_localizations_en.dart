@@ -84,7 +84,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accessCodeHelper =>
-      'Code only — server receives deviceId-accessCode';
+      'Enter the same access code shown on the car login page after the Device ID';
 
   @override
   String get connectSave => 'Connect and save';
@@ -327,6 +327,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionTyres => 'Tires';
 
   @override
+  String get tyreFrontLeft => 'Front left';
+
+  @override
+  String get tyreFrontRight => 'Front right';
+
+  @override
+  String get tyreRearLeft => 'Rear left';
+
+  @override
+  String get tyreRearRight => 'Rear right';
+
+  @override
   String get sectionCloud => 'BYD cloud';
 
   @override
@@ -476,4 +488,470 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get controlsNoConnection =>
       'No server connection — controls unavailable';
+
+  @override
+  String get actionCancel => 'Cancel';
+
+  @override
+  String get settingsSectionConnection => 'Connection';
+
+  @override
+  String get settingsSectionAppearance => 'Appearance';
+
+  @override
+  String get settingsSectionRemote => 'Remote services';
+
+  @override
+  String get settingsAppearanceHint =>
+      'Light, dark, or follow system. Dynamic color requires Android 12+.';
+
+  @override
+  String get settingsDynamicColorTitle => 'Dynamic colors (Material You)';
+
+  @override
+  String get settingsDynamicColorSubtitle =>
+      'From your device wallpaper palette';
+
+  @override
+  String get settingsSaveConnect => 'Save and connect';
+
+  @override
+  String get settingsSaved => 'Settings saved';
+
+  @override
+  String get settingsThemeSystem => 'System';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeDark => 'Dark';
+
+  @override
+  String get settingsOpenRemoteServices => 'Cabin audio, GenAI, WireGuard';
+
+  @override
+  String get settingsOpenCapabilityInventory =>
+      'API coverage vs Overdrive server';
+
+  @override
+  String get controlsTabCommands => 'Commands';
+
+  @override
+  String get controlsTabSchedules => 'Schedules';
+
+  @override
+  String get controlsTabComfort => 'Comfort';
+
+  @override
+  String get controlsTabCharging => 'Charging';
+
+  @override
+  String get scheduleTabClimate => 'Pre-climate';
+
+  @override
+  String get scheduleTabCharging => 'Smart charge';
+
+  @override
+  String get gpsNoLocationServer =>
+      'No location — active server connection required';
+
+  @override
+  String get gpsServerNoGps => 'Server returned no GPS data';
+
+  @override
+  String get gpsNoCoordinates => 'No coordinates in server response';
+
+  @override
+  String get gpsMapNeedsNetwork =>
+      'Map preview needs network on this device.\nCoordinates and navigation below are still from the server.';
+
+  @override
+  String get gpsMapLoadFailed => 'Could not load map — coordinates are shown';
+
+  @override
+  String get gpsCoordinates => 'Coordinates';
+
+  @override
+  String get gpsSpeed => 'Speed';
+
+  @override
+  String get gpsHeading => 'Heading';
+
+  @override
+  String get gpsOpenNavigation => 'Open in maps';
+
+  @override
+  String get gpsNavigationUnavailable => 'Could not open a maps app';
+
+  @override
+  String get chargeCapTitle => 'Charge limit';
+
+  @override
+  String get chargeCapLoadFailed => 'Could not load charge limit from server';
+
+  @override
+  String get chargeCapUnsupported =>
+      'Server reports charge limit not supported on this vehicle';
+
+  @override
+  String get chargeCapDescription =>
+      'Cap the maximum state of charge while charging.';
+
+  @override
+  String get chargeCapTarget => 'Charge target';
+
+  @override
+  String get chargeCapEnableTitle => 'Enable limit';
+
+  @override
+  String get chargeCapEnableSubtitle =>
+      'When on, charging stops at the selected target';
+
+  @override
+  String get chargeCapSave => 'Save to server';
+
+  @override
+  String get acChargeTitle => 'AC charge current';
+
+  @override
+  String get acChargeLoadFailed =>
+      'Could not read AC charge current from server';
+
+  @override
+  String get acChargeTrimUnsupported =>
+      'This trim does not support AC current limiting.';
+
+  @override
+  String get acChargeUnavailable =>
+      'AC current data unavailable from vehicle right now.';
+
+  @override
+  String get acChargeLevelsHint =>
+      'Five levels set on the vehicle; saving updates the server limit.';
+
+  @override
+  String acChargeLevelAmps(int amps) {
+    return '$amps A';
+  }
+
+  @override
+  String acChargeCurrentLabel(String label) {
+    return 'Current level: $label';
+  }
+
+  @override
+  String get extendedPowerSection => 'Power';
+
+  @override
+  String get extendedPowerDrivingBlocked =>
+      'Vehicle reports driving — power on/off blocked until stopped (server guard).';
+
+  @override
+  String get extendedPowerOn => 'Power on';
+
+  @override
+  String get extendedPowerOff => 'Power off';
+
+  @override
+  String get extendedBatteryHeatSection => 'Battery heat';
+
+  @override
+  String get extendedBatteryHeatUnknown =>
+      'Server did not report battery heat — toggle unavailable.';
+
+  @override
+  String get extendedBatteryPreheat => 'Battery preconditioning';
+
+  @override
+  String get extendedBatteryHeatOn => 'Active per server';
+
+  @override
+  String get extendedBatteryHeatOff => 'Off per server';
+
+  @override
+  String get extendedScreenshotsSection => 'In-vehicle displays';
+
+  @override
+  String get extendedScreenshotsHint =>
+      'PNG capture is stored on the vehicle (HU or cluster). Not auto-downloaded to phone.';
+
+  @override
+  String get extendedScreenshotHu => 'Multimedia screenshot';
+
+  @override
+  String get extendedScreenshotCluster => 'Cluster screenshot';
+
+  @override
+  String get extendedConfirmPowerOnTitle => 'Power on vehicle?';
+
+  @override
+  String get extendedConfirmPowerOffTitle => 'Power off vehicle?';
+
+  @override
+  String get extendedConfirmPowerOnBody =>
+      'Sent only when parked with no motion (server SDK guard).';
+
+  @override
+  String get extendedConfirmPowerOffBody =>
+      'Vehicle will shut down — ensure occupants are clear.';
+
+  @override
+  String extendedConfirmScreenshotTitle(String label) {
+    return 'Confirm $label?';
+  }
+
+  @override
+  String get extendedConfirmScreenshotBody =>
+      'Server captures on the vehicle and saves a PNG file.';
+
+  @override
+  String get extendedConfirmCapture => 'Capture';
+
+  @override
+  String get scheduleClimateTitle => 'Climate schedules from server';
+
+  @override
+  String get scheduleClimateEmpty => 'No active schedules — create one below.';
+
+  @override
+  String scheduleClimateUnsupported(String reason) {
+    return 'Not supported: $reason';
+  }
+
+  @override
+  String scheduleClimateListUnavailable(String reason) {
+    return 'Schedule list unavailable ($reason).\nAn empty list is not shown as proof of no schedules.';
+  }
+
+  @override
+  String get scheduleInvalidResponse => 'Invalid server response';
+
+  @override
+  String get scheduleDurationMinutes => 'Duration (minutes)';
+
+  @override
+  String get scheduleCreate => 'Create';
+
+  @override
+  String get scheduleUpdate => 'Update';
+
+  @override
+  String get scheduleCancelEdit => 'Cancel edit';
+
+  @override
+  String get scheduleDeleteTooltip => 'Delete';
+
+  @override
+  String scheduleChargingUnsupported(Object reason) {
+    return 'Not supported: $reason';
+  }
+
+  @override
+  String get scheduleChargingStatus => 'Status';
+
+  @override
+  String get scheduleChargingEnabled => 'Scheduled charging on';
+
+  @override
+  String get scheduleChargingStart => 'Start (HH:mm)';
+
+  @override
+  String get scheduleChargingEnd => 'End (HH:mm or full)';
+
+  @override
+  String get scheduleChargingRepeat => 'Repeat';
+
+  @override
+  String get scheduleRepeatDaily => 'Every day';
+
+  @override
+  String get scheduleRepeatOnce => 'One time';
+
+  @override
+  String get scheduleChargingSaveWindow => 'Save window';
+
+  @override
+  String get scheduleChargingStartNow => 'Start charging now';
+
+  @override
+  String get stateActive => 'Active';
+
+  @override
+  String get stateInactive => 'Off';
+
+  @override
+  String get comfortTabSeats => 'Seats';
+
+  @override
+  String get comfortTabMediaSafety => 'Media & safety';
+
+  @override
+  String get comfortMediaTitle => 'Media volume & screen brightness';
+
+  @override
+  String get comfortSafetyTitle => 'Safety';
+
+  @override
+  String get comfortEsp => 'Stability (ESP)';
+
+  @override
+  String get comfortItac => 'Traction (ITAC)';
+
+  @override
+  String get comfortUnavailable => 'Unavailable';
+
+  @override
+  String get comfortSlw => 'Speed limit warning (SLW)';
+
+  @override
+  String get comfortCpd => 'Child presence (CPD)';
+
+  @override
+  String get seatHint => 'Heat and vent levels as reported by the vehicle';
+
+  @override
+  String get seatDriver => 'Driver seat';
+
+  @override
+  String get seatPassenger => 'Passenger seat';
+
+  @override
+  String get seatHeat => 'Heat';
+
+  @override
+  String get seatVent => 'Vent';
+
+  @override
+  String get seatVentUnsupported => 'Vent not supported on this vehicle';
+
+  @override
+  String get seatRecallMemory => 'Recall memory';
+
+  @override
+  String get seatSaveMemory => 'Save seat';
+
+  @override
+  String commandFailed(String action) {
+    return '$action failed';
+  }
+
+  @override
+  String commandSentUnconfirmed(String action) {
+    return '$action sent but not confirmed on vehicle';
+  }
+
+  @override
+  String commandSuccess(String action) {
+    return '$action completed';
+  }
+
+  @override
+  String get commandLockConfirmed => 'Vehicle locked';
+
+  @override
+  String get commandUnlockConfirmed => 'Vehicle unlocked';
+
+  @override
+  String get surveillanceHeatmapTitle => 'Parking heatmap';
+
+  @override
+  String get surveillanceHeatmapLoad => 'Load heatmap';
+
+  @override
+  String get surveillanceFilterLogTitle => 'Filter log';
+
+  @override
+  String get surveillanceFilterLogLoad => 'Load log';
+
+  @override
+  String get surveillanceScreenDeterrentTitle => 'Screen deterrent';
+
+  @override
+  String get surveillanceScreenDeterrentTest => 'Test on vehicle';
+
+  @override
+  String get surveillanceScreenDeterrentFetch => 'Preview image';
+
+  @override
+  String get remoteCommunicateTitle => 'Cabin communication';
+
+  @override
+  String get remoteGenAiTitle => 'GenAI assistant';
+
+  @override
+  String get remoteWireGuardTitle => 'WireGuard tunnel';
+
+  @override
+  String get communicateAudioReady => 'Voice ready';
+
+  @override
+  String get communicateMessagesReady => 'Messages ready';
+
+  @override
+  String get communicateListenerReady => 'Listener ready';
+
+  @override
+  String get communicateSendMessage => 'Send message';
+
+  @override
+  String get communicateMessageHint => 'Text shown on vehicle';
+
+  @override
+  String get communicateTestSpeaker => 'Test speaker';
+
+  @override
+  String get communicateEmergencyStop => 'Emergency stop';
+
+  @override
+  String get communicateLoadStatus => 'Refresh status';
+
+  @override
+  String get genAiLoadStatus => 'Refresh status';
+
+  @override
+  String get genAiSendChat => 'Send';
+
+  @override
+  String get genAiChatHint => 'Ask the vehicle assistant';
+
+  @override
+  String get genAiInsightsOpen => 'Insights dashboard';
+
+  @override
+  String get wireGuardLoadStatus => 'Refresh status';
+
+  @override
+  String get wireGuardExposeOn => 'Expose dashboard';
+
+  @override
+  String get wireGuardExposeOff => 'Hide dashboard';
+
+  @override
+  String get inventoryTitle => 'Server capability map';
+
+  @override
+  String get inventoryImplemented => 'In app';
+
+  @override
+  String get inventoryPartial => 'Partial';
+
+  @override
+  String get inventoryNotInApp => 'HTTP only / not in UI';
+
+  @override
+  String get errorFreshnessUnknown => 'Unknown time source';
+
+  @override
+  String get errorFreshnessClockSkew => 'Vehicle clock ahead of device';
+
+  @override
+  String get errorConnectionNotConfigured => 'Server connection not configured';
+
+  @override
+  String get errorDeviceIdBeforeLogin =>
+      'Load Device ID from tunnel before sign-in';
+
+  @override
+  String get errorConfigureTunnel => 'Set tunnel URL and device token';
 }

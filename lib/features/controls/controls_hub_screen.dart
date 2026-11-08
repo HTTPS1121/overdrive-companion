@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n_x.dart';
 import '../comfort/comfort_screen.dart';
 import '../schedules/schedules_screen.dart';
 import 'charge_cap_panel.dart';
 import 'controls_commands_tab.dart';
 
-/// שליטה — פקודות בסיס, תזמונים, נוחות ומגבלת טעינה תחת לשוניות.
 class ControlsHubScreen extends StatelessWidget {
   const ControlsHubScreen({super.key});
 
-  static const tabLabels = ['פקודות', 'תזמונים', 'נוחות', 'טעינה'];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final tabs = [
+      l10n.controlsTabCommands,
+      l10n.controlsTabSchedules,
+      l10n.controlsTabComfort,
+      l10n.controlsTabCharging,
+    ];
     return DefaultTabController(
-      length: tabLabels.length,
+      length: tabs.length,
       child: Column(
         children: [
           Material(
@@ -24,7 +29,7 @@ class ControlsHubScreen extends StatelessWidget {
               tabAlignment: TabAlignment.start,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               labelPadding: const EdgeInsets.symmetric(horizontal: 12),
-              tabs: [for (final label in tabLabels) Tab(text: label)],
+              tabs: [for (final label in tabs) Tab(text: label)],
             ),
           ),
           const Expanded(

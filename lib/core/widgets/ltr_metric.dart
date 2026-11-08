@@ -16,6 +16,7 @@ class LtrMetricRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final base = style ?? Theme.of(context).textTheme.bodyLarge;
+    final shellDir = Directionality.of(context);
     return Text.rich(
       TextSpan(
         children: [
@@ -29,7 +30,7 @@ class LtrMetricRow extends StatelessWidget {
           ),
         ],
       ),
-      textDirection: TextDirection.rtl,
+      textDirection: shellDir,
     );
   }
 }

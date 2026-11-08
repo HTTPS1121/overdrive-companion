@@ -233,7 +233,7 @@ abstract class AppLocalizations {
   /// No description provided for @accessCodeHelper.
   ///
   /// In en, this message translates to:
-  /// **'Code only — server receives deviceId-accessCode'**
+  /// **'Enter the same access code shown on the car login page after the Device ID'**
   String get accessCodeHelper;
 
   /// No description provided for @connectSave.
@@ -680,6 +680,30 @@ abstract class AppLocalizations {
   /// **'Tires'**
   String get sectionTyres;
 
+  /// No description provided for @tyreFrontLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Front left'**
+  String get tyreFrontLeft;
+
+  /// No description provided for @tyreFrontRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Front right'**
+  String get tyreFrontRight;
+
+  /// No description provided for @tyreRearLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Rear left'**
+  String get tyreRearLeft;
+
+  /// No description provided for @tyreRearRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Rear right'**
+  String get tyreRearRight;
+
   /// No description provided for @sectionCloud.
   ///
   /// In en, this message translates to:
@@ -949,6 +973,864 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No server connection — controls unavailable'**
   String get controlsNoConnection;
+
+  /// No description provided for @actionCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get actionCancel;
+
+  /// No description provided for @settingsSectionConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection'**
+  String get settingsSectionConnection;
+
+  /// No description provided for @settingsSectionAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsSectionAppearance;
+
+  /// No description provided for @settingsSectionRemote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote services'**
+  String get settingsSectionRemote;
+
+  /// No description provided for @settingsAppearanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Light, dark, or follow system. Dynamic color requires Android 12+.'**
+  String get settingsAppearanceHint;
+
+  /// No description provided for @settingsDynamicColorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamic colors (Material You)'**
+  String get settingsDynamicColorTitle;
+
+  /// No description provided for @settingsDynamicColorSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'From your device wallpaper palette'**
+  String get settingsDynamicColorSubtitle;
+
+  /// No description provided for @settingsSaveConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and connect'**
+  String get settingsSaveConnect;
+
+  /// No description provided for @settingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings saved'**
+  String get settingsSaved;
+
+  /// No description provided for @settingsThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsThemeSystem;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsThemeDark;
+
+  /// No description provided for @settingsOpenRemoteServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabin audio, GenAI, WireGuard'**
+  String get settingsOpenRemoteServices;
+
+  /// No description provided for @settingsOpenCapabilityInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'API coverage vs Overdrive server'**
+  String get settingsOpenCapabilityInventory;
+
+  /// No description provided for @controlsTabCommands.
+  ///
+  /// In en, this message translates to:
+  /// **'Commands'**
+  String get controlsTabCommands;
+
+  /// No description provided for @controlsTabSchedules.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedules'**
+  String get controlsTabSchedules;
+
+  /// No description provided for @controlsTabComfort.
+  ///
+  /// In en, this message translates to:
+  /// **'Comfort'**
+  String get controlsTabComfort;
+
+  /// No description provided for @controlsTabCharging.
+  ///
+  /// In en, this message translates to:
+  /// **'Charging'**
+  String get controlsTabCharging;
+
+  /// No description provided for @scheduleTabClimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-climate'**
+  String get scheduleTabClimate;
+
+  /// No description provided for @scheduleTabCharging.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart charge'**
+  String get scheduleTabCharging;
+
+  /// No description provided for @gpsNoLocationServer.
+  ///
+  /// In en, this message translates to:
+  /// **'No location — active server connection required'**
+  String get gpsNoLocationServer;
+
+  /// No description provided for @gpsServerNoGps.
+  ///
+  /// In en, this message translates to:
+  /// **'Server returned no GPS data'**
+  String get gpsServerNoGps;
+
+  /// No description provided for @gpsNoCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'No coordinates in server response'**
+  String get gpsNoCoordinates;
+
+  /// No description provided for @gpsMapNeedsNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Map preview needs network on this device.\nCoordinates and navigation below are still from the server.'**
+  String get gpsMapNeedsNetwork;
+
+  /// No description provided for @gpsMapLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load map — coordinates are shown'**
+  String get gpsMapLoadFailed;
+
+  /// No description provided for @gpsCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinates'**
+  String get gpsCoordinates;
+
+  /// No description provided for @gpsSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get gpsSpeed;
+
+  /// No description provided for @gpsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading'**
+  String get gpsHeading;
+
+  /// No description provided for @gpsOpenNavigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in maps'**
+  String get gpsOpenNavigation;
+
+  /// No description provided for @gpsNavigationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open a maps app'**
+  String get gpsNavigationUnavailable;
+
+  /// No description provided for @chargeCapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge limit'**
+  String get chargeCapTitle;
+
+  /// No description provided for @chargeCapLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load charge limit from server'**
+  String get chargeCapLoadFailed;
+
+  /// No description provided for @chargeCapUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Server reports charge limit not supported on this vehicle'**
+  String get chargeCapUnsupported;
+
+  /// No description provided for @chargeCapDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Cap the maximum state of charge while charging.'**
+  String get chargeCapDescription;
+
+  /// No description provided for @chargeCapTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge target'**
+  String get chargeCapTarget;
+
+  /// No description provided for @chargeCapEnableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable limit'**
+  String get chargeCapEnableTitle;
+
+  /// No description provided for @chargeCapEnableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When on, charging stops at the selected target'**
+  String get chargeCapEnableSubtitle;
+
+  /// No description provided for @chargeCapSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to server'**
+  String get chargeCapSave;
+
+  /// No description provided for @acChargeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AC charge current'**
+  String get acChargeTitle;
+
+  /// No description provided for @acChargeLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read AC charge current from server'**
+  String get acChargeLoadFailed;
+
+  /// No description provided for @acChargeTrimUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This trim does not support AC current limiting.'**
+  String get acChargeTrimUnsupported;
+
+  /// No description provided for @acChargeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'AC current data unavailable from vehicle right now.'**
+  String get acChargeUnavailable;
+
+  /// No description provided for @acChargeLevelsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Five levels set on the vehicle; saving updates the server limit.'**
+  String get acChargeLevelsHint;
+
+  /// No description provided for @acChargeLevelAmps.
+  ///
+  /// In en, this message translates to:
+  /// **'{amps} A'**
+  String acChargeLevelAmps(int amps);
+
+  /// No description provided for @acChargeCurrentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current level: {label}'**
+  String acChargeCurrentLabel(String label);
+
+  /// No description provided for @extendedPowerSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Power'**
+  String get extendedPowerSection;
+
+  /// No description provided for @extendedPowerDrivingBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle reports driving — power on/off blocked until stopped (server guard).'**
+  String get extendedPowerDrivingBlocked;
+
+  /// No description provided for @extendedPowerOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Power on'**
+  String get extendedPowerOn;
+
+  /// No description provided for @extendedPowerOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Power off'**
+  String get extendedPowerOff;
+
+  /// No description provided for @extendedBatteryHeatSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery heat'**
+  String get extendedBatteryHeatSection;
+
+  /// No description provided for @extendedBatteryHeatUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Server did not report battery heat — toggle unavailable.'**
+  String get extendedBatteryHeatUnknown;
+
+  /// No description provided for @extendedBatteryPreheat.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery preconditioning'**
+  String get extendedBatteryPreheat;
+
+  /// No description provided for @extendedBatteryHeatOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Active per server'**
+  String get extendedBatteryHeatOn;
+
+  /// No description provided for @extendedBatteryHeatOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off per server'**
+  String get extendedBatteryHeatOff;
+
+  /// No description provided for @extendedScreenshotsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'In-vehicle displays'**
+  String get extendedScreenshotsSection;
+
+  /// No description provided for @extendedScreenshotsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'PNG capture is stored on the vehicle (HU or cluster). Not auto-downloaded to phone.'**
+  String get extendedScreenshotsHint;
+
+  /// No description provided for @extendedScreenshotHu.
+  ///
+  /// In en, this message translates to:
+  /// **'Multimedia screenshot'**
+  String get extendedScreenshotHu;
+
+  /// No description provided for @extendedScreenshotCluster.
+  ///
+  /// In en, this message translates to:
+  /// **'Cluster screenshot'**
+  String get extendedScreenshotCluster;
+
+  /// No description provided for @extendedConfirmPowerOnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Power on vehicle?'**
+  String get extendedConfirmPowerOnTitle;
+
+  /// No description provided for @extendedConfirmPowerOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Power off vehicle?'**
+  String get extendedConfirmPowerOffTitle;
+
+  /// No description provided for @extendedConfirmPowerOnBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent only when parked with no motion (server SDK guard).'**
+  String get extendedConfirmPowerOnBody;
+
+  /// No description provided for @extendedConfirmPowerOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle will shut down — ensure occupants are clear.'**
+  String get extendedConfirmPowerOffBody;
+
+  /// No description provided for @extendedConfirmScreenshotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm {label}?'**
+  String extendedConfirmScreenshotTitle(String label);
+
+  /// No description provided for @extendedConfirmScreenshotBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Server captures on the vehicle and saves a PNG file.'**
+  String get extendedConfirmScreenshotBody;
+
+  /// No description provided for @extendedConfirmCapture.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture'**
+  String get extendedConfirmCapture;
+
+  /// No description provided for @scheduleClimateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Climate schedules from server'**
+  String get scheduleClimateTitle;
+
+  /// No description provided for @scheduleClimateEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No active schedules — create one below.'**
+  String get scheduleClimateEmpty;
+
+  /// No description provided for @scheduleClimateUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Not supported: {reason}'**
+  String scheduleClimateUnsupported(String reason);
+
+  /// No description provided for @scheduleClimateListUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule list unavailable ({reason}).\nAn empty list is not shown as proof of no schedules.'**
+  String scheduleClimateListUnavailable(String reason);
+
+  /// No description provided for @scheduleInvalidResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid server response'**
+  String get scheduleInvalidResponse;
+
+  /// No description provided for @scheduleDurationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (minutes)'**
+  String get scheduleDurationMinutes;
+
+  /// No description provided for @scheduleCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get scheduleCreate;
+
+  /// No description provided for @scheduleUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get scheduleUpdate;
+
+  /// No description provided for @scheduleCancelEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel edit'**
+  String get scheduleCancelEdit;
+
+  /// No description provided for @scheduleDeleteTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get scheduleDeleteTooltip;
+
+  /// No description provided for @scheduleChargingUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Not supported: {reason}'**
+  String scheduleChargingUnsupported(Object reason);
+
+  /// No description provided for @scheduleChargingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get scheduleChargingStatus;
+
+  /// No description provided for @scheduleChargingEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled charging on'**
+  String get scheduleChargingEnabled;
+
+  /// No description provided for @scheduleChargingStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start (HH:mm)'**
+  String get scheduleChargingStart;
+
+  /// No description provided for @scheduleChargingEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End (HH:mm or full)'**
+  String get scheduleChargingEnd;
+
+  /// No description provided for @scheduleChargingRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get scheduleChargingRepeat;
+
+  /// No description provided for @scheduleRepeatDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get scheduleRepeatDaily;
+
+  /// No description provided for @scheduleRepeatOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'One time'**
+  String get scheduleRepeatOnce;
+
+  /// No description provided for @scheduleChargingSaveWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Save window'**
+  String get scheduleChargingSaveWindow;
+
+  /// No description provided for @scheduleChargingStartNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Start charging now'**
+  String get scheduleChargingStartNow;
+
+  /// No description provided for @stateActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get stateActive;
+
+  /// No description provided for @stateInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get stateInactive;
+
+  /// No description provided for @comfortTabSeats.
+  ///
+  /// In en, this message translates to:
+  /// **'Seats'**
+  String get comfortTabSeats;
+
+  /// No description provided for @comfortTabMediaSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Media & safety'**
+  String get comfortTabMediaSafety;
+
+  /// No description provided for @comfortMediaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Media volume & screen brightness'**
+  String get comfortMediaTitle;
+
+  /// No description provided for @comfortSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety'**
+  String get comfortSafetyTitle;
+
+  /// No description provided for @comfortEsp.
+  ///
+  /// In en, this message translates to:
+  /// **'Stability (ESP)'**
+  String get comfortEsp;
+
+  /// No description provided for @comfortItac.
+  ///
+  /// In en, this message translates to:
+  /// **'Traction (ITAC)'**
+  String get comfortItac;
+
+  /// No description provided for @comfortUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get comfortUnavailable;
+
+  /// No description provided for @comfortSlw.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed limit warning (SLW)'**
+  String get comfortSlw;
+
+  /// No description provided for @comfortCpd.
+  ///
+  /// In en, this message translates to:
+  /// **'Child presence (CPD)'**
+  String get comfortCpd;
+
+  /// No description provided for @seatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Heat and vent levels as reported by the vehicle'**
+  String get seatHint;
+
+  /// No description provided for @seatDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver seat'**
+  String get seatDriver;
+
+  /// No description provided for @seatPassenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Passenger seat'**
+  String get seatPassenger;
+
+  /// No description provided for @seatHeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Heat'**
+  String get seatHeat;
+
+  /// No description provided for @seatVent.
+  ///
+  /// In en, this message translates to:
+  /// **'Vent'**
+  String get seatVent;
+
+  /// No description provided for @seatVentUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Vent not supported on this vehicle'**
+  String get seatVentUnsupported;
+
+  /// No description provided for @seatRecallMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Recall memory'**
+  String get seatRecallMemory;
+
+  /// No description provided for @seatSaveMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Save seat'**
+  String get seatSaveMemory;
+
+  /// No description provided for @commandFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{action} failed'**
+  String commandFailed(String action);
+
+  /// No description provided for @commandSentUnconfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'{action} sent but not confirmed on vehicle'**
+  String commandSentUnconfirmed(String action);
+
+  /// No description provided for @commandSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{action} completed'**
+  String commandSuccess(String action);
+
+  /// No description provided for @commandLockConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle locked'**
+  String get commandLockConfirmed;
+
+  /// No description provided for @commandUnlockConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle unlocked'**
+  String get commandUnlockConfirmed;
+
+  /// No description provided for @surveillanceHeatmapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Parking heatmap'**
+  String get surveillanceHeatmapTitle;
+
+  /// No description provided for @surveillanceHeatmapLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Load heatmap'**
+  String get surveillanceHeatmapLoad;
+
+  /// No description provided for @surveillanceFilterLogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter log'**
+  String get surveillanceFilterLogTitle;
+
+  /// No description provided for @surveillanceFilterLogLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Load log'**
+  String get surveillanceFilterLogLoad;
+
+  /// No description provided for @surveillanceScreenDeterrentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen deterrent'**
+  String get surveillanceScreenDeterrentTitle;
+
+  /// No description provided for @surveillanceScreenDeterrentTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Test on vehicle'**
+  String get surveillanceScreenDeterrentTest;
+
+  /// No description provided for @surveillanceScreenDeterrentFetch.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview image'**
+  String get surveillanceScreenDeterrentFetch;
+
+  /// No description provided for @remoteCommunicateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabin communication'**
+  String get remoteCommunicateTitle;
+
+  /// No description provided for @remoteGenAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'GenAI assistant'**
+  String get remoteGenAiTitle;
+
+  /// No description provided for @remoteWireGuardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'WireGuard tunnel'**
+  String get remoteWireGuardTitle;
+
+  /// No description provided for @communicateAudioReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice ready'**
+  String get communicateAudioReady;
+
+  /// No description provided for @communicateMessagesReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages ready'**
+  String get communicateMessagesReady;
+
+  /// No description provided for @communicateListenerReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Listener ready'**
+  String get communicateListenerReady;
+
+  /// No description provided for @communicateSendMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send message'**
+  String get communicateSendMessage;
+
+  /// No description provided for @communicateMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Text shown on vehicle'**
+  String get communicateMessageHint;
+
+  /// No description provided for @communicateTestSpeaker.
+  ///
+  /// In en, this message translates to:
+  /// **'Test speaker'**
+  String get communicateTestSpeaker;
+
+  /// No description provided for @communicateEmergencyStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency stop'**
+  String get communicateEmergencyStop;
+
+  /// No description provided for @communicateLoadStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh status'**
+  String get communicateLoadStatus;
+
+  /// No description provided for @genAiLoadStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh status'**
+  String get genAiLoadStatus;
+
+  /// No description provided for @genAiSendChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get genAiSendChat;
+
+  /// No description provided for @genAiChatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the vehicle assistant'**
+  String get genAiChatHint;
+
+  /// No description provided for @genAiInsightsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Insights dashboard'**
+  String get genAiInsightsOpen;
+
+  /// No description provided for @wireGuardLoadStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh status'**
+  String get wireGuardLoadStatus;
+
+  /// No description provided for @wireGuardExposeOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expose dashboard'**
+  String get wireGuardExposeOn;
+
+  /// No description provided for @wireGuardExposeOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide dashboard'**
+  String get wireGuardExposeOff;
+
+  /// No description provided for @inventoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server capability map'**
+  String get inventoryTitle;
+
+  /// No description provided for @inventoryImplemented.
+  ///
+  /// In en, this message translates to:
+  /// **'In app'**
+  String get inventoryImplemented;
+
+  /// No description provided for @inventoryPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get inventoryPartial;
+
+  /// No description provided for @inventoryNotInApp.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP only / not in UI'**
+  String get inventoryNotInApp;
+
+  /// No description provided for @errorFreshnessUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown time source'**
+  String get errorFreshnessUnknown;
+
+  /// No description provided for @errorFreshnessClockSkew.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle clock ahead of device'**
+  String get errorFreshnessClockSkew;
+
+  /// No description provided for @errorConnectionNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Server connection not configured'**
+  String get errorConnectionNotConfigured;
+
+  /// No description provided for @errorDeviceIdBeforeLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Load Device ID from tunnel before sign-in'**
+  String get errorDeviceIdBeforeLogin;
+
+  /// No description provided for @errorConfigureTunnel.
+  ///
+  /// In en, this message translates to:
+  /// **'Set tunnel URL and device token'**
+  String get errorConfigureTunnel;
 }
 
 class _AppLocalizationsDelegate

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format/freshness.dart';
 import '../../core/layout/scroll_insets.dart';
+import '../../core/l10n/command_result_l10n.dart';
 import '../../core/l10n/control_l10n.dart';
 import '../../core/l10n/l10n_x.dart';
 import '../../core/widgets/confirm_risky_action.dart';
@@ -255,10 +256,10 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
     if (!mounted) return;
     setState(() {
       _busy = false;
-      _lastFeedback = result.userMessageHe(actionLabel: label);
+      _lastFeedback = result.userMessage(l10n, actionLabel: label);
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result.userMessageHe(actionLabel: label))),
+      SnackBar(content: Text(result.userMessage(l10n, actionLabel: label))),
     );
     if (result.userConfirmed) {
       await ref.read(vehicleSnapshotProvider.notifier).refresh();
@@ -278,7 +279,7 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
     if (!mounted) return;
     setState(() {
       _busy = false;
-      _lastFeedback = result.userMessageHe(actionLabel: l10n.sectionClimate);
+      _lastFeedback = result.userMessage(l10n, actionLabel: l10n.sectionClimate);
     });
     if (result.success) {
       await ref.read(vehicleSnapshotProvider.notifier).refresh();

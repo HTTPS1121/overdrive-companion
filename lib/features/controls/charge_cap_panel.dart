@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/command_result_l10n.dart';
+import '../../core/l10n/l10n_x.dart';
 import '../../core/widgets/ltr_metric.dart';
 import '../../core/widgets/requires_connection.dart';
 import '../../data/models/remote_feature_models.dart';
 import '../../providers/app_providers.dart';
 import 'ac_charge_current_panel.dart';
 
-/// מגבלת טעינה — GET/POST `/api/vehicle/charge-cap`.
 class ChargeCapPanel extends ConsumerStatefulWidget {
   const ChargeCapPanel({super.key});
 
@@ -57,6 +58,7 @@ class _ChargeCapPanelState extends ConsumerState<ChargeCapPanel> {
   }
 
   Future<void> _save() async {
+    final l10n = context.l10n;
     setState(() => _saving = true);
     final r = await ref.read(vehicleRepositoryProvider).postChargeCap(
           percent: _percent,
@@ -65,26 +67,27 @@ class _ChargeCapPanelState extends ConsumerState<ChargeCapPanel> {
     if (!mounted) return;
     setState(() => _saving = false);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(r.userMessageHe(actionLabel: 'מגבלת טעינה'))),
+      SnackBar(content: Text(r.userMessage(l10n, actionLabel: l10n.chargeCapTitle))),
     );
     if (r.success) await _load();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return RequiresConnection(
       child: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
               ? Center(child: Text(_error!))
               : _state == null || !_state!.success
-                  ? const Center(child: Text('לא ניתן לטעון מגבלת טעינה מהשרת'))
+                  ? Center(child: Text(l10n.chargeCapLoadFailed))
                   : !_state!.supported
-                      ? const Center(
+                      ? Center(
                           child: Padding(
-                            padding: EdgeInsets.all(24),
+                            padding: const EdgeInsets.all(24),
                             child: Text(
-                              'השרת דיווח שמגבלת טעינה אינה נתמכת במכונית זו',
+                              l10n.chargeCapUnsupported,
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -92,18 +95,12 @@ class _ChargeCapPanelState extends ConsumerState<ChargeCapPanel> {
                       : ListView(
                           padding: const EdgeInsets.all(16),
                           children: [
-                            Text(
-                              'מגבלת טעינה',
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
+                            Text(l10n.chargeCapTitle, style: Theme.of(context).textTheme.titleLarge),
                             const SizedBox(height: 8),
-                            Text(
-                              'הגבלת אחוז סוללה מקסימלי בטעינה.',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
+                            Text(l10n.chargeCapDescription, style: Theme.of(context).textTheme.bodySmall),
                             const SizedBox(height: 16),
                             LtrMetricRow(
-                              label: 'יעד טעינה',
+                              label: l10n.chargeCapTarget,
                               value: '$_percent%',
                             ),
                             Slider(
@@ -117,8 +114,8 @@ class _ChargeCapPanelState extends ConsumerState<ChargeCapPanel> {
                                   : (v) => setState(() => _percent = v.round()),
                             ),
                             SwitchListTile(
-                              title: const Text('הפעלת מגבלה'),
-                              subtitle: const Text('כאשר פעיל, הטעינה תיעצר ביעד שנבחר'),
+                              title: Text(l10n.chargeCapEnableTitle),
+                              subtitle: Text(l10n.chargeCapEnableSubtitle),
                               value: _enabled,
                               onChanged: _saving ? null : (v) => setState(() => _enabled = v),
                             ),
@@ -132,7 +129,7 @@ class _ChargeCapPanelState extends ConsumerState<ChargeCapPanel> {
                                       child: CircularProgressIndicator(strokeWidth: 2),
                                     )
                                   : const Icon(Icons.save),
-                              label: const Text('שמירה לשרת'),
+                              label: Text(l10n.chargeCapSave),
                             ),
                             const AcChargeCurrentPanel(),
                           ],

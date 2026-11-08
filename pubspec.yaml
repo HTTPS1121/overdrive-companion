@@ -1,7 +1,7 @@
 name: overdrive_companion
 description: Overdrive Companion — remote BYD vehicle control for the Overdrive HTTP server.
 publish_to: "none"
-version: 2.7.0+15
+version: 2.7.1+17
 
 environment:
   sdk: ^3.13.0
@@ -54,3 +54,4 @@ flutter:
     - fixtures/auth_token_success.json
     - fixtures/command_lock_confirmed.json
     - fixtures/command_lock_unconfirmed.json
+    - assets/images/byd-atto3-hero.png

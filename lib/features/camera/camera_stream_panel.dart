@@ -73,21 +73,17 @@ class CameraStreamPanel extends StatelessWidget {
         const SizedBox(height: 16),
         Text(l10n.cameraViewPickerTitle, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (var i = 0; i < 5; i++)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(_viewName(l10n, i)),
-                    selected: selectedView == i || stream?.viewMode == i,
-                    onSelected: busy ? null : (_) => onView(i),
-                  ),
-                ),
-            ],
-          ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (var i = 0; i < 5; i++)
+              FilterChip(
+                label: Text(_viewName(l10n, i)),
+                selected: selectedView == i || stream?.viewMode == i,
+                onSelected: busy ? null : (_) => onView(i),
+              ),
+          ],
         ),
         const SizedBox(height: 16),
         Text(l10n.cameraQualityTitle, style: theme.textTheme.titleSmall),

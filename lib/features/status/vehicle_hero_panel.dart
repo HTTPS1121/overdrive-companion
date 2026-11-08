@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/l10n_x.dart';
-import 'vehicle_silhouette.dart';
+import 'vehicle_hero_visual.dart';
 
 class VehicleHeroPanel extends StatelessWidget {
   const VehicleHeroPanel({
@@ -31,96 +31,76 @@ class VehicleHeroPanel extends StatelessWidget {
       borderRadius: BorderRadius.circular(28),
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 22, 16, 20),
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned(
-                  top: 4,
-                  right: -8,
-                  child: Opacity(
-                    opacity: 0.85,
-                    child: VehicleSilhouette(
-                      height: 76,
-                      color: scheme.primary.withValues(alpha: 0.22),
+            Text(
+              l10n.statusHeroTitle,
+              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            if (driving != null) ...[
+              const SizedBox(height: 6),
+              Text(driving!, style: theme.textTheme.bodyMedium),
+            ],
+            const SizedBox(height: 16),
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 88,
+                    height: 88,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox.expand(
+                          child: CircularProgressIndicator(
+                            value: soc != null ? pct / 100 : null,
+                            strokeWidth: 8,
+                            backgroundColor: scheme.surfaceContainerHighest,
+                          ),
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              soc != null ? '${soc!.round()}' : '—',
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text('%', style: theme.textTheme.labelLarge),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.statusHeroTitle,
-                      style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    if (driving != null) ...[
-                      const SizedBox(height: 6),
-                      Text(driving!, style: theme.textTheme.bodyMedium),
-                    ],
-                    const SizedBox(height: 18),
-                    Directionality(
-                      textDirection: TextDirection.ltr,
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 88,
-                            height: 88,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                SizedBox.expand(
-                                  child: CircularProgressIndicator(
-                                    value: soc != null ? pct / 100 : null,
-                                    strokeWidth: 8,
-                                    backgroundColor: scheme.surfaceContainerHighest,
-                                  ),
-                                ),
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      soc != null ? '${soc!.round()}' : '—',
-                                      style: theme.textTheme.headlineMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text('%', style: theme.textTheme.labelLarge),
-                                  ],
-                                ),
-                              ],
-                            ),
+                  const SizedBox(width: 16),
+                  if (rangeKm != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$rangeKm',
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            height: 1,
                           ),
-                          const SizedBox(width: 16),
-                          if (rangeKm != null)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '$rangeKm',
-                                  style: theme.textTheme.displaySmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    height: 1,
-                                  ),
-                                ),
-                                Text(
-                                  l10n.statusRangeUnit,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: scheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
+                        ),
+                        Text(
+                          l10n.statusRangeUnit,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
+            const VehicleHeroVisual(),
+            const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,

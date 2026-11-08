@@ -144,15 +144,89 @@ class _MetricGrid extends StatelessWidget {
         ),
         if (tyres?.available == true) ...[
           const SizedBox(height: 10),
-          _MetricTile(
-            icon: Icons.tire_repair,
-            title: l10n.sectionTyres,
-            value: tyres?.fl?.kPa != null ? '${tyres!.fl!.kPa} kPa' : '—',
-            subtitle: tyres?.fr?.kPa != null ? '${tyres!.fr!.kPa} kPa' : null,
-            wide: true,
-          ),
+          _TyreStrip(tyres: tyres!, l10n: l10n),
         ],
       ],
+    );
+  }
+}
+
+class _TyreStrip extends StatelessWidget {
+  const _TyreStrip({required this.tyres, required this.l10n});
+
+  final TyreBlock tyres;
+  final dynamic l10n;
+
+  String _kpa(TyreCorner? c) => c?.kPa != null ? '${c!.kPa} kPa' : '—';
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surfaceContainer,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.tire_repair, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(l10n.sectionTyres, style: theme.textTheme.titleSmall),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(child: _TyreCorner(label: l10n.tyreFrontLeft, value: _kpa(tyres.fl))),
+                const SizedBox(width: 8),
+                Expanded(child: _TyreCorner(label: l10n.tyreFrontRight, value: _kpa(tyres.fr))),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(child: _TyreCorner(label: l10n.tyreRearLeft, value: _kpa(tyres.rl))),
+                const SizedBox(width: 8),
+                Expanded(child: _TyreCorner(label: l10n.tyreRearRight, value: _kpa(tyres.rr))),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TyreCorner extends StatelessWidget {
+  const _TyreCorner({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: theme.textTheme.labelMedium),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+      ),
     );
   }
 }

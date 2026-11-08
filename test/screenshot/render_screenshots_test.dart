@@ -19,8 +19,12 @@ import '../support/fixture_api_client.dart';
 import 'test_fonts.dart';
 
 const _artifactRoots = [
-  '/opt/cursor/artifacts/v2.7-0/screenshots',
-  '/cursor/stores/self/artifacts/v2.7-0/screenshots',
+  '/opt/cursor/artifacts/v2.7-1/screenshots',
+  '/cursor/stores/self/artifacts/v2.7-1/screenshots',
+];
+const _artifactPackageRoots = [
+  '/opt/cursor/artifacts/v2.7-1',
+  '/cursor/stores/self/artifacts/v2.7-1',
 ];
 const _goldenRoot = 'goldens/v2.7';
 
@@ -39,6 +43,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
     await ensureScreenshotFonts();
+    _stageReleaseManifest();
     _settingsRepo = await SettingsRepository.create();
     _fixtureClient = await FixtureOverdriveApiClient.create();
     final repo = VehicleRepository(
@@ -107,13 +112,20 @@ void main() {
       snapshot: _fixtureSnap,
       expectNavIndex: 0,
       locale: const Locale('en'),
+      afterPump: (t) async {
+        await t.scrollUntilVisible(find.textContaining('32.085'), 200);
+        await t.pumpAndSettle();
+        expect(find.textContaining('Coordinates'), findsWidgets);
+        expect(find.textContaining('Speed'), findsWidgets);
+        expect(find.text('קואורדינטות'), findsNothing);
+      },
     );
   });
 
-  testWidgets('v2.7 status ev accent dynamic light en', (tester) async {
+  testWidgets('v2.7 status fixture seed palette light en (not OS dynamic)', (tester) async {
     await _capture(
       tester,
-      '02c_status_ev_accent_light_en',
+      '02c_status_fixture_seed_palette_light_en',
       settings: _fixtureSettings().copyWith(useDynamicColor: true),
       snapshot: _fixtureSnap,
       expectNavIndex: 0,
@@ -191,7 +203,7 @@ void main() {
       expectNavIndex: 3,
       locale: const Locale('he'),
       afterPump: (t) async {
-        expect(find.text('פתיחה בניווט'), findsOneWidget);
+        expect(find.text('פתיחה בניווט'), findsOneWidget); // he locale
         expect(find.textContaining('32.08530'), findsOneWidget);
       },
     );
@@ -471,6 +483,17 @@ Future<GlobalKey> _pumpHarness(
     expect(bar.selectedIndex, expectNavIndex);
   }
   return boundaryKey;
+}
+
+void _stageReleaseManifest() {
+  const manifestPath = 'docs/RELEASE_MANIFEST_v2.7.1.json';
+  final src = File(manifestPath);
+  if (!src.existsSync()) return;
+  final bytes = src.readAsBytesSync();
+  for (final root in _artifactPackageRoots) {
+    Directory(root).createSync(recursive: true);
+    File('$root/RELEASE_MANIFEST_v2.7.1.json').writeAsBytesSync(bytes);
+  }
 }
 
 Future<void> _writeGolden(WidgetTester tester, String name, Finder finder) async {

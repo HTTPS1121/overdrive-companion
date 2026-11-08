@@ -79,9 +79,7 @@ class _OverdriveAppState extends ConsumerState<OverdriveApp> {
       return const Locale('en');
     }
 
-    final localeOverride = widget.screenshotMode
-        ? (widget.screenshotLocale ?? const Locale('he'))
-        : widget.screenshotLocale;
+    final localeOverride = widget.screenshotLocale;
 
     final lightScheme = widget.screenshotLightScheme;
     final darkScheme = widget.screenshotDarkScheme;

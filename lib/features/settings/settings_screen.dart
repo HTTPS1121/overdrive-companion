@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/auth/tunnel_credentials.dart';
-import '../../core/config/app_settings.dart';
 import '../../data/api/overdrive_api_client.dart';
+import '../../core/config/app_settings.dart';
+import '../../core/l10n/l10n_x.dart';
 import '../../providers/app_providers.dart';
 import '../setup/connection_form.dart';
 
@@ -43,6 +44,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _save() async {
+    final l10n = context.l10n;
     final current = ref.read(appSettingsProvider);
     final deviceId = current.deviceId;
     final composed = composeDeviceToken(deviceId: deviceId, accessCode: _codeCtrl.text.trim());
@@ -56,7 +58,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ref.invalidate(vehicleSnapshotProvider);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ההגדרות נשמרו')),
+        SnackBar(content: Text(l10n.settingsSaved)),
       );
     }
   }
@@ -73,11 +75,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
     final settings = ref.watch(appSettingsProvider);
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
       children: [
-        Text('חיבור', style: theme.textTheme.titleLarge),
+        Text(l10n.settingsSectionConnection, style: theme.textTheme.titleLarge),
         const SizedBox(height: 12),
         ConnectionForm(
           urlController: _urlCtrl,
@@ -85,14 +88,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           showSaveButton: false,
         ),
         const SizedBox(height: 12),
-        FilledButton(onPressed: _save, child: const Text('שמירה והתחברות')),
+        FilledButton(onPressed: _save, child: Text(l10n.settingsSaveConnect)),
         const SizedBox(height: 28),
-        Text('תצוגה', style: theme.textTheme.titleLarge),
+        Text(l10n.settingsSectionAppearance, style: theme.textTheme.titleLarge),
         const SizedBox(height: 8),
-        Text(
-          'מצב בהיר / כהה / לפי המערכת. צבע דינמי דורש Android 12+.',
-          style: theme.textTheme.bodySmall,
-        ),
+        Text(l10n.settingsAppearanceHint, style: theme.textTheme.bodySmall),
         const SizedBox(height: 12),
         Directionality(
           textDirection: TextDirection.ltr,
@@ -101,7 +101,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: [
               for (final mode in CompanionThemeMode.values)
                 FilterChip(
-                  label: Text(_themeLabel(mode)),
+                  label: Text(_themeLabel(l10n, mode)),
                   selected: settings.themeMode == mode,
                   onSelected: (_) => _setThemeMode(mode),
                 ),
@@ -111,8 +111,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 12),
         ListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('צבעים דינמיים (Material You)'),
-          subtitle: const Text('לפי ערכת הצבעים של המכשיר'),
+          title: Text(l10n.settingsDynamicColorTitle),
+          subtitle: Text(l10n.settingsDynamicColorSubtitle),
           trailing: Switch(
             value: settings.useDynamicColor,
             onChanged: (v) async {
@@ -126,9 +126,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  static String _themeLabel(CompanionThemeMode mode) => switch (mode) {
-        CompanionThemeMode.system => 'מערכת',
-        CompanionThemeMode.light => 'בהיר',
-        CompanionThemeMode.dark => 'כהה',
+  static String _themeLabel(dynamic l10n, CompanionThemeMode mode) => switch (mode) {
+        CompanionThemeMode.system => l10n.settingsThemeSystem,
+        CompanionThemeMode.light => l10n.settingsThemeLight,
+        CompanionThemeMode.dark => l10n.settingsThemeDark,
       };
 }

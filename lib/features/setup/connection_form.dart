@@ -161,6 +161,7 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
             labelText: l10n.tunnelUrlLabel,
             hintText: l10n.tunnelUrlHint,
             helperText: l10n.tunnelUrlHelper,
+            helperMaxLines: 3,
           ),
           keyboardType: TextInputType.url,
           textDirection: TextDirection.ltr,
@@ -183,6 +184,7 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
           decoration: InputDecoration(
             labelText: l10n.deviceIdLabelLong,
             helperText: l10n.deviceIdHelper,
+            helperMaxLines: 3,
             suffixIcon: _loadingId
                 ? const Padding(
                     padding: EdgeInsets.all(12),
@@ -213,6 +215,7 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
           decoration: InputDecoration(
             labelText: l10n.accessCodeLabel,
             helperText: l10n.accessCodeHelper,
+            helperMaxLines: 3,
           ),
           obscureText: true,
           textDirection: TextDirection.ltr,
