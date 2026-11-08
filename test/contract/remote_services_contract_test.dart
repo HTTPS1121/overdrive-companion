@@ -28,17 +28,48 @@ void main() {
     );
     expect(comm.messagesReady, isTrue);
 
+    final settings = await client.postJson(
+      OverdriveEndpoints.communicateSettings,
+      body: {'outputLevel': 55, 'voiceEnabled': true},
+    );
+    expect(settings['outputLevel'], 55);
+
+    final msg = await client.postJson(
+      OverdriveEndpoints.communicateMessage,
+      body: {'kind': 'toast', 'message': 'hello tunnel', 'severity': 'info'},
+    );
+    expect(msg['status'], 'displayed');
+
     final gen = GenAiStatusState.fromJson(await client.getJson(OverdriveEndpoints.genaiStatus));
     expect(gen.enabled, isTrue);
 
-    final chat = await client.postJson(OverdriveEndpoints.genaiChat, body: {'messages': []});
+    final chat = await client.postJson(
+      OverdriveEndpoints.genaiChat,
+      body: {
+        'messages': [
+          {'role': 'user', 'content': 'ping'},
+        ],
+      },
+    );
     expect(chat['reply'], isNotNull);
+
+    final insights = await client.getJson('${OverdriveEndpoints.genaiInsights}?limit=5');
+    expect(insights['items'], isNotEmpty);
 
     final wg = WireGuardStatusState.fromJson(await client.getJson(OverdriveEndpoints.wireguardStatus));
     expect(wg.configured, isTrue);
 
     final expose = await client.postJson(OverdriveEndpoints.wireguardExpose, body: {'enabled': true});
     expect(expose['expose_dashboard'], isTrue);
+
+    final uploaded = await client.postJson(
+      OverdriveEndpoints.wireguardConfig,
+      body: {'config': '[Interface]\nAddress = 10.0.0.2/32'},
+    );
+    expect(uploaded['success'], isTrue);
+
+    final deleted = await client.deleteJson(OverdriveEndpoints.wireguardConfigDelete);
+    expect(deleted['success'], isTrue);
 
     final deterrent = await client.getBytes(OverdriveEndpoints.surveillanceScreenDeterrentImage);
     expect(deterrent.first, 0xFF);

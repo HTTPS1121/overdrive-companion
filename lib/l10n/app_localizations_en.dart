@@ -1049,4 +1049,88 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authHtmlRejected =>
       'Server returned HTML instead of JSON — check the tunnel URL.';
+
+  @override
+  String get communicateSettingsTitle => 'Cabin audio & messages';
+
+  @override
+  String get communicateVoiceEnabled => 'Remote voice enabled';
+
+  @override
+  String get communicateMessagesEnabled => 'On-screen messages enabled';
+
+  @override
+  String get communicateListenerEnabled => 'Cabin listener enabled';
+
+  @override
+  String get communicateOutputLevel => 'Speaker output level';
+
+  @override
+  String get communicateSaveSettings => 'Save communication settings';
+
+  @override
+  String get communicateMessageKind => 'Message style';
+
+  @override
+  String get communicateKindToast => 'Toast';
+
+  @override
+  String get communicateKindDialog => 'Dialog';
+
+  @override
+  String get communicateEmergencyStopTitle => 'Emergency stop?';
+
+  @override
+  String get communicateEmergencyStopBody =>
+      'Stops active remote voice/listening sessions on the vehicle.';
+
+  @override
+  String get communicateWsNote =>
+      'Live push-to-talk uses /ws/communicate in the browser PWA; this app uses HTTP settings, messages, and test speaker.';
+
+  @override
+  String get genAiInsightsList => 'Load insight history';
+
+  @override
+  String get genAiTest => 'Run GenAI self-test';
+
+  @override
+  String get genAiWsNote =>
+      'Voice sessions use /ws/genai; chat and insights use HTTP.';
+
+  @override
+  String get wireGuardConfigTitle => 'Tunnel configuration';
+
+  @override
+  String get wireGuardConfigHint =>
+      'Paste wg-quick text. Private keys never leave the vehicle server.';
+
+  @override
+  String get wireGuardConfigPlaceholder => '[Interface]\\nPrivateKey = …';
+
+  @override
+  String get wireGuardConfigSave => 'Upload config';
+
+  @override
+  String get wireGuardConfigDelete => 'Remove config';
+
+  @override
+  String get wireGuardConfigConfirmTitle => 'Upload WireGuard config?';
+
+  @override
+  String get wireGuardConfigConfirmBody =>
+      'Replaces the stored tunnel config on the vehicle daemon.';
+
+  @override
+  String get wireGuardConfigDeleteTitle => 'Delete WireGuard config?';
+
+  @override
+  String get wireGuardConfigDeleteBody =>
+      'Removes stored tunnel configuration from the vehicle.';
+
+  @override
+  String get commonSuccess => 'Success';
+
+  @override
+  String get commonError => 'Error';
 }

@@ -30,7 +30,13 @@ class MockOverdriveBackend {
   String? _jwt;
   bool authRequired = false;
   bool _wireguardExpose = false;
+  bool _wireguardConfigured = true;
+  String _wireguardConfigText = '[Interface]\n# mock';
   bool _genaiEnabled = true;
+  bool _communicateVoice = true;
+  bool _communicateMessages = true;
+  bool _communicateListener = true;
+  int _communicateOutputLevel = 70;
 
   static Map<String, dynamic> _defaultState() => {
         'success': true,
@@ -213,11 +219,27 @@ class MockOverdriveBackend {
         return _ok('surveillance-toggle');
       case '/api/surveillance/screen-deterrent/test':
         return {'success': true, 'status': 'queued'};
+      case '/api/communicate/settings':
+        if (body.containsKey('voiceEnabled')) {
+          _communicateVoice = body['voiceEnabled'] == true;
+        }
+        if (body.containsKey('messagesEnabled')) {
+          _communicateMessages = body['messagesEnabled'] == true;
+        }
+        if (body.containsKey('listenerEnabled')) {
+          _communicateListener = body['listenerEnabled'] == true;
+        }
+        if (body['outputLevel'] is num) {
+          _communicateOutputLevel = (body['outputLevel'] as num).toInt();
+        }
+        return communicateSettings();
       case '/api/communicate/message':
+        final msg = body['message']?.toString() ?? body['text']?.toString() ?? '';
         return {
           'success': true,
-          'status': 'queued',
-          'message': body['text']?.toString(),
+          'status': 'displayed',
+          'renderedKind': body['kind'] ?? 'toast',
+          'message': msg,
         };
       case '/api/communicate/test-speaker':
         return {'success': true, 'status': 'queued'};
@@ -229,6 +251,16 @@ class MockOverdriveBackend {
           'reply': _genaiEnabled ? 'Mock GenAI reply' : null,
           if (!_genaiEnabled) 'error': 'genai_disabled',
         };
+      case '/api/genai/test':
+        return {'success': _genaiEnabled, 'status': 'ok'};
+      case '/api/wireguard/config':
+        final text = body['config']?.toString() ?? '';
+        if (text.isEmpty) {
+          return {'success': false, 'error': 'config required'};
+        }
+        _wireguardConfigText = text;
+        _wireguardConfigured = true;
+        return {'success': true, 'configured': true, 'peerCount': 1};
       case '/api/wireguard/expose':
         _wireguardExpose = body['enabled'] == true;
         return {'success': true, 'expose_dashboard': _wireguardExpose};
@@ -254,6 +286,8 @@ class MockOverdriveBackend {
 
   Map<String, dynamic> handleGet(String path) {
     switch (path) {
+      case '/api/vehicle/state':
+        return vehicleState();
       case '/api/vehicle/climate-schedule':
         return {
           'success': true,
@@ -356,15 +390,32 @@ class MockOverdriveBackend {
           'online': true,
           'carState': 'on',
           'busy': false,
-          'audioReady': true,
-          'messagesReady': true,
-          'listenerReady': true,
+          'audioReady': _communicateVoice,
+          'messagesReady': _communicateMessages,
+          'listenerReady': _communicateListener,
+          'audioState': _communicateVoice ? 'ready' : 'disabled',
+          'messageState': _communicateMessages ? 'ready' : 'disabled',
+          'listenerState': _communicateListener ? 'ready' : 'disabled',
+          'maxMessageChars': 200,
+          'maxSeconds': 30,
         };
+      case '/api/communicate/settings':
+        return communicateSettings();
       case '/api/genai/status':
+      case '/api/genai/config':
         return {
           'success': true,
           'enabled': _genaiEnabled,
           'model': 'mock-model',
+          'configured': _genaiEnabled,
+          'provider': 'mock',
+        };
+      case '/api/genai/insights':
+        return {
+          'success': true,
+          'items': [
+            {'id': '1', 'title': 'Battery trend', 'createdAt': 1730000000},
+          ],
         };
       case '/api/genai/insights/dashboard':
         return {
@@ -374,18 +425,36 @@ class MockOverdriveBackend {
           ],
         };
       case '/api/wireguard':
-        return {
-          'configured': true,
-          'running': false,
-          'summary': 'mock-peer',
-          'expose_dashboard': _wireguardExpose,
-        };
+        return wireguardStatus();
       default:
         if (path.startsWith('/api/surveillance/snapshot/')) {
           return {'success': false, 'error': 'use binary fixture via getBytes'};
         }
         return {'success': false, 'error': 'unsupported GET $path'};
     }
+  }
+
+  Map<String, dynamic> communicateSettings() => {
+        'success': true,
+        'voiceEnabled': _communicateVoice,
+        'messagesEnabled': _communicateMessages,
+        'listenerEnabled': _communicateListener,
+        'outputLevel': _communicateOutputLevel,
+        'outputLevelOverrideEnabled': false,
+        'emergencyDisabled': false,
+      };
+
+  Map<String, dynamic> wireguardStatus() => {
+        'configured': _wireguardConfigured,
+        'running': false,
+        'summary': _wireguardConfigured ? 'mock-peer' : '',
+        'expose_dashboard': _wireguardExpose,
+      };
+
+  Map<String, dynamic> deleteWireGuardConfig() {
+    _wireguardConfigured = false;
+    _wireguardConfigText = '';
+    return {'success': true};
   }
 
   List<int> screenDeterrentJpeg() => [

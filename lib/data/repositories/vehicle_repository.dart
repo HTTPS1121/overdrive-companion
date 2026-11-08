@@ -539,13 +539,42 @@ class VehicleRepository {
     return CommunicateStatusState.fromJson(json);
   }
 
-  Future<CommandResult> postCommunicateMessage(String text) async {
+  Future<CommunicateSettingsState> fetchCommunicateSettings() async {
     await ensureAuthenticated();
-    final json = await _client.postJson(
-      OverdriveEndpoints.communicateMessage,
-      body: {'text': text},
-    );
-    return CommandResult.fromJson(json);
+    final json = await _client.getJson(OverdriveEndpoints.communicateSettings);
+    return CommunicateSettingsState.fromJson(json);
+  }
+
+  Future<CommunicateSettingsState> postCommunicateSettings(Map<String, dynamic> body) async {
+    await ensureAuthenticated();
+    final json = await _client.postJson(OverdriveEndpoints.communicateSettings, body: body);
+    return CommunicateSettingsState.fromJson(json);
+  }
+
+  Future<CommandResult> postCommunicateMessage({
+    required String message,
+    String kind = 'toast',
+    String severity = 'info',
+    String position = 'bottom',
+    String duration = 'short',
+    String? title,
+  }) async {
+    await ensureAuthenticated();
+    final body = <String, dynamic>{
+      'kind': kind,
+      'message': message,
+      'severity': severity,
+      'position': position,
+      'duration': duration,
+    };
+    if (title != null && title.isNotEmpty) body['title'] = title;
+    final json = await _client.postJson(OverdriveEndpoints.communicateMessage, body: body);
+    return CommandResult.fromJson({
+      'success': json['success'] == true || json['status'] == 'displayed',
+      'message': json['status']?.toString(),
+      'error': json['reason']?.toString(),
+      ...json,
+    });
   }
 
   Future<CommandResult> postCommunicateTestSpeaker() async {
@@ -566,13 +595,30 @@ class VehicleRepository {
     return GenAiStatusState.fromJson(json);
   }
 
+  Future<GenAiConfigState> fetchGenAiConfig() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.genaiConfig);
+    return GenAiConfigState.fromJson(json);
+  }
+
+  Future<Map<String, dynamic>> fetchGenAiInsights({int limit = 20}) async {
+    await ensureAuthenticated();
+    return _client.getJson('${OverdriveEndpoints.genaiInsights}?limit=$limit');
+  }
+
+  Future<CommandResult> postGenAiTest() async {
+    await ensureAuthenticated();
+    final json = await _client.postJson(OverdriveEndpoints.genaiTest);
+    return CommandResult.fromJson(json);
+  }
+
   Future<GenAiChatResult> postGenAiChat(String message) async {
     await ensureAuthenticated();
     final json = await _client.postJson(
       OverdriveEndpoints.genaiChat,
       body: {
         'messages': [
-          {'role': 'user', 'content': message},
+          {'role': 'user', 'content': message, 'text': message},
         ],
       },
     );
@@ -596,6 +642,21 @@ class VehicleRepository {
       OverdriveEndpoints.wireguardExpose,
       body: {'enabled': enabled},
     );
+    return CommandResult.fromJson(json);
+  }
+
+  Future<CommandResult> postWireGuardConfig(String wgQuickText) async {
+    await ensureAuthenticated();
+    final json = await _client.postJson(
+      OverdriveEndpoints.wireguardConfig,
+      body: {'config': wgQuickText},
+    );
+    return CommandResult.fromJson(json);
+  }
+
+  Future<CommandResult> deleteWireGuardConfig() async {
+    await ensureAuthenticated();
+    final json = await _client.deleteJson(OverdriveEndpoints.wireguardConfigDelete);
     return CommandResult.fromJson(json);
   }
 }

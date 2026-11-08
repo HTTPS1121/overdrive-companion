@@ -65,6 +65,9 @@ abstract final class OverdriveEndpoints {
   static const genaiConfig = '/api/genai/config';
   static const genaiChat = '/api/genai/chat';
   static const genaiInsightsDashboard = '/api/genai/insights/dashboard';
+  static const genaiInsights = '/api/genai/insights';
+  static const genaiTest = '/api/genai/test';
+  static const wireguardConfigDelete = '/api/wireguard/config';
 }
 
 enum ControlKind {

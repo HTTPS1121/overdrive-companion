@@ -42,10 +42,17 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
       case OverdriveEndpoints.genaiStatus:
       case OverdriveEndpoints.genaiInsightsDashboard:
       case OverdriveEndpoints.wireguardStatus:
+      case OverdriveEndpoints.communicateSettings:
+      case OverdriveEndpoints.genaiConfig:
+      case OverdriveEndpoints.genaiInsights:
         return _backend.handleGet(path);
       default:
         if (path.startsWith(OverdriveEndpoints.streamView)) {
           return _backend.handlePost(path, const {});
+        }
+        final base = path.split('?').first;
+        if (base == OverdriveEndpoints.genaiInsights) {
+          return _backend.handleGet(base);
         }
         throw OverdriveApiException('fixture: unknown GET $path');
     }
@@ -62,10 +69,13 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
     }
     if (path == OverdriveEndpoints.surveillanceScreenDeterrentTest ||
         path == OverdriveEndpoints.communicateMessage ||
+        path == OverdriveEndpoints.communicateSettings ||
         path == OverdriveEndpoints.communicateTestSpeaker ||
         path == OverdriveEndpoints.communicateEmergencyStop ||
         path == OverdriveEndpoints.genaiChat ||
-        path == OverdriveEndpoints.wireguardExpose) {
+        path == OverdriveEndpoints.genaiTest ||
+        path == OverdriveEndpoints.wireguardExpose ||
+        path == OverdriveEndpoints.wireguardConfig) {
       return _backend.handlePost(path, body);
     }
     return _backend.handlePost(path, body);
@@ -106,6 +116,9 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
   Future<Map<String, dynamic>> deleteJson(String path) async {
     if (path.startsWith('/api/recordings/id/')) {
       return {'success': true};
+    }
+    if (path == OverdriveEndpoints.wireguardConfigDelete) {
+      return _backend.deleteWireGuardConfig();
     }
     throw OverdriveApiException('fixture: unknown DELETE $path');
   }

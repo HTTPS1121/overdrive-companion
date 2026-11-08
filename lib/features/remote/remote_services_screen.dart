@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:overdrive_companion/l10n/app_localizations.dart';
 
 import '../../core/l10n/command_result_l10n.dart';
 import '../../core/l10n/l10n_x.dart';
 import '../../core/layout/scroll_insets.dart';
+import '../../core/widgets/confirm_risky_action.dart';
 import '../../core/widgets/requires_connection.dart';
 import '../../data/models/remote_services_models.dart';
 import '../../providers/app_providers.dart';
@@ -20,11 +22,20 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
   late final TabController _tabs;
   final _messageCtrl = TextEditingController();
   final _genAiCtrl = TextEditingController();
+  final _wgConfigCtrl = TextEditingController();
   CommunicateStatusState? _communicate;
+  CommunicateSettingsState? _commSettings;
   GenAiStatusState? _genAi;
+  GenAiConfigState? _genAiConfig;
+  List<String> _insightTitles = const [];
   WireGuardStatusState? _wireGuard;
   String? _genAiReply;
   bool _busy = false;
+  String _messageKind = 'toast';
+  int _outputLevel = 70;
+  bool _voiceEnabled = true;
+  bool _messagesEnabled = true;
+  bool _listenerEnabled = true;
 
   @override
   void initState() {
@@ -37,6 +48,7 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
     _tabs.dispose();
     _messageCtrl.dispose();
     _genAiCtrl.dispose();
+    _wgConfigCtrl.dispose();
     super.dispose();
   }
 
@@ -51,6 +63,37 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Future<void> _loadCommunicateBundle() async {
+    final repo = ref.read(vehicleRepositoryProvider);
+    final status = await repo.fetchCommunicateStatus();
+    final settings = await repo.fetchCommunicateSettings();
+    setState(() {
+      _communicate = status;
+      _commSettings = settings;
+      _voiceEnabled = settings.voiceEnabled ?? true;
+      _messagesEnabled = settings.messagesEnabled ?? true;
+      _listenerEnabled = settings.listenerEnabled ?? true;
+      _outputLevel = (settings.raw['outputLevel'] as num?)?.toInt() ?? 70;
+    });
+  }
+
+  Future<void> _saveCommunicateSettings() async {
+    final l10n = context.l10n;
+    final repo = ref.read(vehicleRepositoryProvider);
+    final updated = await repo.postCommunicateSettings({
+      'voiceEnabled': _voiceEnabled,
+      'messagesEnabled': _messagesEnabled,
+      'listenerEnabled': _listenerEnabled,
+      'outputLevel': _outputLevel,
+    });
+    setState(() => _commSettings = updated);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.commonSuccess)),
+    );
+    await _loadCommunicateBundle();
   }
 
   @override
@@ -81,18 +124,14 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
     );
   }
 
-  Widget _communicateTab(dynamic l10n) {
+  Widget _communicateTab(AppLocalizations l10n) {
     final status = _communicate;
+    final messagesReady = status?.messagesReady ?? _messagesEnabled;
     return ListView(
       padding: scrollBottomPadding(context, extra: 24),
       children: [
         FilledButton.tonal(
-          onPressed: _busy
-              ? null
-              : () => _guard(() async {
-                    final s = await ref.read(vehicleRepositoryProvider).fetchCommunicateStatus();
-                    setState(() => _communicate = s);
-                  }),
+          onPressed: _busy ? null : () => _guard(_loadCommunicateBundle),
           child: Text(l10n.communicateLoadStatus),
         ),
         if (status != null) ...[
@@ -100,42 +139,98 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
             title: Text(l10n.communicateCarState),
             subtitle: Text(status.carState ?? '—'),
           ),
-          SwitchListTile(
+          ListTile(
+            dense: true,
             title: Text(l10n.communicateAudioReady),
-            value: status.audioReady == true,
-            onChanged: null,
+            trailing: Icon(
+              status.audioReady == true ? Icons.check_circle : Icons.block,
+              color: status.audioReady == true ? Colors.green : null,
+            ),
           ),
-          SwitchListTile(
+          ListTile(
+            dense: true,
             title: Text(l10n.communicateMessagesReady),
-            value: status.messagesReady == true,
-            onChanged: null,
+            trailing: Icon(
+              messagesReady ? Icons.check_circle : Icons.block,
+              color: messagesReady ? Colors.green : null,
+            ),
           ),
-          SwitchListTile(
+          ListTile(
+            dense: true,
             title: Text(l10n.communicateListenerReady),
-            value: status.listenerReady == true,
-            onChanged: null,
+            trailing: Icon(
+              status.listenerReady == true ? Icons.check_circle : Icons.block,
+              color: status.listenerReady == true ? Colors.green : null,
+            ),
           ),
         ],
-        const SizedBox(height: 12),
+        const Divider(),
+        Text(l10n.communicateSettingsTitle, style: Theme.of(context).textTheme.titleSmall),
+        SwitchListTile(
+          title: Text(l10n.communicateVoiceEnabled),
+          value: _voiceEnabled,
+          onChanged: _busy ? null : (v) => setState(() => _voiceEnabled = v),
+        ),
+        SwitchListTile(
+          title: Text(l10n.communicateMessagesEnabled),
+          value: _messagesEnabled,
+          onChanged: _busy ? null : (v) => setState(() => _messagesEnabled = v),
+        ),
+        SwitchListTile(
+          title: Text(l10n.communicateListenerEnabled),
+          value: _listenerEnabled,
+          onChanged: _busy ? null : (v) => setState(() => _listenerEnabled = v),
+        ),
+        Text(l10n.communicateOutputLevel),
+        Slider(
+          value: _outputLevel.toDouble(),
+          min: 0,
+          max: 100,
+          divisions: 20,
+          label: '$_outputLevel',
+          onChanged: _busy ? null : (v) => setState(() => _outputLevel = v.round()),
+        ),
+        FilledButton.tonal(
+          onPressed: _busy ? null : () => _guard(_saveCommunicateSettings),
+          child: Text(l10n.communicateSaveSettings),
+        ),
+        const Divider(),
+        DropdownButtonFormField<String>(
+          initialValue: _messageKind,
+          decoration: InputDecoration(labelText: l10n.communicateMessageKind),
+          items: [
+            DropdownMenuItem(value: 'toast', child: Text(l10n.communicateKindToast)),
+            DropdownMenuItem(value: 'dialog', child: Text(l10n.communicateKindDialog)),
+          ],
+          onChanged: _busy ? null : (v) => setState(() => _messageKind = v ?? 'toast'),
+        ),
         TextField(
           controller: _messageCtrl,
+          maxLength: 200,
           decoration: InputDecoration(
             labelText: l10n.communicateSendMessage,
             hintText: l10n.communicateMessageHint,
           ),
         ),
-        const SizedBox(height: 8),
         FilledButton(
-          onPressed: _busy
+          onPressed: _busy || !messagesReady
               ? null
               : () => _guard(() async {
                     final r = await ref.read(vehicleRepositoryProvider).postCommunicateMessage(
-                          _messageCtrl.text.trim(),
+                          message: _messageCtrl.text.trim(),
+                          kind: _messageKind,
                         );
                     if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(r.userMessage(l10n, actionLabel: l10n.communicateSendMessage))),
+                      SnackBar(
+                        content: Text(
+                          r.success
+                              ? (r.message ?? l10n.commonSuccess)
+                              : r.userMessage(l10n, actionLabel: l10n.communicateSendMessage),
+                        ),
+                      ),
                     );
+                    if (r.success) _messageCtrl.clear();
                   }),
           child: Text(l10n.communicateSendMessage),
         ),
@@ -161,6 +256,13 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
               onPressed: _busy
                   ? null
                   : () => _guard(() async {
+                        final ok = await confirmRiskyAction(
+                          context,
+                          title: l10n.communicateEmergencyStopTitle,
+                          body: l10n.communicateEmergencyStopBody,
+                          confirmLabel: l10n.communicateEmergencyStop,
+                        );
+                        if (!ok) return;
                         final r = await ref.read(vehicleRepositoryProvider).postCommunicateEmergencyStop();
                         if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -168,16 +270,25 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
                             content: Text(r.userMessage(l10n, actionLabel: l10n.communicateEmergencyStop)),
                           ),
                         );
+                        await _loadCommunicateBundle();
                       }),
               child: Text(l10n.communicateEmergencyStop),
             ),
           ],
         ),
+        if (_commSettings != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              l10n.communicateWsNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
       ],
     );
   }
 
-  Widget _genAiTab(dynamic l10n) {
+  Widget _genAiTab(AppLocalizations l10n) {
     return ListView(
       padding: scrollBottomPadding(context, extra: 24),
       children: [
@@ -185,15 +296,25 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
           onPressed: _busy
               ? null
               : () => _guard(() async {
-                    final s = await ref.read(vehicleRepositoryProvider).fetchGenAiStatus();
-                    setState(() => _genAi = s);
+                    final repo = ref.read(vehicleRepositoryProvider);
+                    final s = await repo.fetchGenAiStatus();
+                    final c = await repo.fetchGenAiConfig();
+                    setState(() {
+                      _genAi = s;
+                      _genAiConfig = c;
+                    });
                   }),
           child: Text(l10n.genAiLoadStatus),
         ),
         if (_genAi != null)
           ListTile(
             title: Text(_genAi!.model ?? 'GenAI'),
-            subtitle: Text(_genAi!.enabled == true ? 'enabled' : 'disabled'),
+            subtitle: Text(
+              [
+                if (_genAiConfig?.provider != null) _genAiConfig!.provider!,
+                _genAi!.enabled == true ? 'enabled' : 'disabled',
+              ].join(' · '),
+            ),
           ),
         TextField(
           controller: _genAiCtrl,
@@ -203,13 +324,12 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
           ),
           maxLines: 3,
         ),
-        const SizedBox(height: 8),
         FilledButton(
-          onPressed: _busy
+          onPressed: (_busy || _genAi?.enabled == false)
               ? null
               : () => _guard(() async {
                     final r = await ref.read(vehicleRepositoryProvider).postGenAiChat(_genAiCtrl.text.trim());
-                    setState(() => _genAiReply = r.reply);
+                    setState(() => _genAiReply = r.reply ?? r.error);
                   }),
           child: Text(l10n.genAiSendChat),
         ),
@@ -220,23 +340,61 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
               subtitle: Text(_genAiReply!),
             ),
           ),
-        OutlinedButton(
-          onPressed: _busy
-              ? null
-              : () => _guard(() async {
-                    final dash = await ref.read(vehicleRepositoryProvider).fetchGenAiInsightsDashboard();
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(dash['tiles']?.toString() ?? l10n.genAiInsightsOpen)),
-                    );
-                  }),
-          child: Text(l10n.genAiInsightsOpen),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton(
+              onPressed: _busy
+                  ? null
+                  : () => _guard(() async {
+                        final dash = await ref.read(vehicleRepositoryProvider).fetchGenAiInsightsDashboard();
+                        if (!mounted) return;
+                        final item = dash['item'];
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(item?.toString() ?? l10n.genAiInsightsOpen)),
+                        );
+                      }),
+              child: Text(l10n.genAiInsightsOpen),
+            ),
+            OutlinedButton(
+              onPressed: _busy
+                  ? null
+                  : () => _guard(() async {
+                        final list = await ref.read(vehicleRepositoryProvider).fetchGenAiInsights();
+                        final items = list['items'];
+                        final titles = <String>[];
+                        if (items is List) {
+                          for (final e in items) {
+                            if (e is Map && e['title'] != null) titles.add(e['title'].toString());
+                          }
+                        }
+                        setState(() => _insightTitles = titles);
+                      }),
+              child: Text(l10n.genAiInsightsList),
+            ),
+            OutlinedButton(
+              onPressed: (_busy || _genAi?.enabled == false)
+                  ? null
+                  : () => _guard(() async {
+                        final r = await ref.read(vehicleRepositoryProvider).postGenAiTest();
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(r.userMessage(l10n, actionLabel: l10n.genAiTest))),
+                        );
+                      }),
+              child: Text(l10n.genAiTest),
+            ),
+          ],
         ),
+        if (_insightTitles.isNotEmpty)
+          ..._insightTitles.map((t) => ListTile(dense: true, title: Text(t))),
+        Text(l10n.genAiWsNote, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
 
-  Widget _wireGuardTab(dynamic l10n) {
+  Widget _wireGuardTab(AppLocalizations l10n) {
     final wg = _wireGuard;
     return ListView(
       padding: scrollBottomPadding(context, extra: 24),
@@ -268,6 +426,60 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
                     }),
           ),
         ],
+        const Divider(),
+        Text(l10n.wireGuardConfigTitle, style: Theme.of(context).textTheme.titleSmall),
+        Text(l10n.wireGuardConfigHint, style: Theme.of(context).textTheme.bodySmall),
+        TextField(
+          controller: _wgConfigCtrl,
+          maxLines: 8,
+          decoration: InputDecoration(hintText: l10n.wireGuardConfigPlaceholder),
+          textDirection: TextDirection.ltr,
+        ),
+        FilledButton(
+          onPressed: _busy
+              ? null
+              : () => _guard(() async {
+                    final ok = await confirmRiskyAction(
+                      context,
+                      title: l10n.wireGuardConfigConfirmTitle,
+                      body: l10n.wireGuardConfigConfirmBody,
+                      confirmLabel: l10n.wireGuardConfigSave,
+                    );
+                    if (!ok) return;
+                    final r = await ref.read(vehicleRepositoryProvider).postWireGuardConfig(
+                          _wgConfigCtrl.text.trim(),
+                        );
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(r.userMessage(l10n, actionLabel: l10n.wireGuardConfigSave))),
+                    );
+                    final s = await ref.read(vehicleRepositoryProvider).fetchWireGuardStatus();
+                    setState(() => _wireGuard = s);
+                  }),
+          child: Text(l10n.wireGuardConfigSave),
+        ),
+        OutlinedButton(
+          onPressed: _busy
+              ? null
+              : () => _guard(() async {
+                    final ok = await confirmRiskyAction(
+                      context,
+                      title: l10n.wireGuardConfigDeleteTitle,
+                      body: l10n.wireGuardConfigDeleteBody,
+                      confirmLabel: l10n.wireGuardConfigDelete,
+                    );
+                    if (!ok) return;
+                    final r = await ref.read(vehicleRepositoryProvider).deleteWireGuardConfig();
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(r.userMessage(l10n, actionLabel: l10n.wireGuardConfigDelete))),
+                    );
+                    _wgConfigCtrl.clear();
+                    final s = await ref.read(vehicleRepositoryProvider).fetchWireGuardStatus();
+                    setState(() => _wireGuard = s);
+                  }),
+          child: Text(l10n.wireGuardConfigDelete),
+        ),
       ],
     );
   }

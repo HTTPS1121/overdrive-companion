@@ -2005,6 +2005,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Server returned HTML instead of JSON — check the tunnel URL.'**
   String get authHtmlRejected;
+
+  /// No description provided for @communicateSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabin audio & messages'**
+  String get communicateSettingsTitle;
+
+  /// No description provided for @communicateVoiceEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote voice enabled'**
+  String get communicateVoiceEnabled;
+
+  /// No description provided for @communicateMessagesEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'On-screen messages enabled'**
+  String get communicateMessagesEnabled;
+
+  /// No description provided for @communicateListenerEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabin listener enabled'**
+  String get communicateListenerEnabled;
+
+  /// No description provided for @communicateOutputLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker output level'**
+  String get communicateOutputLevel;
+
+  /// No description provided for @communicateSaveSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Save communication settings'**
+  String get communicateSaveSettings;
+
+  /// No description provided for @communicateMessageKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Message style'**
+  String get communicateMessageKind;
+
+  /// No description provided for @communicateKindToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Toast'**
+  String get communicateKindToast;
+
+  /// No description provided for @communicateKindDialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Dialog'**
+  String get communicateKindDialog;
+
+  /// No description provided for @communicateEmergencyStopTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency stop?'**
+  String get communicateEmergencyStopTitle;
+
+  /// No description provided for @communicateEmergencyStopBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Stops active remote voice/listening sessions on the vehicle.'**
+  String get communicateEmergencyStopBody;
+
+  /// No description provided for @communicateWsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Live push-to-talk uses /ws/communicate in the browser PWA; this app uses HTTP settings, messages, and test speaker.'**
+  String get communicateWsNote;
+
+  /// No description provided for @genAiInsightsList.
+  ///
+  /// In en, this message translates to:
+  /// **'Load insight history'**
+  String get genAiInsightsList;
+
+  /// No description provided for @genAiTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Run GenAI self-test'**
+  String get genAiTest;
+
+  /// No description provided for @genAiWsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice sessions use /ws/genai; chat and insights use HTTP.'**
+  String get genAiWsNote;
+
+  /// No description provided for @wireGuardConfigTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tunnel configuration'**
+  String get wireGuardConfigTitle;
+
+  /// No description provided for @wireGuardConfigHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste wg-quick text. Private keys never leave the vehicle server.'**
+  String get wireGuardConfigHint;
+
+  /// No description provided for @wireGuardConfigPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'[Interface]\\nPrivateKey = …'**
+  String get wireGuardConfigPlaceholder;
+
+  /// No description provided for @wireGuardConfigSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload config'**
+  String get wireGuardConfigSave;
+
+  /// No description provided for @wireGuardConfigDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove config'**
+  String get wireGuardConfigDelete;
+
+  /// No description provided for @wireGuardConfigConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload WireGuard config?'**
+  String get wireGuardConfigConfirmTitle;
+
+  /// No description provided for @wireGuardConfigConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaces the stored tunnel config on the vehicle daemon.'**
+  String get wireGuardConfigConfirmBody;
+
+  /// No description provided for @wireGuardConfigDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete WireGuard config?'**
+  String get wireGuardConfigDeleteTitle;
+
+  /// No description provided for @wireGuardConfigDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes stored tunnel configuration from the vehicle.'**
+  String get wireGuardConfigDeleteBody;
+
+  /// No description provided for @commonSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get commonSuccess;
+
+  /// No description provided for @commonError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get commonError;
 }
 
 class _AppLocalizationsDelegate
