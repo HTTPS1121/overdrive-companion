@@ -131,6 +131,31 @@ class MockExtendedBackend {
           ],
           'page': 1,
         };
+      case '/api/debug/seat/read':
+        return {
+          'success': true,
+          'group': 'all',
+          'registers': {'driver_vent': 2, 'passenger_heat': 0},
+        };
+      case '/api/logs/available':
+        return {
+          'available': true,
+          'daemons': ['overdrive', 'roadsense'],
+        };
+      case '/api/debug/car-property/status':
+        return {'success': true, 'ready': true, 'apiLevel': 33};
+      case '/api/debug/car-property/get':
+        return {'success': true, 'key': '0x11400008', 'value': 42, 'type': 'int32'};
+      case '/api/debug/adas/resolve':
+        return {'success': true, 'stack': 'mock_adas_v1'};
+      case '/api/debug/adas/read':
+        return {'success': true, 'registers': {'laneAssist': true}};
+      case '/api/debug/light/resolve':
+        return {'success': true, 'zones': ['ambient', 'reading']};
+      case '/api/debug/remote-key':
+        return {'success': true, 'pairedKeys': 1, 'lastEvent': 'lock'};
+      case '/api/debug/autoservice/status':
+        return {'success': true, 'status': 'idle', 'queueDepth': 0};
       default:
         if (base.startsWith('/api/trips/') && base != '/api/trips/config') {
           return {'success': true, 'id': base.split('/').last, 'distanceKm': 24.5};
@@ -183,6 +208,20 @@ class MockExtendedBackend {
         return {'success': true, ...body};
       case '/api/mqtt/connections':
         return {'success': true, 'id': 'mqtt-new', ...body};
+      case '/api/logs/upload':
+        return {'success': true, 'code': 'mock-upload-7f3a'};
+      case '/api/roadsense/delete-local':
+        return {'success': true, 'deleted': 'local'};
+      case '/api/roadsense/delete-cloud':
+        return {'success': true, 'deleted': 'cloud'};
+      case '/api/roadsense/test-chime':
+        return {
+          'success': true,
+          'played': true,
+          'severity': body['severity'],
+          'channel': body['channel'],
+          'volumePercent': body['volumePercent'],
+        };
       default:
         if (base.startsWith('/api/automations/test/')) {
           return {'success': true, 'tested': base.split('/').last};
@@ -194,6 +233,10 @@ class MockExtendedBackend {
             if (a['id'] == id) a['mode'] = mode;
           }
           return {'success': true, 'mode': mode};
+        }
+        if (base.contains('/api/roadsense/hazard/') &&
+            (base.endsWith('/confirm') || base.endsWith('/reject'))) {
+          return {'success': true, 'hazardId': base.split('/')[4], 'verdict': base.split('/').last};
         }
         return null;
     }

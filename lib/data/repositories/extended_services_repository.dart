@@ -208,4 +208,48 @@ class ExtendedServicesRepository {
 
   Future<Map<String, dynamic>> listCommunityAutomations({int page = 1}) =>
       _client.getJson('${ExtendedEndpoints.communityList}?page=$page&pageSize=10');
+
+  Future<Map<String, dynamic>> readSeatDebug({String group = 'all'}) =>
+      _client.getJson('${ExtendedEndpoints.debugSeatRead}?group=$group');
+
+  Future<Map<String, dynamic>> fetchLogsAvailable() =>
+      _client.getJson(ExtendedEndpoints.logsAvailable);
+
+  Future<Map<String, dynamic>> uploadLogDaemon(String daemon) =>
+      _client.postJson('${ExtendedEndpoints.logsUpload}?daemon=$daemon');
+
+  Future<Map<String, dynamic>> fetchCarPropertyStatus() =>
+      _client.getJson(ExtendedEndpoints.debugCarPropertyStatus);
+
+  Future<Map<String, dynamic>> readCarProperty(String key) =>
+      _client.getJson('${ExtendedEndpoints.debugCarPropertyGet}?key=$key');
+
+  Future<Map<String, dynamic>> resolveAdas() =>
+      _client.getJson(ExtendedEndpoints.debugAdasResolve);
+
+  Future<Map<String, dynamic>> readAdasRegisters() =>
+      _client.getJson(ExtendedEndpoints.debugAdasRead);
+
+  Future<Map<String, dynamic>> resolveLightDebug() =>
+      _client.getJson(ExtendedEndpoints.debugLightResolve);
+
+  Future<Map<String, dynamic>> fetchRemoteKeyDebug() =>
+      _client.getJson(ExtendedEndpoints.debugRemoteKey);
+
+  Future<Map<String, dynamic>> fetchAutoServiceDebugStatus() =>
+      _client.getJson(ExtendedEndpoints.debugAutoServiceStatus);
+
+  Future<Map<String, dynamic>> postRoadSenseDeleteLocal() =>
+      _client.postJson(ExtendedEndpoints.roadsenseDeleteLocal);
+
+  Future<Map<String, dynamic>> postRoadSenseDeleteCloud() =>
+      _client.postJson(ExtendedEndpoints.roadsenseDeleteCloud);
+
+  Future<Map<String, dynamic>> postRoadSenseTestChime(Map<String, dynamic> body) =>
+      _client.postJson(ExtendedEndpoints.roadsenseTestChime, body: body);
+
+  Future<Map<String, dynamic>> postRoadSenseHazardVerdict(String id, bool confirm) =>
+      _client.postJson(
+        ExtendedEndpoints.roadsenseHazardAction(id, confirm ? 'confirm' : 'reject'),
+      );
 }

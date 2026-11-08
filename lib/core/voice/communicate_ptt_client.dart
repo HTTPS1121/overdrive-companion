@@ -93,7 +93,10 @@ class CommunicatePttClient {
 
   Future<void> dispose() async {
     await pressUp(reason: 'Disposed');
-    await _events.close();
+    await _stopMic();
+    await _mic?.dispose();
+    _mic = null;
+    if (!_events.isClosed) await _events.close();
   }
 
   void _onFrame(Object? frame, int gen) {

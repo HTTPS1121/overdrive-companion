@@ -7,28 +7,10 @@ import '../../core/widgets/confirm_risky_action.dart';
 import '../../core/widgets/requires_connection.dart';
 import '../../data/models/extended_services_models.dart';
 import '../../providers/app_providers.dart';
+import 'integrations_loader.dart';
 
-Future<void> _snack(BuildContext context, String text) {
-  return Future.microtask(() {
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
-  });
-}
+Future<void> _snack(BuildContext context, String text) => integrationSnack(context, text);
 
-mixin _FamilyLoader<T extends ConsumerStatefulWidget> on ConsumerState<T> {
-  bool busy = false;
-
-  Future<void> guard(Future<void> Function() fn) async {
-    setState(() => busy = true);
-    try {
-      await fn();
-    } catch (e) {
-      if (mounted) await _snack(context, e.toString());
-    } finally {
-      if (mounted) setState(() => busy = false);
-    }
-  }
-}
 
 class AutomationsFamilyScreen extends ConsumerStatefulWidget {
   const AutomationsFamilyScreen({super.key});
@@ -38,7 +20,7 @@ class AutomationsFamilyScreen extends ConsumerStatefulWidget {
 }
 
 class _AutomationsFamilyScreenState extends ConsumerState<AutomationsFamilyScreen>
-    with _FamilyLoader {
+    with FamilyLoaderMixin {
   List<AutomationEntry> _items = const [];
   final _nameCtrl = TextEditingController();
 
@@ -150,7 +132,7 @@ class ParkingFamilyScreen extends ConsumerStatefulWidget {
   ConsumerState<ParkingFamilyScreen> createState() => _ParkingFamilyScreenState();
 }
 
-class _ParkingFamilyScreenState extends ConsumerState<ParkingFamilyScreen> with _FamilyLoader {
+class _ParkingFamilyScreenState extends ConsumerState<ParkingFamilyScreen> with FamilyLoaderMixin {
   ParkingStatusState? _status;
   List<ParkingSessionEntry> _sessions = const [];
 
@@ -228,7 +210,7 @@ class TripsFamilyScreen extends ConsumerStatefulWidget {
   ConsumerState<TripsFamilyScreen> createState() => _TripsFamilyScreenState();
 }
 
-class _TripsFamilyScreenState extends ConsumerState<TripsFamilyScreen> with _FamilyLoader {
+class _TripsFamilyScreenState extends ConsumerState<TripsFamilyScreen> with FamilyLoaderMixin {
   List<TripEntry> _trips = const [];
   Map<String, dynamic>? _summary;
 
@@ -301,7 +283,7 @@ class AudioLibraryFamilyScreen extends ConsumerStatefulWidget {
 }
 
 class _AudioLibraryFamilyScreenState extends ConsumerState<AudioLibraryFamilyScreen>
-    with _FamilyLoader {
+    with FamilyLoaderMixin {
   List<AudioLibraryEntry> _clips = const [];
 
   @override
@@ -364,7 +346,7 @@ class GenAiToolsFamilyScreen extends ConsumerStatefulWidget {
   ConsumerState<GenAiToolsFamilyScreen> createState() => _GenAiToolsFamilyScreenState();
 }
 
-class _GenAiToolsFamilyScreenState extends ConsumerState<GenAiToolsFamilyScreen> with _FamilyLoader {
+class _GenAiToolsFamilyScreenState extends ConsumerState<GenAiToolsFamilyScreen> with FamilyLoaderMixin {
   GenAiRoutinesState? _routines;
   List<GenAiIncidentPack> _incidents = const [];
 
@@ -444,7 +426,7 @@ class TelegramFamilyScreen extends ConsumerStatefulWidget {
   ConsumerState<TelegramFamilyScreen> createState() => _TelegramFamilyScreenState();
 }
 
-class _TelegramFamilyScreenState extends ConsumerState<TelegramFamilyScreen> with _FamilyLoader {
+class _TelegramFamilyScreenState extends ConsumerState<TelegramFamilyScreen> with FamilyLoaderMixin {
   TelegramStatusState? _status;
 
   @override
@@ -520,7 +502,7 @@ class PlatformConnectorsScreen extends ConsumerStatefulWidget {
 }
 
 class _PlatformConnectorsScreenState extends ConsumerState<PlatformConnectorsScreen>
-    with _FamilyLoader {
+    with FamilyLoaderMixin {
   Map<String, dynamic>? _abrpConfig;
   Map<String, dynamic>? _mqttConnections;
   List<dynamic> _community = const [];

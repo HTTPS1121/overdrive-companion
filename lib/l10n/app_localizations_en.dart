@@ -1414,4 +1414,105 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get platformDestructiveWarning =>
       'This changes vehicle-side configuration. Confirm before sending.';
+
+  @override
+  String get screenshotFixtureDisclaimer =>
+      'Fixture capture — not live vehicle verification';
+
+  @override
+  String get settingsOpenDiagnostics =>
+      'Seat debug, logs, car property, ADAS, lights, RoadSense tools';
+
+  @override
+  String get integrationsDiagnosticsTitle => 'Diagnostics & RoadSense';
+
+  @override
+  String get integrationsDiagnosticsSubtitle =>
+      'Debug reads, log upload, and RoadSense maintenance POSTs';
+
+  @override
+  String get integrationsRoadSenseTitle => 'RoadSense';
+
+  @override
+  String get diagnosticsHubTitle => 'Diagnostics';
+
+  @override
+  String get diagnosticsSeatTitle => 'Seat debug';
+
+  @override
+  String get diagnosticsLogsTitle => 'Daemon logs';
+
+  @override
+  String get diagnosticsLogsUnavailable => 'Log upload not available on server';
+
+  @override
+  String get diagnosticsLogsUploadTitle => 'Upload daemon log?';
+
+  @override
+  String get diagnosticsLogsUpload => 'Upload';
+
+  @override
+  String get diagnosticsCarPropertyTitle => 'Car property debug';
+
+  @override
+  String get diagnosticsPropertyKeyLabel => 'Property key (hex)';
+
+  @override
+  String get diagnosticsAdasTitle => 'ADAS debug';
+
+  @override
+  String get diagnosticsLightTitle => 'Interior light debug';
+
+  @override
+  String get diagnosticsLightReadOnly =>
+      'Read-only resolve registers (writes need vehicle confirm upstream).';
+
+  @override
+  String get diagnosticsRemoteKeyTitle => 'Remote key debug';
+
+  @override
+  String get diagnosticsAutoServiceTitle => 'Auto service debug';
+
+  @override
+  String get roadSenseHazardCount => 'Active hazards (fixture)';
+
+  @override
+  String get roadSenseSeverity => 'Chime severity';
+
+  @override
+  String get roadSenseChannel => 'Audio channel';
+
+  @override
+  String get roadSenseVolumePercent => 'Volume %';
+
+  @override
+  String get roadSenseTestChime => 'Test chime (POST)';
+
+  @override
+  String get roadSenseDeleteLocalTitle => 'Delete local RoadSense data?';
+
+  @override
+  String get roadSenseDeleteLocalBody =>
+      'Removes cached hazard tiles on the vehicle (destructive).';
+
+  @override
+  String get roadSenseDeleteLocal => 'Delete local data';
+
+  @override
+  String get roadSenseDeleteCloudTitle => 'Delete cloud RoadSense data?';
+
+  @override
+  String get roadSenseDeleteCloudBody =>
+      'Requests cloud purge for this vehicle (destructive).';
+
+  @override
+  String get roadSenseDeleteCloud => 'Delete cloud data';
+
+  @override
+  String get voiceFixtureUnsupported =>
+      'Voice disabled in vehicle settings (fixture)';
+
+  @override
+  String get releaseSigningDebugNote =>
+      'Release builds are signed with the debug key for CI/preview only — use your own release keystore for production distribution.';
 }

@@ -60,6 +60,25 @@ abstract final class ExtendedEndpoints {
   static const bydCloudStatus = '/api/bydcloud/status';
   static const communityList = '/api/community/list';
 
+  // Diagnostics (read-mostly; writes require confirm upstream)
+  static const debugSeatRead = '/api/debug/seat/read';
+  static const logsAvailable = '/api/logs/available';
+  static const logsUpload = '/api/logs/upload';
+  static const debugCarPropertyStatus = '/api/debug/car-property/status';
+  static const debugCarPropertyGet = '/api/debug/car-property/get';
+  static const debugAdasResolve = '/api/debug/adas/resolve';
+  static const debugAdasRead = '/api/debug/adas/read';
+  static const debugLightResolve = '/api/debug/light/resolve';
+  static const debugRemoteKey = '/api/debug/remote-key';
+  static const debugAutoServiceStatus = '/api/debug/autoservice/status';
+
+  // RoadSense
+  static const roadsenseDeleteLocal = '/api/roadsense/delete-local';
+  static const roadsenseDeleteCloud = '/api/roadsense/delete-cloud';
+  static const roadsenseTestChime = '/api/roadsense/test-chime';
+  static String roadsenseHazardAction(String id, String action) =>
+      '/api/roadsense/hazard/$id/$action';
+
   // WebSocket (companion voice clients)
   static const wsCommunicate = '/ws/communicate';
   static const wsGenAi = '/ws/genai';

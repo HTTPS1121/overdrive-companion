@@ -1,0 +1,18 @@
+{
+  "version": "2.8.3+22",
+  "apkFile": "overdrive-companion-2.8.3.apk",
+  "apkSha256": "c2305df4a101a23e517ad62d044f6e840f066f45fa19cda81c6802f466ccced8",
+  "apkSizeBytes": 60038531,
+  "apkVersionCode": 22,
+  "apkVersionName": "2.8.3",
+  "apkSigningCertSummary": "debug (Flutter template release)",
+  "goldens": "test/screenshot/goldens/v2.8",
+  "screenshotArtifacts": "v2.8.0/screenshots",
+  "implementationInventory": "IMPLEMENTATION_INVENTORY_v2.8.0.md",
+  "android": {
+    "signing": "debug (Flutter template release) unless production keystore configured",
+    "mediaCodecDecode": "not verified in CI — framing unit tests only"
+  },
+  "dynamicColorGoldenNote": "02c uses seeded CompanionColorSchemes — not OS wallpaper dynamic color",
+  "upstreamRef": "4807e94389de38feca3a8f8582e811a6c63eb2a2"
+}

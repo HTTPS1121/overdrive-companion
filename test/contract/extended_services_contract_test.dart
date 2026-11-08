@@ -37,5 +37,27 @@ void main() {
 
     final mqtt = await repo.fetchMqttStatus();
     expect(mqtt['success'], isTrue);
+
+    final seat = await repo.readSeatDebug();
+    expect(seat['success'], isTrue);
+
+    final logs = await repo.fetchLogsAvailable();
+    expect(logs['available'], isTrue);
+
+    final upload = await repo.uploadLogDaemon('overdrive');
+    expect(upload['code'], isNotEmpty);
+
+    final hazards = await repo.fetchRoadSenseHazards();
+    expect(hazards['features'], isList);
+
+    final chime = await repo.postRoadSenseTestChime({
+      'severity': 'moderate',
+      'channel': 'navigation',
+      'volumePercent': 50,
+    });
+    expect(chime['success'], isTrue);
+
+    final verdict = await repo.postRoadSenseHazardVerdict('h1', true);
+    expect(verdict['success'], isTrue);
   });
 }

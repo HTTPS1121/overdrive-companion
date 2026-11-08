@@ -95,7 +95,9 @@ class GenAiVoiceClient {
 
   Future<void> dispose() async {
     await stop(reason: 'Disposed');
-    await _events.close();
+    await _mic?.dispose();
+    _mic = null;
+    if (!_events.isClosed) await _events.close();
   }
 
   Future<void> truncatePlayback({int audioEndMs = 0}) async {

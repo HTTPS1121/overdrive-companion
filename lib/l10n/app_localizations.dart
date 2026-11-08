@@ -2671,6 +2671,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This changes vehicle-side configuration. Confirm before sending.'**
   String get platformDestructiveWarning;
+
+  /// No description provided for @screenshotFixtureDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixture capture — not live vehicle verification'**
+  String get screenshotFixtureDisclaimer;
+
+  /// No description provided for @settingsOpenDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat debug, logs, car property, ADAS, lights, RoadSense tools'**
+  String get settingsOpenDiagnostics;
+
+  /// No description provided for @integrationsDiagnosticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics & RoadSense'**
+  String get integrationsDiagnosticsTitle;
+
+  /// No description provided for @integrationsDiagnosticsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug reads, log upload, and RoadSense maintenance POSTs'**
+  String get integrationsDiagnosticsSubtitle;
+
+  /// No description provided for @integrationsRoadSenseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'RoadSense'**
+  String get integrationsRoadSenseTitle;
+
+  /// No description provided for @diagnosticsHubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics'**
+  String get diagnosticsHubTitle;
+
+  /// No description provided for @diagnosticsSeatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat debug'**
+  String get diagnosticsSeatTitle;
+
+  /// No description provided for @diagnosticsLogsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daemon logs'**
+  String get diagnosticsLogsTitle;
+
+  /// No description provided for @diagnosticsLogsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Log upload not available on server'**
+  String get diagnosticsLogsUnavailable;
+
+  /// No description provided for @diagnosticsLogsUploadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload daemon log?'**
+  String get diagnosticsLogsUploadTitle;
+
+  /// No description provided for @diagnosticsLogsUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get diagnosticsLogsUpload;
+
+  /// No description provided for @diagnosticsCarPropertyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Car property debug'**
+  String get diagnosticsCarPropertyTitle;
+
+  /// No description provided for @diagnosticsPropertyKeyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Property key (hex)'**
+  String get diagnosticsPropertyKeyLabel;
+
+  /// No description provided for @diagnosticsAdasTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ADAS debug'**
+  String get diagnosticsAdasTitle;
+
+  /// No description provided for @diagnosticsLightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interior light debug'**
+  String get diagnosticsLightTitle;
+
+  /// No description provided for @diagnosticsLightReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only resolve registers (writes need vehicle confirm upstream).'**
+  String get diagnosticsLightReadOnly;
+
+  /// No description provided for @diagnosticsRemoteKeyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote key debug'**
+  String get diagnosticsRemoteKeyTitle;
+
+  /// No description provided for @diagnosticsAutoServiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto service debug'**
+  String get diagnosticsAutoServiceTitle;
+
+  /// No description provided for @roadSenseHazardCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Active hazards (fixture)'**
+  String get roadSenseHazardCount;
+
+  /// No description provided for @roadSenseSeverity.
+  ///
+  /// In en, this message translates to:
+  /// **'Chime severity'**
+  String get roadSenseSeverity;
+
+  /// No description provided for @roadSenseChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio channel'**
+  String get roadSenseChannel;
+
+  /// No description provided for @roadSenseVolumePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume %'**
+  String get roadSenseVolumePercent;
+
+  /// No description provided for @roadSenseTestChime.
+  ///
+  /// In en, this message translates to:
+  /// **'Test chime (POST)'**
+  String get roadSenseTestChime;
+
+  /// No description provided for @roadSenseDeleteLocalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete local RoadSense data?'**
+  String get roadSenseDeleteLocalTitle;
+
+  /// No description provided for @roadSenseDeleteLocalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes cached hazard tiles on the vehicle (destructive).'**
+  String get roadSenseDeleteLocalBody;
+
+  /// No description provided for @roadSenseDeleteLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete local data'**
+  String get roadSenseDeleteLocal;
+
+  /// No description provided for @roadSenseDeleteCloudTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete cloud RoadSense data?'**
+  String get roadSenseDeleteCloudTitle;
+
+  /// No description provided for @roadSenseDeleteCloudBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests cloud purge for this vehicle (destructive).'**
+  String get roadSenseDeleteCloudBody;
+
+  /// No description provided for @roadSenseDeleteCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete cloud data'**
+  String get roadSenseDeleteCloud;
+
+  /// No description provided for @voiceFixtureUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice disabled in vehicle settings (fixture)'**
+  String get voiceFixtureUnsupported;
+
+  /// No description provided for @releaseSigningDebugNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Release builds are signed with the debug key for CI/preview only — use your own release keystore for production distribution.'**
+  String get releaseSigningDebugNote;
 }
 
 class _AppLocalizationsDelegate

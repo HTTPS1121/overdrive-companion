@@ -1388,4 +1388,102 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get platformDestructiveWarning =>
       'פעולה זו משנה הגדרות ברכב — אשר לפני שליחה.';
+
+  @override
+  String get screenshotFixtureDisclaimer => 'צילום fixture — לא אימות רכב חי';
+
+  @override
+  String get settingsOpenDiagnostics =>
+      'דיבוג מושב, יומנים, מאפייני רכב, ADAS, תאורה, RoadSense';
+
+  @override
+  String get integrationsDiagnosticsTitle => 'אבחון ו־RoadSense';
+
+  @override
+  String get integrationsDiagnosticsSubtitle =>
+      'קריאות דיבוג, העלאת יומן ופעולות תחזוקת RoadSense';
+
+  @override
+  String get integrationsRoadSenseTitle => 'RoadSense';
+
+  @override
+  String get diagnosticsHubTitle => 'אבחון';
+
+  @override
+  String get diagnosticsSeatTitle => 'דיבוג מושב';
+
+  @override
+  String get diagnosticsLogsTitle => 'יומני דמוון';
+
+  @override
+  String get diagnosticsLogsUnavailable => 'העלאת יומן לא זמינה בשרת';
+
+  @override
+  String get diagnosticsLogsUploadTitle => 'להעלות יומן דמוון?';
+
+  @override
+  String get diagnosticsLogsUpload => 'העלאה';
+
+  @override
+  String get diagnosticsCarPropertyTitle => 'דיבוג מאפייני רכב';
+
+  @override
+  String get diagnosticsPropertyKeyLabel => 'מפתח מאפיין (hex)';
+
+  @override
+  String get diagnosticsAdasTitle => 'דיבוג ADAS';
+
+  @override
+  String get diagnosticsLightTitle => 'דיבוג תאורת פנים';
+
+  @override
+  String get diagnosticsLightReadOnly =>
+      'קריאה בלבד — כתיבה דורשת אישור בשרת הרכב.';
+
+  @override
+  String get diagnosticsRemoteKeyTitle => 'דיבוג מפתח מרחוק';
+
+  @override
+  String get diagnosticsAutoServiceTitle => 'דיבוג Auto service';
+
+  @override
+  String get roadSenseHazardCount => 'מכשולים פעילים (fixture)';
+
+  @override
+  String get roadSenseSeverity => 'חומרת צליל';
+
+  @override
+  String get roadSenseChannel => 'ערוץ שמע';
+
+  @override
+  String get roadSenseVolumePercent => 'עוצמה %';
+
+  @override
+  String get roadSenseTestChime => 'בדיקת צליל (POST)';
+
+  @override
+  String get roadSenseDeleteLocalTitle => 'למחוק נתוני RoadSense מקומיים?';
+
+  @override
+  String get roadSenseDeleteLocalBody =>
+      'מוחק אריחי מכשולים במטמון הרכב (הרסני).';
+
+  @override
+  String get roadSenseDeleteLocal => 'מחיקת נתונים מקומיים';
+
+  @override
+  String get roadSenseDeleteCloudTitle => 'למחוק נתוני RoadSense בענן?';
+
+  @override
+  String get roadSenseDeleteCloudBody => 'מבקש מחיקה בענן עבור הרכב (הרסני).';
+
+  @override
+  String get roadSenseDeleteCloud => 'מחיקת נתונים בענן';
+
+  @override
+  String get voiceFixtureUnsupported => 'קול מושבת בהגדרות הרכב (fixture)';
+
+  @override
+  String get releaseSigningDebugNote =>
+      'בניית שחרור חתומה במפתח debug ל־CI/תצוגה בלבד — להפצה השתמשו בחתימת שחרור משלכם.';
 }

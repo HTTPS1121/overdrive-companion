@@ -10,6 +10,7 @@ abstract class MicCapture {
   Future<void> start({required int sampleRate});
   Stream<Uint8List> get pcmFrames;
   Future<void> stop();
+  Future<void> dispose() async => stop();
 }
 
 /// Live device microphone — not used in CI fixture tests.
@@ -47,6 +48,13 @@ class RecordMicCapture implements MicCapture {
       await _record.stop();
     }
   }
+
+  @override
+  Future<void> dispose() async {
+    await stop();
+    await _record.dispose();
+    await _controller.close();
+  }
 }
 
 /// Feeds prerecorded PCM frames (tests / screenshot harness).
@@ -78,6 +86,12 @@ class FixtureMicCapture implements MicCapture {
   Future<void> stop() async {
     _timer?.cancel();
     _timer = null;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await stop();
+    if (!_controller.isClosed) await _controller.close();
   }
 }
 

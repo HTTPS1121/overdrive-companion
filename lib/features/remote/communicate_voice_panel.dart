@@ -7,6 +7,8 @@ import '../../core/l10n/l10n_x.dart';
 import '../../core/voice/cabin_audio_client.dart';
 import '../../core/voice/communicate_ptt_client.dart';
 import '../../core/voice/mic_permission.dart';
+import '../../core/layout/screenshot_scope.dart';
+import '../../core/widgets/fixture_disclaimer_banner.dart';
 import '../../providers/app_providers.dart';
 
 class CommunicateVoicePanel extends ConsumerStatefulWidget {
@@ -37,18 +39,41 @@ class _CommunicateVoicePanelState extends ConsumerState<CommunicateVoicePanel>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _refreshMicPermission();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (ScreenshotScope.of(context)) {
+      _micPermission = MicPermissionOutcome.granted;
+    } else {
+      unawaited(_refreshMicPermission());
+    }
+    if (_ptt == null) _bindClients();
+  }
+
+  Future<void> _rebindClients() async {
+    await _teardownVoice();
+    if (!mounted) return;
     _bindClients();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    unawaited(_pttSub?.cancel());
-    unawaited(_cabinSub?.cancel());
-    unawaited(_ptt?.dispose());
-    unawaited(_cabin?.dispose());
+    unawaited(_teardownVoice());
     super.dispose();
+  }
+
+  Future<void> _teardownVoice() async {
+    await _pttSub?.cancel();
+    await _cabinSub?.cancel();
+    _pttSub = null;
+    _cabinSub = null;
+    await _ptt?.dispose();
+    await _cabin?.dispose();
+    _ptt = null;
+    _cabin = null;
   }
 
   @override
@@ -68,8 +93,9 @@ class _CommunicateVoicePanelState extends ConsumerState<CommunicateVoicePanel>
     final settings = ref.read(appSettingsProvider);
     final jwt = ref.read(vehicleRepositoryProvider).sessionJwt;
     final base = settings.baseUrl;
-    _ptt = CommunicatePttClient(baseUrl: base, jwt: jwt, fixtureMic: false);
-    _cabin = CabinAudioClient(baseUrl: base, jwt: jwt);
+    final fixture = ScreenshotScope.of(context);
+    _ptt = CommunicatePttClient(baseUrl: base, jwt: jwt, fixtureMic: fixture);
+    _cabin = CabinAudioClient(baseUrl: base, jwt: jwt, useTestSink: fixture);
     _pttSub = _ptt!.events.listen((e) {
       if (!mounted) return;
       setState(() {
@@ -130,13 +156,18 @@ class _CommunicateVoicePanelState extends ConsumerState<CommunicateVoicePanel>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(appSettingsProvider, (_, __) => unawaited(_rebindClients()));
+    ref.listen(vehicleRepositoryProvider, (_, __) => unawaited(_rebindClients()));
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final talkLive = _talkPhase == CommunicateTalkPhase.live;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const FixtureDisclaimerBanner(),
         Text(l10n.voicePttTitle, style: theme.textTheme.titleMedium),
+        if (!widget.voiceReady)
+          Text(l10n.voiceFixtureUnsupported, style: theme.textTheme.bodySmall),
         Text(l10n.voicePttHint, style: theme.textTheme.bodySmall),
         const SizedBox(height: 12),
         Listener(

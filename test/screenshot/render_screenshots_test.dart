@@ -24,14 +24,14 @@ import '../support/fixture_api_client.dart';
 import 'test_fonts.dart';
 
 const _artifactRoots = [
-  '/opt/cursor/artifacts/v2.8.0/screenshots',
-  '/cursor/stores/self/artifacts/v2.8.0/screenshots',
+  '/opt/cursor/artifacts/v2.8.3/screenshots',
+  '/cursor/stores/self/artifacts/v2.8.3/screenshots',
 ];
 const _artifactPackageRoots = [
-  '/opt/cursor/artifacts/v2.8.0',
-  '/cursor/stores/self/artifacts/v2.8.0',
+  '/opt/cursor/artifacts/v2.8.3',
+  '/cursor/stores/self/artifacts/v2.8.3',
 ];
-const _goldenRoot = 'goldens/v2.8';
+const _goldenRoot = 'goldens/v2.8.3';
 
 late SettingsRepository _settingsRepo;
 late VehicleSnapshot _fixtureSnap;
@@ -550,13 +550,13 @@ Future<GlobalKey> _pumpHarness(
 }
 
 void _stageReleaseManifest() {
-  const manifestPath = 'docs/RELEASE_MANIFEST_v2.8.0.json';
+  const manifestPath = 'docs/RELEASE_MANIFEST_v2.8.3.json';
   final src = File(manifestPath);
   if (!src.existsSync()) return;
   final bytes = src.readAsBytesSync();
   for (final root in _artifactPackageRoots) {
     Directory(root).createSync(recursive: true);
-    File('$root/RELEASE_MANIFEST_v2.8.0.json').writeAsBytesSync(bytes);
+    File('$root/RELEASE_MANIFEST_v2.8.3.json').writeAsBytesSync(bytes);
   }
 }
 

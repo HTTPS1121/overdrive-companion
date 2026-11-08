@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/l10n/l10n_x.dart';
 import '../../core/layout/scroll_insets.dart';
+import 'diagnostics_screens.dart';
 import 'family_screens.dart';
 
 class IntegrationsHubScreen extends StatelessWidget {
@@ -54,6 +55,12 @@ class IntegrationsHubScreen extends StatelessWidget {
         title: l10n.integrationsPlatformTitle,
         subtitle: l10n.integrationsPlatformSubtitle,
         builder: (_) => const PlatformConnectorsScreen(),
+      ),
+      _HubRoute(
+        icon: Icons.bug_report_outlined,
+        title: l10n.integrationsDiagnosticsTitle,
+        subtitle: l10n.integrationsDiagnosticsSubtitle,
+        builder: (_) => const DiagnosticsHubScreen(),
       ),
     ];
 
