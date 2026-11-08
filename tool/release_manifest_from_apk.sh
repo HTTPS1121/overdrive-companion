@@ -38,15 +38,19 @@ fi
 cat >"$OUT" <<EOF
 {
   "version": "$NAME_VER+$BUILD",
-  "apkFile": "overdrive-companion-$NAME_VER.apk",
+  "apkFile": "app-release.apk",
+  "apkArtifactName": "overdrive-companion-$NAME_VER.apk",
   "apkSha256": "$SHA",
   "apkSizeBytes": $SIZE,
   "apkVersionCode": ${ACTUAL_CODE:-$BUILD},
   "apkVersionName": "${ACTUAL_NAME:-$NAME_VER}",
   "apkSigningCertSummary": "$SIGNER",
-  "goldens": "test/screenshot/goldens/v2.8",
-  "screenshotArtifacts": "v2.8.0/screenshots",
-  "implementationInventory": "IMPLEMENTATION_INVENTORY_v2.8.0.md",
+  "goldens": "test/screenshot/goldens/v$NAME_VER",
+  "screenshotArtifacts": "v$NAME_VER/screenshots",
+  "screenshotCount": 77,
+  "screenshotCountBreakdown": {"core": 17, "integration": 60},
+  "implementationInventory": "IMPLEMENTATION_INVENTORY_v$NAME_VER.md",
+  "artifactDirectory": "v$NAME_VER",
   "android": {
     "signing": "debug (Flutter template release) unless production keystore configured",
     "mediaCodecDecode": "not verified in CI — framing unit tests only"

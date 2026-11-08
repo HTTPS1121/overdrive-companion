@@ -1431,6 +1431,32 @@ class AppLocalizationsEn extends AppLocalizations {
       'Debug reads, log upload, and RoadSense maintenance POSTs';
 
   @override
+  String get integrationsAdvancedDiagnosticsTitle => 'Advanced diagnostics';
+
+  @override
+  String get integrationsAdvancedDiagnosticsSubtitle =>
+      'Vehicle engineers only — destructive actions and debug reads';
+
+  @override
+  String get diagnosticsAdvancedTitle => 'Advanced diagnostics';
+
+  @override
+  String get diagnosticsAdvancedWarning =>
+      'These tools change vehicle-side state or upload logs. Use only when you understand the impact.';
+
+  @override
+  String get integrationsLoadingData => 'Loading from vehicle…';
+
+  @override
+  String get integrationsEmptyList => 'Nothing to show yet';
+
+  @override
+  String get integrationsEmptyParkingSessions => 'No parking sessions recorded';
+
+  @override
+  String get integrationsEmptyTrips => 'No trips in history';
+
+  @override
   String get integrationsRoadSenseTitle => 'RoadSense';
 
   @override

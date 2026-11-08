@@ -21,6 +21,7 @@ import 'package:overdrive_companion/providers/settings_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/fixture_api_client.dart';
+import 'screenshot_harness.dart';
 import 'test_fonts.dart';
 
 const _artifactRoots = [
@@ -320,31 +321,18 @@ void main() {
   });
 
   testWidgets('v2.8 integrations hub light he', (tester) async {
-    _FixedAppSettings.pinned = _fixtureSettings();
+    configurePhoneView(tester);
     final boundaryKey = GlobalKey();
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          settingsRepositoryProvider.overrideWithValue(_settingsRepo),
-          appSettingsProvider.overrideWith(_FixedAppSettings.new),
-          overdriveApiClientProvider.overrideWithValue(_fixtureClient),
-          vehicleRepositoryProvider.overrideWith(() => _FixtureRepo(_fixtureClient)),
-          extendedServicesRepositoryProvider.overrideWith(() => _FixtureExtendedRepo(_fixtureClient)),
-        ],
-        child: MaterialApp(
-          locale: const Locale('he'),
-          home: Scaffold(key: boundaryKey, body: const IntegrationsHubScreen()),
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-        ),
-      ),
+    await pumpScreenshotApp(
+      tester,
+      child: const IntegrationsHubScreen(),
+      locale: const Locale('he'),
+      themeMode: CompanionThemeMode.light,
+      settingsRepo: _settingsRepo,
+      fixtureClient: _fixtureClient,
+      fixtureSnap: _fixtureSnap,
+      boundaryKey: boundaryKey,
     );
-    await tester.pumpAndSettle();
     expect(find.text('מרכז אינטגרציות'), findsOneWidget);
     await _writeGolden(tester, '13_integrations_hub_light_he', find.byKey(boundaryKey));
   });

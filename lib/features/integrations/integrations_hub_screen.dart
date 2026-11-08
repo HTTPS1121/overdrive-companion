@@ -56,12 +56,6 @@ class IntegrationsHubScreen extends StatelessWidget {
         subtitle: l10n.integrationsPlatformSubtitle,
         builder: (_) => const PlatformConnectorsScreen(),
       ),
-      _HubRoute(
-        icon: Icons.bug_report_outlined,
-        title: l10n.integrationsDiagnosticsTitle,
-        subtitle: l10n.integrationsDiagnosticsSubtitle,
-        builder: (_) => const DiagnosticsHubScreen(),
-      ),
     ];
 
     return Scaffold(
@@ -86,6 +80,19 @@ class IntegrationsHubScreen extends StatelessWidget {
                 ),
               ),
             ),
+          Card(
+            margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            color: theme.colorScheme.surfaceContainerHighest,
+            child: ListTile(
+              leading: Icon(Icons.biotech_outlined, color: theme.colorScheme.error),
+              title: Text(l10n.integrationsAdvancedDiagnosticsTitle),
+              subtitle: Text(l10n.integrationsAdvancedDiagnosticsSubtitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const DiagnosticsHubScreen()),
+              ),
+            ),
+          ),
         ],
       ),
     );

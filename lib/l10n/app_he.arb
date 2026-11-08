@@ -250,7 +250,7 @@
       }
     }
   },
-  "acChargeLevelAmps": "{amps} A",
+  "acChargeLevelAmps": "{amps}\u202fA",
   "@acChargeLevelAmps": {
     "placeholders": {
       "amps": {
@@ -524,6 +524,14 @@
   "settingsOpenDiagnostics": "דיבוג מושב, יומנים, מאפייני רכב, ADAS, תאורה, RoadSense",
   "integrationsDiagnosticsTitle": "אבחון ו־RoadSense",
   "integrationsDiagnosticsSubtitle": "קריאות דיבוג, העלאת יומן ופעולות תחזוקת RoadSense",
+  "integrationsAdvancedDiagnosticsTitle": "אבחון מתקדם",
+  "integrationsAdvancedDiagnosticsSubtitle": "למתקדמים בלבד — פעולות הרסניות וקריאות דיבוג",
+  "diagnosticsAdvancedTitle": "אבחון מתקדם",
+  "diagnosticsAdvancedWarning": "כלים אלה משנים מצב ברכב או מעלים יומנים. השתמשו רק אם אתם מבינים את ההשלכות.",
+  "integrationsLoadingData": "טוען מהרכב…",
+  "integrationsEmptyList": "אין נתונים להצגה",
+  "integrationsEmptyParkingSessions": "אין מפגשי חניה",
+  "integrationsEmptyTrips": "אין נסיעות בהיסטוריה",
   "integrationsRoadSenseTitle": "RoadSense",
   "diagnosticsHubTitle": "אבחון",
   "diagnosticsSeatTitle": "דיבוג מושב",

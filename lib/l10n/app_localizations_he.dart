@@ -651,7 +651,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String acChargeLevelAmps(int amps) {
-    return '$amps A';
+    return '$amps A';
   }
 
   @override
@@ -1402,6 +1402,32 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get integrationsDiagnosticsSubtitle =>
       'קריאות דיבוג, העלאת יומן ופעולות תחזוקת RoadSense';
+
+  @override
+  String get integrationsAdvancedDiagnosticsTitle => 'אבחון מתקדם';
+
+  @override
+  String get integrationsAdvancedDiagnosticsSubtitle =>
+      'למתקדמים בלבד — פעולות הרסניות וקריאות דיבוג';
+
+  @override
+  String get diagnosticsAdvancedTitle => 'אבחון מתקדם';
+
+  @override
+  String get diagnosticsAdvancedWarning =>
+      'כלים אלה משנים מצב ברכב או מעלים יומנים. השתמשו רק אם אתם מבינים את ההשלכות.';
+
+  @override
+  String get integrationsLoadingData => 'טוען מהרכב…';
+
+  @override
+  String get integrationsEmptyList => 'אין נתונים להצגה';
+
+  @override
+  String get integrationsEmptyParkingSessions => 'אין מפגשי חניה';
+
+  @override
+  String get integrationsEmptyTrips => 'אין נסיעות בהיסטוריה';
 
   @override
   String get integrationsRoadSenseTitle => 'RoadSense';

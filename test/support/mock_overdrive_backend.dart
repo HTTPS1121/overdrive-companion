@@ -41,6 +41,16 @@ class MockOverdriveBackend {
   int _communicateOutputLevel = 70;
   final MockExtendedBackend _extended = MockExtendedBackend();
 
+  void configureRemoteServicesFixture({
+    bool communicateVoice = true,
+    bool communicateListener = true,
+    bool genAiEnabled = true,
+  }) {
+    _communicateVoice = communicateVoice;
+    _communicateListener = communicateListener;
+    _genaiEnabled = genAiEnabled;
+  }
+
   static Map<String, dynamic> _defaultState() => {
         'success': true,
         'doors': {

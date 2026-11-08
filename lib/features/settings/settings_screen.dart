@@ -116,7 +116,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         ListTile(
           contentPadding: EdgeInsets.zero,
-          title: Text(l10n.diagnosticsHubTitle),
+          title: Text(l10n.integrationsAdvancedDiagnosticsTitle),
           subtitle: Text(l10n.settingsOpenDiagnostics),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => Navigator.of(context).push(

@@ -164,19 +164,34 @@ class _ParkingFamilyScreenState extends ConsumerState<ParkingFamilyScreen> with 
         body: ListView(
           padding: scrollBottomPadding(context),
           children: [
+            if (status == null && busy)
+              const Padding(
+                padding: EdgeInsets.all(32),
+                child: Center(child: CircularProgressIndicator()),
+              ),
             if (status != null)
-              SwitchListTile(
-                title: Text(l10n.integrationsParkingEnabled),
-                value: status.enabled ?? false,
-                onChanged: busy
-                    ? null
-                    : (v) => guard(() async {
-                          await ref.read(extendedServicesRepositoryProvider).saveParkingConfig(enabled: v);
-                          await _reload();
-                        }),
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: SwitchListTile(
+                  title: Text(l10n.integrationsParkingEnabled),
+                  value: status.enabled ?? false,
+                  onChanged: busy
+                      ? null
+                      : (v) => guard(() async {
+                            await ref.read(extendedServicesRepositoryProvider).saveParkingConfig(enabled: v);
+                            await _reload();
+                          }),
+                ),
+              ),
+            if (status != null && _sessions.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(l10n.integrationsEmptyParkingSessions, textAlign: TextAlign.center),
               ),
             for (final s in _sessions)
-              ListTile(
+              Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: ListTile(
                 title: Text(s.place ?? s.id),
                 subtitle: Text(s.startedAt ?? ''),
                 trailing: IconButton(
@@ -195,6 +210,7 @@ class _ParkingFamilyScreenState extends ConsumerState<ParkingFamilyScreen> with 
                     });
                   },
                 ),
+              ),
               ),
           ],
         ),
@@ -242,13 +258,28 @@ class _TripsFamilyScreenState extends ConsumerState<TripsFamilyScreen> with Fami
         body: ListView(
           padding: scrollBottomPadding(context),
           children: [
+            if (_summary == null && busy)
+              const Padding(
+                padding: EdgeInsets.all(32),
+                child: Center(child: CircularProgressIndicator()),
+              ),
             if (totalKm != null)
-              ListTile(
-                title: Text(l10n.integrationsTripSummary),
-                subtitle: Text(l10n.integrationsTripTotalKm(totalKm.toString())),
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: ListTile(
+                  title: Text(l10n.integrationsTripSummary),
+                  subtitle: Text(l10n.integrationsTripTotalKm(totalKm.toString())),
+                ),
+              ),
+            if (_trips.isEmpty && _summary != null)
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(l10n.integrationsEmptyTrips, textAlign: TextAlign.center),
               ),
             for (final t in _trips)
-              ListTile(
+              Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: ListTile(
                 title: Text(t.label ?? t.id),
                 subtitle: Text('${t.distanceKm ?? '—'} km · ${t.startedAt ?? ''}'),
                 trailing: IconButton(
@@ -267,6 +298,7 @@ class _TripsFamilyScreenState extends ConsumerState<TripsFamilyScreen> with Fami
                     });
                   },
                 ),
+              ),
               ),
           ],
         ),
@@ -452,12 +484,22 @@ class _TelegramFamilyScreenState extends ConsumerState<TelegramFamilyScreen> wit
         body: ListView(
           padding: scrollBottomPadding(context),
           children: [
-            if (status != null) ...[
-              ListTile(
-                title: Text(l10n.integrationsTelegramBot),
-                subtitle: Text(status.botUsername ?? l10n.integrationsNotConfigured),
+            if (status == null && busy)
+              const Padding(
+                padding: EdgeInsets.all(32),
+                child: Center(child: CircularProgressIndicator()),
               ),
-              SwitchListTile(
+            if (status != null) ...[
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: ListTile(
+                  title: Text(l10n.integrationsTelegramBot),
+                  subtitle: Text(status.botUsername ?? l10n.integrationsNotConfigured),
+                ),
+              ),
+              Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: SwitchListTile(
                 title: Text(l10n.integrationsTelegramVideoUploads),
                 value: status.videoUploads ?? false,
                 onChanged: busy
@@ -469,7 +511,10 @@ class _TelegramFamilyScreenState extends ConsumerState<TelegramFamilyScreen> wit
                           await _reload();
                         }),
               ),
-              ListTile(
+              ),
+              Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
                 title: Text(l10n.integrationsTelegramClearPairing),
                 subtitle: Text(l10n.integrationsTelegramClearHint),
                 onTap: () async {
@@ -485,6 +530,7 @@ class _TelegramFamilyScreenState extends ConsumerState<TelegramFamilyScreen> wit
                     await _reload();
                   });
                 },
+              ),
               ),
             ],
           ],

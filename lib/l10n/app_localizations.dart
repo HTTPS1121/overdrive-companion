@@ -2696,6 +2696,54 @@ abstract class AppLocalizations {
   /// **'Debug reads, log upload, and RoadSense maintenance POSTs'**
   String get integrationsDiagnosticsSubtitle;
 
+  /// No description provided for @integrationsAdvancedDiagnosticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced diagnostics'**
+  String get integrationsAdvancedDiagnosticsTitle;
+
+  /// No description provided for @integrationsAdvancedDiagnosticsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle engineers only — destructive actions and debug reads'**
+  String get integrationsAdvancedDiagnosticsSubtitle;
+
+  /// No description provided for @diagnosticsAdvancedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced diagnostics'**
+  String get diagnosticsAdvancedTitle;
+
+  /// No description provided for @diagnosticsAdvancedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'These tools change vehicle-side state or upload logs. Use only when you understand the impact.'**
+  String get diagnosticsAdvancedWarning;
+
+  /// No description provided for @integrationsLoadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading from vehicle…'**
+  String get integrationsLoadingData;
+
+  /// No description provided for @integrationsEmptyList.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to show yet'**
+  String get integrationsEmptyList;
+
+  /// No description provided for @integrationsEmptyParkingSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'No parking sessions recorded'**
+  String get integrationsEmptyParkingSessions;
+
+  /// No description provided for @integrationsEmptyTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips in history'**
+  String get integrationsEmptyTrips;
+
   /// No description provided for @integrationsRoadSenseTitle.
   ///
   /// In en, this message translates to:

@@ -1,46 +1,39 @@
-# Implementation inventory (2.8.3)
+# Implementation inventory (2.8.3+23)
 
-## Diagnostics & RoadSense
+## Screenshot QA (v2.8.3)
 
-| Surface | UI | Repository / client | CI evidence |
-|---------|----|---------------------|-------------|
-| `GET /api/debug/seat/read` | `SeatDebugScreen` | `readSeatDebug` | `extended_services_contract_test.dart`, fixture mock |
-| `GET /api/logs/available` + `POST /api/logs/upload` | `LogsDiagnosticScreen` (confirm) | `fetchLogsAvailable`, `uploadLogDaemon` | contract + mock (fake upload code, no exfil) |
-| Car property / ADAS / light / remote-key / autoservice debug | respective screens | `fetchCarPropertyStatus`, `readCarProperty`, `resolveAdas`, `readAdasRegisters`, `resolveLightDebug`, `fetchRemoteKeyDebug`, `fetchAutoServiceDebugStatus` | contract GET fixtures |
-| `GET /api/roadsense/hazards` | `RoadSenseToolsScreen` | `fetchRoadSenseHazards` | contract |
-| `POST` delete-local/cloud, test-chime, hazard confirm/reject | `RoadSenseToolsScreen` (confirms on destructive) | `postRoadSenseDeleteLocal/Cloud`, `postRoadSenseTestChime`, `postRoadSenseHazardVerdict` | contract POST fixtures |
+| Item | Value |
+|------|-------|
+| Golden root | `test/screenshot/goldens/v2.8.3` |
+| Total PNGs | **77** (17 core `0x_`/`1x_` … `13_` + **60** `int_*`) |
+| Harness | `test/screenshot/screenshot_harness.dart` — `ensureBundledFontsLoaded`, `PhoneViewport` (390×844), `companionLightTheme` / `companionDarkTheme` |
+| Integration routes | Full production `Scaffold` screens; voice via **`RemoteServicesScreen`** (tabs, load, margins) |
+| Fixture banner | `screenshotFixtureDisclaimer` — does not replace readable UI |
 
-Hub entry: `DiagnosticsHubScreen` + integrations hub card. All panels show `FixtureDisclaimerBanner` in screenshot mode only.
+Artifact dir: `artifacts/v2.8.3/` (`app-release.apk`, `RELEASE_MANIFEST_v2.8.3.json`, `screenshots/`).
 
-## Voice lifecycle (audit)
+## Advanced diagnostics (retained, grouped)
 
-- Teardown: `CommunicatePttClient` / `GenAiVoiceClient` / `CabinAudioClient` dispose mic + WS; panels cancel subs on dispose and rebind on settings/JWT changes.
-- Cabin local pause during PTT; listener bytes from client (test sink in screenshots).
-- Screenshot harness: `fixtureMic` / `useTestSink` / `useTestPlayback`; mic permission bypassed when `ScreenshotScope` active.
-- No JWT/device tokens in screenshot labels or mock payloads (`fixture-token` only in tests).
+- Primary **Integrations hub** lists user-facing families only; **Advanced diagnostics** is a separate warned card.
+- `DiagnosticsHubScreen`: warning banner + RoadSense + seat/logs/car-property/ADAS/light/remote-key/autoservice.
+- Readouts use `KeyValueReadoutCard` (not raw JSON dumps).
 
-## MediaCodec / Annex-B
+## RoadSense / debug POSTs
 
-| Layer | Evidence |
-|-------|----------|
-| Dart | `H264AnnexB` — `camera_api_contract_test.dart` |
-| JVM | `AnnexBUtilsTest` — `:app:testDebugUnitTest` **passed** |
-| Instrumented | `MediaCodecAnnexBInstrumentedTest` — **attempted** via `./gradlew :app:connectedDebugAndroidTest` |
+Same as 2.8.3 repository coverage; contract tests unchanged. No live vehicle uploads in CI.
 
-**Blocker (this environment):** `DeviceException: No connected devices!` — no emulator attached in Cloud Agent VM. Test source is ready for local `connectedDebugAndroidTest`; decode success/failure is reported in assertion messages when a device is present.
+## Voice lifecycle
+
+`RemoteServicesScreen` + panels; screenshot harness loads communicate/GenAI status from fixture before capture.
+
+## MediaCodec
+
+JVM `AnnexBUtilsTest` ✅. Instrumented `MediaCodecAnnexBInstrumentedTest` — **not run** in Cloud Agent (no connected device/emulator).
 
 ## Signing
 
-Release APK uses **debug signing** (unchanged keystore). See `releaseSigningDebugNote` in l10n and manifest `signing` field. Production signing is an external release step, not a feature gate.
+Debug release keystore retained (`releaseSigningDebugNote`).
 
-## Screenshots (v2.8.3)
+## Tests
 
-- Core app: `test/screenshot/render_screenshots_test.dart` → `goldens/v2.8.3/` (18 baselines).
-- Integrations + voice matrix: `integration_screenshots_test.dart` — every integration family × he/en × light/dark + voice ready/unsupported/enabled/disabled (fixture disclaimer on panels).
-- Artifacts: `/cursor/stores/self/artifacts/v2.8.3/screenshots/` (no runtime fixture paths in app binary).
-
-## Test count
-
-**136** Flutter tests passed (`flutter test`).
-
-Goldens + manifest + APK staged under `artifacts/v2.8.3/`.
+**136** `flutter test` (after screenshot regeneration).

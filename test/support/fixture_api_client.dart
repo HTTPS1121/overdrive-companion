@@ -9,7 +9,21 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
 
   final MockOverdriveBackend _backend;
 
+  MockOverdriveBackend get backend => _backend;
+
   void setAuthRequired(bool value) => _backend.authRequired = value;
+
+  void configureRemoteServicesFixture({
+    bool communicateVoice = true,
+    bool communicateListener = true,
+    bool genAiEnabled = true,
+  }) {
+    _backend.configureRemoteServicesFixture(
+      communicateVoice: communicateVoice,
+      communicateListener: communicateListener,
+      genAiEnabled: genAiEnabled,
+    );
+  }
 
   static Future<FixtureOverdriveApiClient> create() async {
     final backend = await MockOverdriveBackend.fromFixture();

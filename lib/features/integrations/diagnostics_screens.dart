@@ -5,9 +5,30 @@ import '../../core/l10n/l10n_x.dart';
 import '../../core/layout/scroll_insets.dart';
 import '../../core/widgets/confirm_risky_action.dart';
 import '../../core/widgets/fixture_disclaimer_banner.dart';
+import '../../core/widgets/key_value_readout_card.dart';
 import '../../core/widgets/requires_connection.dart';
 import '../../providers/app_providers.dart';
+import 'advanced_diagnostics_warning.dart';
 import 'integrations_loader.dart';
+
+List<MapEntry<String, String>> _rowsFromJson(Object? value, {String prefix = ''}) {
+  if (value == null) return [];
+  if (value is num || value is bool || value is String) {
+    return [MapEntry(prefix.isEmpty ? 'value' : prefix, value.toString())];
+  }
+  if (value is Map) {
+    final rows = <MapEntry<String, String>>[];
+    for (final e in value.entries) {
+      final key = prefix.isEmpty ? e.key.toString() : '$prefix.${e.key}';
+      rows.addAll(_rowsFromJson(e.value, prefix: key));
+    }
+    return rows;
+  }
+  if (value is List) {
+    return [MapEntry(prefix.isEmpty ? 'items' : prefix, '${value.length} entries')];
+  }
+  return [MapEntry(prefix, value.toString())];
+}
 
 class DiagnosticsHubScreen extends StatelessWidget {
   const DiagnosticsHubScreen({super.key});
@@ -16,10 +37,11 @@ class DiagnosticsHubScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.diagnosticsHubTitle)),
+      appBar: AppBar(title: Text(l10n.integrationsAdvancedDiagnosticsTitle)),
       body: ListView(
         padding: scrollBottomPadding(context),
         children: [
+          const AdvancedDiagnosticsWarning(),
           const FixtureDisclaimerBanner(),
           _DiagTile(title: l10n.diagnosticsSeatTitle, screen: const SeatDebugScreen()),
           _DiagTile(title: l10n.diagnosticsLogsTitle, screen: const LogsDiagnosticScreen()),
@@ -92,13 +114,20 @@ class _SeatDebugScreenState extends ConsumerState<SeatDebugScreen> with FamilyLo
           padding: scrollBottomPadding(context),
           children: [
             const FixtureDisclaimerBanner(),
-            if (_error.isNotEmpty) ListTile(title: Text(l10n.commonError), subtitle: Text(_error)),
-            if (_data != null)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: SelectableText(_data.toString()),
+            if (busy && _data == null)
+              const Padding(
+                padding: EdgeInsets.all(24),
+                child: Center(child: CircularProgressIndicator()),
               ),
-            FilledButton(onPressed: busy ? null : _load, child: Text(l10n.integrationsRefresh)),
+            KeyValueReadoutCard(
+              title: l10n.diagnosticsSeatTitle,
+              rows: _data == null ? const [] : _rowsFromJson(_data!['registers'] ?? _data),
+              error: _error.isNotEmpty ? _error : null,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: FilledButton(onPressed: busy ? null : _load, child: Text(l10n.integrationsRefresh)),
+            ),
           ],
         ),
       ),
@@ -220,7 +249,16 @@ class _CarPropertyDebugScreenState extends ConsumerState<CarPropertyDebugScreen>
               child: Text(l10n.integrationsRefresh),
             ),
             if (_result.isNotEmpty)
-              Padding(padding: const EdgeInsets.all(16), child: SelectableText(_result)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: KeyValueReadoutCard(
+                  title: l10n.diagnosticsCarPropertyTitle,
+                  rows: _result.split('\n').map((line) {
+                    final parts = line.split('=');
+                    return MapEntry(parts.first, parts.length > 1 ? parts.sublist(1).join('=') : '—');
+                  }).toList(),
+                ),
+              ),
           ],
         ),
       ),
@@ -259,7 +297,16 @@ class _AdasDebugScreenState extends ConsumerState<AdasDebugScreen> with FamilyLo
               child: Text(l10n.integrationsRefresh),
             ),
             if (_body.isNotEmpty)
-              Padding(padding: const EdgeInsets.all(16), child: SelectableText(_body)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: KeyValueReadoutCard(
+                  title: l10n.diagnosticsAdasTitle,
+                  rows: _body.split('\n').map((line) {
+                    final parts = line.split('=');
+                    return MapEntry(parts.first, parts.length > 1 ? parts.sublist(1).join('=') : '—');
+                  }).toList(),
+                ),
+              ),
           ],
         ),
       ),
@@ -290,10 +337,15 @@ class LightDebugScreen extends ConsumerWidget {
                     child: Center(child: CircularProgressIndicator()),
                   );
                 }
-                if (snap.hasError) return ListTile(title: Text(snap.error.toString()));
+                if (snap.hasError) {
+                  return KeyValueReadoutCard(title: l10n.diagnosticsLightTitle, rows: const [], error: snap.error.toString());
+                }
                 return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: SelectableText(snap.data.toString()),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: KeyValueReadoutCard(
+                    title: l10n.diagnosticsLightTitle,
+                    rows: _rowsFromJson(snap.data),
+                  ),
                 );
               },
             ),
@@ -322,8 +374,11 @@ class RemoteKeyDebugScreen extends ConsumerWidget {
               builder: (ctx, snap) {
                 if (!snap.hasData) return const Center(child: CircularProgressIndicator());
                 return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: SelectableText(snap.data.toString()),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: KeyValueReadoutCard(
+                    title: l10n.diagnosticsRemoteKeyTitle,
+                    rows: _rowsFromJson(snap.data),
+                  ),
                 );
               },
             ),
@@ -352,8 +407,11 @@ class AutoServiceDebugScreen extends ConsumerWidget {
               builder: (ctx, snap) {
                 if (!snap.hasData) return const Center(child: CircularProgressIndicator());
                 return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: SelectableText(snap.data.toString()),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: KeyValueReadoutCard(
+                    title: l10n.diagnosticsAutoServiceTitle,
+                    rows: _rowsFromJson(snap.data),
+                  ),
                 );
               },
             ),
@@ -407,8 +465,19 @@ class _RoadSenseToolsScreenState extends ConsumerState<RoadSenseToolsScreen> wit
         body: ListView(
           padding: scrollBottomPadding(context),
           children: [
+            const AdvancedDiagnosticsWarning(),
             const FixtureDisclaimerBanner(),
-            ListTile(title: Text(l10n.roadSenseHazardCount), subtitle: Text('$count')),
+            Card(
+              margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: ListTile(title: Text(l10n.roadSenseHazardCount), subtitle: Text('$count')),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
             DropdownButtonFormField<String>(
               value: _severity,
               decoration: InputDecoration(labelText: l10n.roadSenseSeverity),
@@ -428,32 +497,39 @@ class _RoadSenseToolsScreenState extends ConsumerState<RoadSenseToolsScreen> wit
               ],
               onChanged: busy ? null : (v) => setState(() => _channel = v ?? _channel),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                controller: _volumeCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: l10n.roadSenseVolumePercent),
+                      TextField(
+                        controller: _volumeCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(labelText: l10n.roadSenseVolumePercent),
+                      ),
+                      const SizedBox(height: 8),
+                      FilledButton(
+                        onPressed: busy
+                            ? null
+                            : () => guard(() async {
+                                  final vol = int.tryParse(_volumeCtrl.text) ?? 70;
+                                  final r = await ref.read(extendedServicesRepositoryProvider).postRoadSenseTestChime({
+                                    'severity': _severity,
+                                    'channel': _channel,
+                                    'volumePercent': vol.clamp(10, 100),
+                                  });
+                                  if (mounted) {
+                                    await integrationSnack(
+                                      context,
+                                      r['success'] == true ? l10n.commonSuccess : l10n.commonError,
+                                    );
+                                  }
+                                }),
+                        child: Text(l10n.roadSenseTestChime),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
-              child: FilledButton(
-                onPressed: busy
-                    ? null
-                    : () => guard(() async {
-                          final vol = int.tryParse(_volumeCtrl.text) ?? 70;
-                          final r = await ref.read(extendedServicesRepositoryProvider).postRoadSenseTestChime({
-                            'severity': _severity,
-                            'channel': _channel,
-                            'volumePercent': vol.clamp(10, 100),
-                          });
-                          if (mounted) await integrationSnack(context, r['success'] == true ? l10n.commonSuccess : l10n.commonError);
-                        }),
-                child: Text(l10n.roadSenseTestChime),
-              ),
-            ),
-            OutlinedButton(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: OutlinedButton(
               onPressed: busy
                   ? null
                   : () async {
@@ -469,9 +545,12 @@ class _RoadSenseToolsScreenState extends ConsumerState<RoadSenseToolsScreen> wit
                         await _load();
                       });
                     },
-              child: Text(l10n.roadSenseDeleteLocal),
+                child: Text(l10n.roadSenseDeleteLocal),
+              ),
             ),
-            OutlinedButton(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: OutlinedButton(
               onPressed: busy
                   ? null
                   : () async {
@@ -486,12 +565,15 @@ class _RoadSenseToolsScreenState extends ConsumerState<RoadSenseToolsScreen> wit
                         await ref.read(extendedServicesRepositoryProvider).postRoadSenseDeleteCloud();
                       });
                     },
-              child: Text(l10n.roadSenseDeleteCloud),
+                child: Text(l10n.roadSenseDeleteCloud),
+              ),
             ),
             if (features is List)
               for (final f in features)
                 if (f is Map)
-                  ListTile(
+                  Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: ListTile(
                     title: Text(f['properties']?['kind']?.toString() ?? 'hazard'),
                     subtitle: Text(f['properties']?['id']?.toString() ?? ''),
                     trailing: Wrap(
@@ -516,6 +598,7 @@ class _RoadSenseToolsScreenState extends ConsumerState<RoadSenseToolsScreen> wit
                         ),
                       ],
                     ),
+                  ),
                   ),
           ],
         ),
