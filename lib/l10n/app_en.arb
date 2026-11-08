@@ -511,6 +511,7 @@
   "automationLabelSchemaVersion": "Schema version",
   "automationLabelSignals": "Signals",
   "automationLabelEngineState": "Engine state",
+  "automationLabelActiveAutomations": "Active automations",
   "automationLabelGlobalEnabled": "Global enabled",
   "roadSenseHazardCount": "Active hazards",
   "roadSenseSeverity": "Chime severity",

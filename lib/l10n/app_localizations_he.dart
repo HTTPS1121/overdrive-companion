@@ -1519,6 +1519,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get automationLabelEngineState => 'מצב מנוע';
 
   @override
+  String get automationLabelActiveAutomations => 'אוטומציות פעילות';
+
+  @override
   String get automationLabelGlobalEnabled => 'פעיל גלובלית';
 
   @override

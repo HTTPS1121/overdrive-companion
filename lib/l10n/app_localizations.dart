@@ -2924,6 +2924,12 @@ abstract class AppLocalizations {
   /// **'Engine state'**
   String get automationLabelEngineState;
 
+  /// No description provided for @automationLabelActiveAutomations.
+  ///
+  /// In en, this message translates to:
+  /// **'Active automations'**
+  String get automationLabelActiveAutomations;
+
   /// No description provided for @automationLabelGlobalEnabled.
   ///
   /// In en, this message translates to:

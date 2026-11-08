@@ -1549,6 +1549,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get automationLabelEngineState => 'Engine state';
 
   @override
+  String get automationLabelActiveAutomations => 'Active automations';
+
+  @override
   String get automationLabelGlobalEnabled => 'Global enabled';
 
   @override

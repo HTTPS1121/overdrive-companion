@@ -567,6 +567,7 @@
   "automationLabelSchemaVersion": "גרסת סכימה",
   "automationLabelSignals": "אותות",
   "automationLabelEngineState": "מצב מנוע",
+  "automationLabelActiveAutomations": "אוטומציות פעילות",
   "automationLabelGlobalEnabled": "פעיל גלובלית",
   "roadSenseHazardCount": "מכשולים פעילים",
   "roadSenseSeverity": "חומרת צליל",

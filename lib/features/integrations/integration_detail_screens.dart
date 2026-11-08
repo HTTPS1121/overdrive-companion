@@ -9,6 +9,7 @@ import '../../core/widgets/key_value_readout_card.dart';
 import '../../core/widgets/requires_connection.dart';
 import '../../data/models/extended_services_models.dart';
 import '../../providers/app_providers.dart';
+import 'automation_state_readout.dart';
 import 'integrations_loader.dart';
 
 class AutomationSettingsScreen extends ConsumerStatefulWidget {
@@ -86,12 +87,10 @@ class _AutomationSettingsScreenState extends ConsumerState<AutomationSettingsScr
             if (_state != null)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: KeyValueReadoutCard(title: l10n.automationStateTitle, rows: [
-                  if (_state!['engine'] != null)
-                    MapEntry(l10n.automationLabelEngineState, _state!['engine']?.toString() ?? '—'),
-                  if (_state!['activeCount'] != null)
-                    MapEntry(l10n.automationStateTitle, _state!['activeCount']?.toString() ?? '—'),
-                ]),
+                child: KeyValueReadoutCard(
+                  title: l10n.automationStateTitle,
+                  rows: automationEngineStateRows(_state!, context.l10n),
+                ),
               ),
           ],
         ),
