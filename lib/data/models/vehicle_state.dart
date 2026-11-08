@@ -11,12 +11,14 @@ class VehicleState {
     this.seats,
     this.lights,
     this.timestamp,
+    this.batteryHeat,
   });
 
   factory VehicleState.fromJson(Map<String, dynamic> json) {
     return VehicleState(
       success: json['success'] == true,
       error: json['error'] as String?,
+      batteryHeat: json['batteryHeat'] as bool?,
       doors: json['doors'] != null
           ? DoorLocks.fromJson(json['doors'] as Map<String, dynamic>)
           : null,
@@ -56,6 +58,8 @@ class VehicleState {
   final SeatInfo? seats;
   final LightInfo? lights;
   final int? timestamp;
+  /// Cloud telemetry when available (`VehicleControlApiHandler` state GET).
+  final bool? batteryHeat;
 
   bool? get isLocked {
     final overall = doors?.overall;

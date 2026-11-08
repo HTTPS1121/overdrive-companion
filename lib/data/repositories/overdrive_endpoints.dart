@@ -23,6 +23,10 @@ abstract final class OverdriveEndpoints {
   static const vehicleSetting = '/api/vehicle/setting';
   static const media = '/api/vehicle/media';
   static const chargeCap = '/api/vehicle/charge-cap';
+  static const powerOn = '/api/vehicle/power-on';
+  static const powerOff = '/api/vehicle/power-off';
+  static const batteryHeat = '/api/vehicle/battery-heat';
+  static const system = '/api/vehicle/system';
 }
 
 enum ControlKind {

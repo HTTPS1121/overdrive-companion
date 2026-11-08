@@ -364,4 +364,18 @@ class VehicleRepository {
       },
     );
   }
+
+  Future<CommandResult> vehiclePowerOn() => postJsonCommand(OverdriveEndpoints.powerOn);
+
+  Future<CommandResult> vehiclePowerOff() => postJsonCommand(OverdriveEndpoints.powerOff);
+
+  Future<CommandResult> setBatteryHeat(bool enabled) => postJsonCommand(
+        OverdriveEndpoints.batteryHeat,
+        body: {'enabled': enabled},
+      );
+
+  Future<CommandResult> systemScreenshot({required int display}) => postJsonCommand(
+        OverdriveEndpoints.system,
+        body: {'target': 'screenshot', 'display': display},
+      );
 }

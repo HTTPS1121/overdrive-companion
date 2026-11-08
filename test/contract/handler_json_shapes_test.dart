@@ -48,6 +48,17 @@ void main() {
     expect(cap.supported, isFalse);
   });
 
+  test('bookingId larger than JS safe int round-trips as string', () {
+    const huge = '18446744073709551615';
+    final b = ClimateBooking.fromCloudListEntry({
+      'bookingId': huge,
+      'bookingTime': 1736150400,
+      'mainSettingTemp': 8,
+      'timeSpan': 3,
+    });
+    expect(b.bookingId, huge);
+  });
+
   test('adas GET esp inverted convention', () {
     final adas = AdasState.fromJson({
       'success': true,

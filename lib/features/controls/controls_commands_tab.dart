@@ -8,6 +8,8 @@ import '../../data/models/vehicle_state.dart';
 import '../../data/repositories/overdrive_endpoints.dart';
 import '../../data/repositories/vehicle_repository.dart';
 import '../../providers/app_providers.dart';
+import 'control_widgets.dart';
+import 'vehicle_extended_controls.dart';
 
 /// פקודות שליטה ישירות (נעילה, חלונות, מיזוג).
 class ControlsCommandsTab extends ConsumerStatefulWidget {
@@ -63,35 +65,35 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
                   ),
                 ),
               ),
-            _ControlSection(
+            ControlSection(
               title: 'גישה לרכב',
               icon: Icons.vpn_key,
               children: [
-                _ActionTile(
+                ControlActionTile(
                   label: 'נעילה',
                   icon: Icons.lock,
                   enabled: !_busy && !staleBlocked,
                   onPressed: () => _runWithConfirm(ControlKind.lock, 'נעילה'),
                 ),
-                _ActionTile(
+                ControlActionTile(
                   label: 'פתיחה',
                   icon: Icons.lock_open,
                   enabled: !_busy && !staleBlocked,
                   onPressed: () => _runWithConfirm(ControlKind.unlock, 'פתיחה'),
                 ),
-                _ActionTile(
+                ControlActionTile(
                   label: 'פתיחת תא מטען',
                   icon: Icons.luggage,
                   enabled: !_busy && !staleBlocked,
                   onPressed: () => _runWithConfirm(ControlKind.trunkOpen, 'תא מטען'),
                 ),
-                _ActionTile(
+                ControlActionTile(
                   label: 'הבהוב אורות',
                   icon: Icons.lightbulb_outline,
                   enabled: !_busy && !staleBlocked,
                   onPressed: () => _run(ControlKind.flash, 'הבהוב'),
                 ),
-                _ActionTile(
+                ControlActionTile(
                   label: 'מציאת רכב',
                   icon: Icons.my_location,
                   enabled: !_busy && !staleBlocked,
@@ -100,23 +102,23 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
               ],
             ),
             const SizedBox(height: 12),
-            _ControlSection(
+            ControlSection(
               title: 'חלונות',
               icon: Icons.filter_drama_outlined,
               children: [
-                _ActionTile(
+                ControlActionTile(
                   label: 'פתיחה מלאה',
                   icon: Icons.vertical_align_top,
                   enabled: !_busy && !staleBlocked,
                   onPressed: () => _runWithConfirm(ControlKind.windowsOpen, 'חלונות'),
                 ),
-                _ActionTile(
+                ControlActionTile(
                   label: 'סגירה',
                   icon: Icons.vertical_align_bottom,
                   enabled: !_busy && !staleBlocked,
                   onPressed: () => _run(ControlKind.windowsClose, 'חלונות'),
                 ),
-                _ActionTile(
+                ControlActionTile(
                   label: 'אוורור',
                   icon: Icons.air,
                   enabled: !_busy && !staleBlocked,
@@ -125,11 +127,11 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
               ],
             ),
             const SizedBox(height: 12),
-            _ControlSection(
+            ControlSection(
               title: 'מיזוג',
               icon: Icons.ac_unit,
               children: [
-                _ActionTile(
+                ControlActionTile(
                   label: snap.state.climate?.acOn == true ? 'כיבוי מיזוג' : 'הפעלת מיזוג',
                   icon: Icons.thermostat,
                   enabled: !_busy && !staleBlocked,
@@ -143,7 +145,7 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
                 Row(
                   children: [
                     Expanded(
-                      child: _ActionTile(
+                      child: ControlActionTile(
                         label: 'טמפ׳ −',
                         icon: Icons.remove,
                         enabled: !_busy && !staleBlocked,
@@ -153,7 +155,7 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: _ActionTile(
+                      child: ControlActionTile(
                         label: 'טמפ׳ +',
                         icon: Icons.add,
                         enabled: !_busy && !staleBlocked,
@@ -163,7 +165,7 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
                     ),
                   ],
                 ),
-                _ActionTile(
+                ControlActionTile(
                   label: snap.state.seats?.steeringHeat == true
                       ? 'כיבוי חימום הגה'
                       : 'חימום הגה',
@@ -172,6 +174,13 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
                   onPressed: () => _run(ControlKind.steeringHeat, 'הגה'),
                 ),
               ],
+            ),
+            VehicleExtendedControls(
+              snap: snap,
+              staleBlocked: staleBlocked,
+              busy: _busy,
+              onBusyChanged: (v) => setState(() => _busy = v),
+              onFeedback: (m) => setState(() => _lastFeedback = m),
             ),
             if (_lastFeedback != null) ...[
               const SizedBox(height: 16),
@@ -263,69 +272,3 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
   }
 }
 
-class _ControlSection extends StatelessWidget {
-  const _ControlSection({
-    required this.title,
-    required this.icon,
-    required this.children,
-  });
-
-  final String title;
-  final IconData icon;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 22),
-                const SizedBox(width: 10),
-                Text(title, style: Theme.of(context).textTheme.titleMedium),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionTile extends StatelessWidget {
-  const _ActionTile({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-    required this.enabled,
-    this.compact = false,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-  final bool enabled;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: compact ? 0 : 8),
-      child: SizedBox(
-        width: double.infinity,
-        height: compact ? 48 : 52,
-        child: FilledButton.tonalIcon(
-          onPressed: enabled ? onPressed : null,
-          icon: Icon(icon, size: 20),
-          label: Text(label),
-        ),
-      ),
-    );
-  }
-}

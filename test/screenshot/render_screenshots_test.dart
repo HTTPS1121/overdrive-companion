@@ -180,18 +180,22 @@ void main() {
   });
 
   testWidgets('v2.3 lock confirmation dialog', (tester) async {
-    await _capture(
+    await _pumpHarness(
       tester,
-      '10_controls_lock_confirm_dialog',
       settings: _fixtureSettings(),
       snapshot: _fixtureSnap,
       expectNavIndex: 1,
-      afterPump: (t) async {
-        await _tapControlsHubTab(t, 'פקודות');
-        await t.tap(find.text('נעילה'));
-        await t.pumpAndSettle();
-        expect(find.text('לאשר נעילה?'), findsOneWidget);
-      },
+    );
+    await _tapControlsHubTab(tester, 'פקודות');
+    await tester.tap(find.text('נעילה'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.text('לאשר נעילה?'), findsOneWidget);
+    await _writeGolden(
+      tester,
+      '10_controls_lock_confirm_dialog',
+      find.byType(AlertDialog),
     );
   });
 }
@@ -273,6 +277,22 @@ Future<void> _capture(
   int? expectNavIndex,
   Future<void> Function(WidgetTester)? afterPump,
 }) async {
+  final boundaryKey = await _pumpHarness(
+    tester,
+    settings: settings,
+    snapshot: snapshot,
+    expectNavIndex: expectNavIndex,
+  );
+  if (afterPump != null) await afterPump(tester);
+  await _writeGolden(tester, name, find.byKey(boundaryKey));
+}
+
+Future<GlobalKey> _pumpHarness(
+  WidgetTester tester, {
+  required AppSettings settings,
+  required VehicleSnapshot? snapshot,
+  int? expectNavIndex,
+}) async {
   tester.view.physicalSize = const Size(1170, 2532);
   tester.view.devicePixelRatio = 3.0;
   addTearDown(tester.view.resetPhysicalSize);
@@ -308,11 +328,12 @@ Future<void> _capture(
     final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
     expect(bar.selectedIndex, expectNavIndex);
   }
+  return boundaryKey;
+}
 
-  if (afterPump != null) await afterPump(tester);
-
+Future<void> _writeGolden(WidgetTester tester, String name, Finder finder) async {
   final golden = '$_goldenRoot/$name.png';
-  await expectLater(find.byKey(boundaryKey), matchesGoldenFile(golden));
+  await expectLater(finder, matchesGoldenFile(golden));
 
   final src = File('test/screenshot/$golden');
   final bytes = src.readAsBytesSync();

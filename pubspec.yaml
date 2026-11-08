@@ -1,7 +1,7 @@
 name: overdrive_companion
 description: Overdrive Companion — remote BYD vehicle control for the Overdrive HTTP server.
 publish_to: "none"
-version: 2.3.0+10
+version: 2.3.0+11
 
 environment:
   sdk: ^3.13.0

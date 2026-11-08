@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/format/booking_labels.dart';
 import '../../core/format/seat_levels.dart';
 import '../../core/layout/scroll_insets.dart';
 import '../../core/widgets/ltr_metric.dart';
@@ -135,12 +136,14 @@ class _ClimateScheduleTabState extends ConsumerState<_ClimateScheduleTab> {
     );
   }
 
-  String _bookingWhen(ClimateBooking b) {
-    final t = b.bookingTime;
-    if (t == null) return 'שעה לא ידועה';
-    final dt = DateTime.fromMillisecondsSinceEpoch(t * 1000, isUtc: true).toLocal();
-    return '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')} '
-        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  ClimateBooking? get _selectedBooking {
+    final id = _bookingId;
+    final bookings = _state?.bookings;
+    if (id == null || bookings == null) return null;
+    for (final b in bookings) {
+      if (b.bookingId == id) return b;
+    }
+    return null;
   }
 
   void _selectForEdit(ClimateBooking b) {
@@ -199,7 +202,7 @@ class _ClimateScheduleTabState extends ConsumerState<_ClimateScheduleTab> {
               child: ListTile(
                 selected: _bookingId == b.bookingId,
                 onTap: () => _selectForEdit(b),
-                title: Text(_bookingWhen(b)),
+                title: Text(formatClimateBookingWhen(b)),
                 subtitle: Text(
                   '${celsiusLabelHe(b.temp ?? _temp)} · ${b.durationMinutes ?? 0} דק׳',
                 ),
@@ -221,7 +224,7 @@ class _ClimateScheduleTabState extends ConsumerState<_ClimateScheduleTab> {
           ),
         const Divider(height: 28),
         Text(
-          _bookingId == null ? 'תזמון חדש' : 'עריכת תזמון $_bookingId',
+          climateEditorTitle(isNew: _bookingId == null, selected: _selectedBooking),
           style: Theme.of(context).textTheme.titleSmall,
         ),
         const SizedBox(height: 8),

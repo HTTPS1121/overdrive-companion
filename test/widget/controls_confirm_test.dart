@@ -31,7 +31,7 @@ void main() {
     fixtureSnap = await repo.fetchSnapshot();
   });
 
-  testWidgets('lock shows confirmation before POST', (tester) async {
+  Future<void> pumpCommands(WidgetTester tester) async {
     final settingsRepo = await SettingsRepository.create();
 
     await tester.pumpWidget(
@@ -47,14 +47,53 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+  }
 
-    await tester.tap(find.text('נעילה'));
-    await tester.pumpAndSettle();
-    expect(find.text('לאשר נעילה?'), findsOneWidget);
-
+  Future<void> expectConfirmDialog(
+    WidgetTester tester, {
+    required String tapLabel,
+    required String dialogTitle,
+  }) async {
+    await tester.tap(find.text(tapLabel));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.text(dialogTitle), findsOneWidget);
     await tester.tap(find.text('ביטול'));
     await tester.pumpAndSettle();
-    expect(find.text('לאשר נעילה?'), findsNothing);
+    expect(find.byType(AlertDialog), findsNothing);
+  }
+
+  testWidgets('lock shows confirmation before POST', (tester) async {
+    await pumpCommands(tester);
+    await expectConfirmDialog(tester, tapLabel: 'נעילה', dialogTitle: 'לאשר נעילה?');
+  });
+
+  testWidgets('unlock trunk and windows require confirmation', (tester) async {
+    await pumpCommands(tester);
+    await expectConfirmDialog(tester, tapLabel: 'פתיחה', dialogTitle: 'לאשר פתיחה?');
+    await expectConfirmDialog(
+      tester,
+      tapLabel: 'פתיחת תא מטען',
+      dialogTitle: 'לאשר תא מטען?',
+    );
+    await expectConfirmDialog(
+      tester,
+      tapLabel: 'פתיחה מלאה',
+      dialogTitle: 'לאשר חלונות?',
+    );
+  });
+
+  testWidgets('lock confirm sends POST when approved', (tester) async {
+    await pumpCommands(tester);
+    await tester.tap(find.text('נעילה'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('לאשר נעילה?'), findsOneWidget);
+    await tester.tap(find.text('שליחה'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.textContaining('נעילה'), findsWidgets);
   });
 }
 

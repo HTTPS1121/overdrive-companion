@@ -101,17 +101,19 @@ class MockOverdriveBackend {
       );
 
   static List<Map<String, dynamic>> _defaultClimateBookings() {
-    const t1 = 1735689600; // fixed epoch for stable goldens
-    const t2 = 1735776000;
+    // Epoch seconds (UTC): 2025-01-06 08:00 → 10:00 Asia/Jerusalem (UTC+2)
+    const t1 = 1736150400;
+    // 2025-01-07 08:00 UTC
+    const t2 = 1736236800;
     return [
       {
-        'bookingId': '18446744073709551615',
+        'bookingId': '8844123456789012',
         'bookingTime': t1,
         'mainSettingTemp': 8,
         'timeSpan': 3,
       },
       {
-        'bookingId': 'mock-climate-2',
+        'bookingId': '8844987654321098',
         'bookingTime': t2,
         'mainSettingTemp': 6,
         'timeSpan': 2,
@@ -165,6 +167,26 @@ class MockOverdriveBackend {
         return _ok('start-charging');
       case '/api/vehicle/charge-cap':
         return _handleChargeCapPost(body);
+      case '/api/vehicle/power-on':
+        return _ok('power-on', message: 'power on', confirmation: 'local');
+      case '/api/vehicle/power-off':
+        return _ok('power-off', message: 'power off', confirmation: 'local');
+      case '/api/vehicle/battery-heat':
+        final en = body['enabled'] == true;
+        _state['batteryHeat'] = en;
+        return _ok('battery-heat', message: 'batteryHeat=$en');
+      case '/api/vehicle/system':
+        if (body['target'] == 'screenshot') {
+          final d = body['display'] ?? 0;
+          return {
+            'success': true,
+            'target': 'screenshot',
+            'path': '/storage/sdcard/OverDrive/screenshots/shot_d${d}_mock.png',
+            'confirmation': 'local',
+            'outcome': 'success',
+          };
+        }
+        return {'success': false, 'error': 'unsupported system target'};
       default:
         return {'success': false, 'error': 'unsupported path $path'};
     }
@@ -297,15 +319,21 @@ class MockOverdriveBackend {
     return _ok('seat', message: body['action']?.toString());
   }
 
+  String? _bookingIdFromBody(Map<String, dynamic> body) {
+    final raw = body['bookingId'];
+    if (raw == null) return null;
+    return raw.toString();
+  }
+
   Map<String, dynamic> _handleClimateSchedule(Map<String, dynamic> body) {
     final action = body['action'] as String? ?? 'create';
     if (action == 'delete') {
-      final id = body['bookingId'] as String?;
+      final id = _bookingIdFromBody(body);
       _climateBookings.removeWhere((b) => b['bookingId'] == id);
       return _ok('climate-schedule', message: 'deleted');
     }
     if (action == 'update') {
-      final id = body['bookingId'] as String?;
+      final id = _bookingIdFromBody(body);
       final existing = _climateBookings.indexWhere((b) => b['bookingId'] == id);
       if (existing >= 0) {
         _climateBookings[existing] = {
@@ -317,7 +345,7 @@ class MockOverdriveBackend {
       }
       return _ok('climate-schedule', message: 'updated');
     }
-    final id = body['bookingId'] as String? ?? 'mock-climate-${_climateBookings.length + 1}';
+    final id = _bookingIdFromBody(body) ?? 'mock-climate-${_climateBookings.length + 1}';
     _climateBookings.add({
       'bookingId': id,
       'bookingTime': body['bookingTime'] ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
