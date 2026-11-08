@@ -1301,4 +1301,91 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get integrationsHeadUnitNote =>
       'Android Auto / שיקוף למסך רכב אינו מיושם באפליקציה; ה־API של Launcher נשאר ברכב.';
+
+  @override
+  String get voicePttTitle => 'לחץ לדבר';
+
+  @override
+  String get voicePttHint => 'החזקה לשליחת PCM ל־/ws/communicate (16 kHz).';
+
+  @override
+  String get voicePttHold => 'החזק לדיבור';
+
+  @override
+  String get voicePttConnecting => 'מתחבר…';
+
+  @override
+  String get voicePttLive => 'שידור חי';
+
+  @override
+  String get voicePttStopping => 'עוצר…';
+
+  @override
+  String get voicePttFailed => 'השיחה נכשלה';
+
+  @override
+  String get voiceCabinListenTitle => 'מיקרופון תא';
+
+  @override
+  String get voiceCabinIdle => 'כבוי';
+
+  @override
+  String get voiceCabinConnecting => 'מתחבר…';
+
+  @override
+  String get voiceCabinLive => 'מאזין';
+
+  @override
+  String get voiceCabinPaused => 'מושהה בזמן דיבור';
+
+  @override
+  String get voiceCabinError => 'שגיאת מאזין';
+
+  @override
+  String voiceCabinBytes(String bytes) {
+    return 'התקבלו $bytes בתים';
+  }
+
+  @override
+  String get voiceMicDenied => 'הרשאת מיקרופון נדחתה';
+
+  @override
+  String get voiceMicOpenSettings => 'פתח הגדרות לאישור מיקרופון';
+
+  @override
+  String get genAiVoiceTitle => 'קול בזמן אמת';
+
+  @override
+  String get genAiVoiceHint => 'משתמש ב־/ws/genai עם PCM דו־כיווני.';
+
+  @override
+  String get genAiVoiceStart => 'התחלת שיחת קול';
+
+  @override
+  String get genAiVoiceStop => 'עצירת שיחת קול';
+
+  @override
+  String get genAiVoiceTruncate => 'קיטוע השמעה';
+
+  @override
+  String get platformAbrpTitle => 'ABRP';
+
+  @override
+  String get platformMqttTitle => 'MQTT';
+
+  @override
+  String get platformMqttAdd => 'הוספת חיבור';
+
+  @override
+  String get platformCommunityImport => 'ייבוא אוטומציה';
+
+  @override
+  String get platformSave => 'שמירה לרכב';
+
+  @override
+  String get platformDeleteToken => 'מחיקת אסימון ABRP';
+
+  @override
+  String get platformDestructiveWarning =>
+      'פעולה זו משנה הגדרות ברכב — אשר לפני שליחה.';
 }

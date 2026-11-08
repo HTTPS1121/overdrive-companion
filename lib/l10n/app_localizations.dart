@@ -2503,6 +2503,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Android Auto / head-unit projection is not implemented in the companion; local launcher APIs remain on the vehicle.'**
   String get integrationsHeadUnitNote;
+
+  /// No description provided for @voicePttTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Push-to-talk'**
+  String get voicePttTitle;
+
+  /// No description provided for @voicePttHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to send PCM to /ws/communicate (16 kHz s16le).'**
+  String get voicePttHint;
+
+  /// No description provided for @voicePttHold.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to talk'**
+  String get voicePttHold;
+
+  /// No description provided for @voicePttConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get voicePttConnecting;
+
+  /// No description provided for @voicePttLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get voicePttLive;
+
+  /// No description provided for @voicePttStopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopping…'**
+  String get voicePttStopping;
+
+  /// No description provided for @voicePttFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk failed'**
+  String get voicePttFailed;
+
+  /// No description provided for @voiceCabinListenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabin microphone'**
+  String get voiceCabinListenTitle;
+
+  /// No description provided for @voiceCabinIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get voiceCabinIdle;
+
+  /// No description provided for @voiceCabinConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get voiceCabinConnecting;
+
+  /// No description provided for @voiceCabinLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening'**
+  String get voiceCabinLive;
+
+  /// No description provided for @voiceCabinPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused during talk'**
+  String get voiceCabinPaused;
+
+  /// No description provided for @voiceCabinError.
+  ///
+  /// In en, this message translates to:
+  /// **'Listener error'**
+  String get voiceCabinError;
+
+  /// No description provided for @voiceCabinBytes.
+  ///
+  /// In en, this message translates to:
+  /// **'{bytes} bytes received'**
+  String voiceCabinBytes(String bytes);
+
+  /// No description provided for @voiceMicDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone permission denied'**
+  String get voiceMicDenied;
+
+  /// No description provided for @voiceMicOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings to allow microphone'**
+  String get voiceMicOpenSettings;
+
+  /// No description provided for @genAiVoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Realtime voice'**
+  String get genAiVoiceTitle;
+
+  /// No description provided for @genAiVoiceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses /ws/genai with bidirectional PCM after live.'**
+  String get genAiVoiceHint;
+
+  /// No description provided for @genAiVoiceStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start voice session'**
+  String get genAiVoiceStart;
+
+  /// No description provided for @genAiVoiceStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop voice session'**
+  String get genAiVoiceStop;
+
+  /// No description provided for @genAiVoiceTruncate.
+  ///
+  /// In en, this message translates to:
+  /// **'Truncate playback'**
+  String get genAiVoiceTruncate;
+
+  /// No description provided for @platformAbrpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ABRP'**
+  String get platformAbrpTitle;
+
+  /// No description provided for @platformMqttTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'MQTT'**
+  String get platformMqttTitle;
+
+  /// No description provided for @platformMqttAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add connection'**
+  String get platformMqttAdd;
+
+  /// No description provided for @platformCommunityImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import automation'**
+  String get platformCommunityImport;
+
+  /// No description provided for @platformSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to vehicle'**
+  String get platformSave;
+
+  /// No description provided for @platformDeleteToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete ABRP token'**
+  String get platformDeleteToken;
+
+  /// No description provided for @platformDestructiveWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This changes vehicle-side configuration. Confirm before sending.'**
+  String get platformDestructiveWarning;
 }
 
 class _AppLocalizationsDelegate

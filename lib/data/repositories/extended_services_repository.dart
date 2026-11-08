@@ -169,6 +169,20 @@ class ExtendedServicesRepository {
   Future<Map<String, dynamic>> saveAbrpConfig(Map<String, dynamic> body) =>
       _client.postJson(ExtendedEndpoints.abrpConfig, body: body);
 
+  Future<Map<String, dynamic>> deleteAbrpToken() => _client.deleteJson(ExtendedEndpoints.abrpToken);
+
+  Future<Map<String, dynamic>> addMqttConnection(Map<String, dynamic> body) =>
+      _client.postJson(ExtendedEndpoints.mqttConnections, body: body);
+
+  Future<Map<String, dynamic>> updateMqttConnection(String id, Map<String, dynamic> body) =>
+      _client.putJson('${ExtendedEndpoints.mqttConnections}/$id', body: body);
+
+  Future<Map<String, dynamic>> deleteMqttConnection(String id) =>
+      _client.deleteJson('${ExtendedEndpoints.mqttConnections}/$id');
+
+  Future<Map<String, dynamic>> importCommunityAutomation(String id) =>
+      _client.postJson('/api/community/import/$id');
+
   Future<Map<String, dynamic>> fetchMqttStatus() =>
       _client.getJson(ExtendedEndpoints.mqttStatus);
 

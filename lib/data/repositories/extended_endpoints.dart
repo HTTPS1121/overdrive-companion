@@ -50,6 +50,7 @@ abstract final class ExtendedEndpoints {
   // Platform integrations
   static const abrpStatus = '/api/abrp/status';
   static const abrpConfig = '/api/abrp/config';
+  static const abrpToken = '/api/abrp/token';
   static const mqttStatus = '/api/mqtt/status';
   static const mqttConnections = '/api/mqtt/connections';
   static const mqttTelemetry = '/api/mqtt/telemetry';

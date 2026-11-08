@@ -1325,4 +1325,93 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get integrationsHeadUnitNote =>
       'Android Auto / head-unit projection is not implemented in the companion; local launcher APIs remain on the vehicle.';
+
+  @override
+  String get voicePttTitle => 'Push-to-talk';
+
+  @override
+  String get voicePttHint =>
+      'Hold to send PCM to /ws/communicate (16 kHz s16le).';
+
+  @override
+  String get voicePttHold => 'Hold to talk';
+
+  @override
+  String get voicePttConnecting => 'Connecting…';
+
+  @override
+  String get voicePttLive => 'Live';
+
+  @override
+  String get voicePttStopping => 'Stopping…';
+
+  @override
+  String get voicePttFailed => 'Talk failed';
+
+  @override
+  String get voiceCabinListenTitle => 'Cabin microphone';
+
+  @override
+  String get voiceCabinIdle => 'Off';
+
+  @override
+  String get voiceCabinConnecting => 'Connecting…';
+
+  @override
+  String get voiceCabinLive => 'Listening';
+
+  @override
+  String get voiceCabinPaused => 'Paused during talk';
+
+  @override
+  String get voiceCabinError => 'Listener error';
+
+  @override
+  String voiceCabinBytes(String bytes) {
+    return '$bytes bytes received';
+  }
+
+  @override
+  String get voiceMicDenied => 'Microphone permission denied';
+
+  @override
+  String get voiceMicOpenSettings => 'Open settings to allow microphone';
+
+  @override
+  String get genAiVoiceTitle => 'Realtime voice';
+
+  @override
+  String get genAiVoiceHint =>
+      'Uses /ws/genai with bidirectional PCM after live.';
+
+  @override
+  String get genAiVoiceStart => 'Start voice session';
+
+  @override
+  String get genAiVoiceStop => 'Stop voice session';
+
+  @override
+  String get genAiVoiceTruncate => 'Truncate playback';
+
+  @override
+  String get platformAbrpTitle => 'ABRP';
+
+  @override
+  String get platformMqttTitle => 'MQTT';
+
+  @override
+  String get platformMqttAdd => 'Add connection';
+
+  @override
+  String get platformCommunityImport => 'Import automation';
+
+  @override
+  String get platformSave => 'Save to vehicle';
+
+  @override
+  String get platformDeleteToken => 'Delete ABRP token';
+
+  @override
+  String get platformDestructiveWarning =>
+      'This changes vehicle-side configuration. Confirm before sending.';
 }

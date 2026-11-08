@@ -94,6 +94,10 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
     String path, {
     Map<String, dynamic> body = const {},
   }) async {
+    final result = _backend.handlePut(path, body);
+    if (result['error']?.toString().startsWith('unsupported PUT') != true) {
+      return result;
+    }
     throw OverdriveApiException('fixture: unknown PUT $path');
   }
 

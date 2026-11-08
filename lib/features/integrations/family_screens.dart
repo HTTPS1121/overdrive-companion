@@ -521,7 +521,12 @@ class PlatformConnectorsScreen extends ConsumerStatefulWidget {
 
 class _PlatformConnectorsScreenState extends ConsumerState<PlatformConnectorsScreen>
     with _FamilyLoader {
-  Map<String, dynamic> _cards = const {};
+  Map<String, dynamic>? _abrpConfig;
+  Map<String, dynamic>? _mqttConnections;
+  List<dynamic> _community = const [];
+  final _abrpEnabled = ValueNotifier(true);
+  final _mqttNameCtrl = TextEditingController(text: 'Home broker');
+  final _mqttHostCtrl = TextEditingController(text: 'mqtt.local');
 
   @override
   void initState() {
@@ -529,18 +534,24 @@ class _PlatformConnectorsScreenState extends ConsumerState<PlatformConnectorsScr
     WidgetsBinding.instance.addPostFrameCallback((_) => _reload());
   }
 
+  @override
+  void dispose() {
+    _mqttNameCtrl.dispose();
+    _mqttHostCtrl.dispose();
+    super.dispose();
+  }
+
   Future<void> _reload() async {
     await guard(() async {
       final repo = ref.read(extendedServicesRepositoryProvider);
-      final data = <String, dynamic>{
-        'abrp': await repo.fetchAbrpStatus(),
-        'mqtt': await repo.fetchMqttStatus(),
-        'launcher': await repo.fetchLauncherSummary(),
-        'roadsense': await repo.fetchRoadSenseHazards(),
-        'bydcloud': await repo.fetchBydCloudStatus(),
-        'community': await repo.listCommunityAutomations(),
-      };
-      setState(() => _cards = data);
+      _abrpConfig = await repo.fetchAbrpConfig();
+      _mqttConnections = await repo.listMqttConnections();
+      final community = await repo.listCommunityAutomations();
+      final items = community['items'];
+      setState(() {
+        _community = items is List ? items : const [];
+        _abrpEnabled.value = _abrpConfig?['enabled'] == true;
+      });
     });
   }
 
@@ -554,44 +565,117 @@ class _PlatformConnectorsScreenState extends ConsumerState<PlatformConnectorsScr
         body: ListView(
           padding: scrollBottomPadding(context),
           children: [
-            _PlatformCard(title: 'ABRP', body: _cards['abrp']?.toString() ?? '—'),
-            _PlatformCard(title: 'MQTT', body: _cards['mqtt']?.toString() ?? '—'),
-            _PlatformCard(title: l10n.integrationsLauncherTitle, body: _cards['launcher']?.toString() ?? '—'),
-            _PlatformCard(title: 'RoadSense', body: _cards['roadsense']?.toString() ?? '—'),
-            _PlatformCard(title: l10n.integrationsBydCloudTitle, body: _cards['bydcloud']?.toString() ?? '—'),
-            _PlatformCard(title: l10n.integrationsCommunityTitle, body: _cards['community']?.toString() ?? '—'),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                l10n.integrationsHeadUnitNote,
-                style: Theme.of(context).textTheme.bodySmall,
+            Text(l10n.platformDestructiveWarning, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 12),
+            Text(l10n.platformAbrpTitle, style: Theme.of(context).textTheme.titleMedium),
+            ValueListenableBuilder<bool>(
+              valueListenable: _abrpEnabled,
+              builder: (_, v, __) => SwitchListTile(
+                title: const Text('enabled'),
+                value: v,
+                onChanged: busy ? null : (nv) => _abrpEnabled.value = nv,
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PlatformCard extends StatelessWidget {
-  const _PlatformCard({required this.title, required this.body});
-
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(body, style: Theme.of(context).textTheme.bodySmall),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: FilledButton(
+                onPressed: busy
+                    ? null
+                    : () => guard(() async {
+                          await ref.read(extendedServicesRepositoryProvider).saveAbrpConfig({
+                            'enabled': _abrpEnabled.value,
+                            'mirrorSoc': true,
+                          });
+                          if (mounted) await _snack(context, l10n.integrationsSaved);
+                          await _reload();
+                        }),
+                child: Text(l10n.platformSave),
+              ),
+            ),
+            TextButton(
+              onPressed: busy
+                  ? null
+                  : () async {
+                      final ok = await confirmRiskyAction(
+                        context,
+                        title: l10n.platformDeleteToken,
+                        body: l10n.platformDestructiveWarning,
+                        confirmLabel: l10n.actionDelete,
+                      );
+                      if (ok != true) return;
+                      await guard(() async {
+                        await ref.read(extendedServicesRepositoryProvider).deleteAbrpToken();
+                        await _reload();
+                      });
+                    },
+              child: Text(l10n.platformDeleteToken),
+            ),
+            const Divider(),
+            Text(l10n.platformMqttTitle, style: Theme.of(context).textTheme.titleMedium),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(controller: _mqttNameCtrl, decoration: const InputDecoration(labelText: 'name')),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(controller: _mqttHostCtrl, decoration: const InputDecoration(labelText: 'host')),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: FilledButton(
+                onPressed: busy
+                    ? null
+                    : () => guard(() async {
+                          await ref.read(extendedServicesRepositoryProvider).addMqttConnection({
+                            'name': _mqttNameCtrl.text.trim(),
+                            'host': _mqttHostCtrl.text.trim(),
+                            'enabled': true,
+                          });
+                          if (mounted) await _snack(context, l10n.integrationsSaved);
+                          await _reload();
+                        }),
+                child: Text(l10n.platformMqttAdd),
+              ),
+            ),
+            if (_mqttConnections?['connections'] is List)
+              for (final c in _mqttConnections!['connections'] as List)
+                ListTile(
+                  title: Text(c is Map ? (c['name']?.toString() ?? '') : c.toString()),
+                  subtitle: Text(c is Map ? (c['host']?.toString() ?? c['id']?.toString() ?? '') : ''),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () async {
+                      final id = c is Map ? c['id']?.toString() : null;
+                      if (id == null) return;
+                      await guard(() async {
+                        await ref.read(extendedServicesRepositoryProvider).deleteMqttConnection(id);
+                        await _reload();
+                      });
+                    },
+                  ),
+                ),
+            const Divider(),
+            Text(l10n.integrationsCommunityTitle, style: Theme.of(context).textTheme.titleMedium),
+            for (final item in _community)
+              ListTile(
+                title: Text(item is Map ? (item['name']?.toString() ?? '') : item.toString()),
+                subtitle: Text(item is Map ? '★ ${item['stars']}' : ''),
+                trailing: FilledButton.tonal(
+                  onPressed: busy
+                      ? null
+                      : () => guard(() async {
+                            final id = item is Map ? item['id']?.toString() : null;
+                            if (id == null) return;
+                            await ref.read(extendedServicesRepositoryProvider).importCommunityAutomation(id);
+                            if (mounted) await _snack(context, l10n.platformCommunityImport);
+                          }),
+                  child: Text(l10n.platformCommunityImport),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.integrationsHeadUnitNote, style: Theme.of(context).textTheme.bodySmall),
+            ),
           ],
         ),
       ),

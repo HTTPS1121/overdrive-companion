@@ -92,7 +92,9 @@ class MockExtendedBackend {
       case '/api/abrp/status':
         return {'success': true, 'linked': true, 'routeActive': false};
       case '/api/abrp/config':
-        return {'success': true, 'tokenPresent': true, 'mirrorSoc': true};
+        return {'success': true, 'tokenPresent': true, 'mirrorSoc': true, 'enabled': true};
+      case '/api/abrp/token':
+        return {'success': true};
       case '/api/mqtt/status':
         return {'success': true, 'connected': 1, 'total': 1};
       case '/api/mqtt/connections':
@@ -179,6 +181,8 @@ class MockExtendedBackend {
         return {'success': true, 'outcome': 'mock_executed', 'action': body['action']};
       case '/api/abrp/config':
         return {'success': true, ...body};
+      case '/api/mqtt/connections':
+        return {'success': true, 'id': 'mqtt-new', ...body};
       default:
         if (base.startsWith('/api/automations/test/')) {
           return {'success': true, 'tested': base.split('/').last};
@@ -211,6 +215,22 @@ class MockExtendedBackend {
       final id = base.replaceFirst('/api/trips/', '');
       _trips.removeWhere((e) => e['id'] == id);
       return {'success': true};
+    }
+    if (base.startsWith('/api/mqtt/connections/')) {
+      return {'success': true};
+    }
+    if (base.startsWith('/api/abrp/token')) {
+      return {'success': true};
+    }
+    if (base.startsWith('/api/community/import/')) {
+      return {'success': true, 'importedId': base.split('/').last};
+    }
+    return null;
+  }
+
+  Map<String, dynamic>? tryPut(String path, Map<String, dynamic> body) {
+    if (path.startsWith('/api/mqtt/connections/')) {
+      return {'success': true, ...body};
     }
     return null;
   }

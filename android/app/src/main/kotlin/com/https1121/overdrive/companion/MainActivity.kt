@@ -7,5 +7,6 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         H264StreamPlugin.register(flutterEngine)
+        PcmAudioPlugin.register(flutterEngine)
     }
 }

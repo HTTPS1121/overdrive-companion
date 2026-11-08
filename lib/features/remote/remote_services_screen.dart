@@ -9,6 +9,8 @@ import '../../core/widgets/confirm_risky_action.dart';
 import '../../core/widgets/requires_connection.dart';
 import '../../data/models/remote_services_models.dart';
 import '../../providers/app_providers.dart';
+import 'communicate_voice_panel.dart';
+import 'genai_voice_panel.dart';
 
 class RemoteServicesScreen extends ConsumerStatefulWidget {
   const RemoteServicesScreen({super.key});
@@ -165,6 +167,11 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
           ),
         ],
         const Divider(),
+        CommunicateVoicePanel(
+          voiceReady: status?.audioReady == true && _voiceEnabled,
+          listenerReady: status?.listenerReady == true && _listenerEnabled,
+        ),
+        const Divider(),
         Text(l10n.communicateSettingsTitle, style: Theme.of(context).textTheme.titleSmall),
         SwitchListTile(
           title: Text(l10n.communicateVoiceEnabled),
@@ -276,14 +283,6 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
             ),
           ],
         ),
-        if (_commSettings != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              l10n.communicateWsNote,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
       ],
     );
   }
@@ -316,6 +315,8 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
               ].join(' · '),
             ),
           ),
+        GenAiVoicePanel(enabled: _genAi?.enabled == true),
+        const Divider(),
         TextField(
           controller: _genAiCtrl,
           decoration: InputDecoration(
@@ -389,7 +390,6 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
         ),
         if (_insightTitles.isNotEmpty)
           ..._insightTitles.map((t) => ListTile(dense: true, title: Text(t))),
-        Text(l10n.genAiWsNote, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }

@@ -295,6 +295,12 @@ class MockOverdriveBackend {
     return {'success': false, 'error': 'unsupported DELETE $path'};
   }
 
+  Map<String, dynamic> handlePut(String path, Map<String, dynamic> body) {
+    final ext = _extended.tryPut(path, body);
+    if (ext != null) return ext;
+    return {'success': false, 'error': 'unsupported PUT $path'};
+  }
+
   Map<String, dynamic> handleGet(String path) {
     final extGet = _extended.tryGet(path);
     if (extGet != null) return extGet;
