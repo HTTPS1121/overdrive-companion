@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
-import '../models/cloud_status.dart';
-import '../models/gps_snapshot.dart';
-import '../models/vehicle_state.dart';
+import 'package:overdrive_companion/data/models/cloud_status.dart';
+import 'package:overdrive_companion/data/models/gps_snapshot.dart';
+import 'package:overdrive_companion/data/models/vehicle_state.dart';
 
 /// In-memory simulation of Overdrive HTTP handlers (vehicle state + controls).
 class MockOverdriveBackend {

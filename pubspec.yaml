@@ -1,7 +1,7 @@
 name: overdrive_companion
 description: Overdrive Companion — remote BYD vehicle control for the Overdrive HTTP server.
 publish_to: "none"
-version: 1.1.2+4
+version: 2.0.0+5
 
 environment:
   sdk: ^3.13.0
@@ -16,13 +16,14 @@ dependencies:
   http: ^1.2.2
   shared_preferences: ^2.3.3
   flutter_secure_storage: ^9.2.4
-  shelf: ^1.4.2
-  shelf_router: ^1.1.4
+  dynamic_color: ^1.8.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  shelf: ^1.4.2
+  shelf_router: ^1.1.4
 
 flutter:
   uses-material-design: true

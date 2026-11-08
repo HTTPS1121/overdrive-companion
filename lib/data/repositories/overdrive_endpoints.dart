@@ -52,7 +52,8 @@ class ControlCapability {
   final bool requiresTyres;
 }
 
-const kStage1Controls = <ControlCapability>[
+/// Controls implemented in this companion (subset of VehicleControlApiHandler).
+const kCompanionControls = <ControlCapability>[
   ControlCapability(
     kind: ControlKind.lock,
     path: OverdriveEndpoints.lock,
@@ -101,13 +102,13 @@ const kStage1Controls = <ControlCapability>[
   ControlCapability(
     kind: ControlKind.climateOn,
     path: OverdriveEndpoints.climate,
-    labelHe: 'מיזוג ON',
+    labelHe: 'הפעלת מיזוג',
     defaultBody: {'action': 'power_on', 'temp': 22, 'remoteDurationMinutes': 20},
   ),
   ControlCapability(
     kind: ControlKind.climateOff,
     path: OverdriveEndpoints.climate,
-    labelHe: 'מיזוג OFF',
+    labelHe: 'כיבוי מיזוג',
     defaultBody: {'action': 'power_off'},
   ),
   ControlCapability(

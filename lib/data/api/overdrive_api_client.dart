@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../../core/config/app_settings.dart';
 import '../repositories/overdrive_endpoints.dart';
 
 class OverdriveApiException implements Exception {
@@ -139,4 +138,3 @@ String normalizeBaseUrl(String input) {
   return url;
 }
 
-ConnectionMode connectionModeFromSettings(AppSettings s) => s.connectionMode;

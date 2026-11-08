@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format/freshness.dart';
-import '../../core/theme/app_theme.dart';
-import '../../core/widgets/demo_banner.dart';
 import '../../data/repositories/overdrive_endpoints.dart';
 import '../../data/repositories/vehicle_repository.dart';
 import '../../providers/app_providers.dart';
@@ -21,163 +19,158 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = ref.watch(appSettingsProvider);
     final snapAsync = ref.watch(vehicleSnapshotProvider);
-    final colors = OverdriveColors.of(context);
 
-    return Column(
-      children: [
-        DemoDataBanner(mode: settings.connectionMode),
-        Expanded(
-          child: snapAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('שגיאה: $e')),
-            data: (snap) {
-              if (snap == null || snap.offline || !snap.state.success) {
-                return Center(
-                  child: Text(snap?.errorMessage ?? 'אין חיבור - לא ניתן לשלוט'),
-                );
-              }
+    return snapAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('שגיאה: $e')),
+      data: (snap) {
+        if (snap == null || snap.offline || !snap.state.success) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                snap?.errorMessage ?? 'אין חיבור לשרת — שליטה לא זמינה',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
 
-              final freshness = DataFreshness(
-                serverEpochSec: snap.state.timestamp,
-                fetchedAt: snap.lastUpdated ?? DateTime.now(),
-              );
-              final staleBlocked = freshness.isStale;
+        final freshness = DataFreshness(
+          serverEpochSec: snap.state.timestamp,
+          fetchedAt: snap.lastUpdated ?? DateTime.now(),
+        );
+        final staleBlocked = freshness.isStale;
 
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
-                children: [
-                  if (staleBlocked)
-                    Card(
-                      color: colors.demoBanner,
-                      child: ListTile(
-                        leading: Icon(Icons.warning_amber, color: colors.warn),
-                        title: const Text('נתונים ישנים'),
-                        subtitle: Text(
-                          'רענן את המצב לפני שליחת פקודה (${freshness.ageLabelHe()})',
-                        ),
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          children: [
+            if (staleBlocked)
+              Card(
+                color: Theme.of(context).colorScheme.tertiaryContainer,
+                child: ListTile(
+                  leading: Icon(Icons.schedule, color: Theme.of(context).colorScheme.onTertiaryContainer),
+                  title: const Text('נתונים ישנים'),
+                  subtitle: Text('רענן את המצב לפני שליחת פקודה (${freshness.ageLabelHe()})'),
+                ),
+              ),
+            _ControlSection(
+              title: 'גישה לרכב',
+              icon: Icons.vpn_key,
+              children: [
+                _ActionTile(
+                  label: 'נעילה',
+                  icon: Icons.lock,
+                  enabled: !_busy && !staleBlocked,
+                  onPressed: () => _run(ControlKind.lock, 'נעילה'),
+                ),
+                _ActionTile(
+                  label: 'פתיחה',
+                  icon: Icons.lock_open,
+                  enabled: !_busy && !staleBlocked,
+                  onPressed: () => _run(ControlKind.unlock, 'פתיחה'),
+                ),
+                _ActionTile(
+                  label: 'פתיחת תא מטען',
+                  icon: Icons.luggage,
+                  enabled: !_busy && !staleBlocked,
+                  onPressed: () => _run(ControlKind.trunkOpen, 'תא מטען'),
+                ),
+                _ActionTile(
+                  label: 'הבהוב אורות',
+                  icon: Icons.lightbulb_outline,
+                  enabled: !_busy && !staleBlocked,
+                  onPressed: () => _run(ControlKind.flash, 'הבהוב'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _ControlSection(
+              title: 'חלונות',
+              icon: Icons.filter_drama_outlined,
+              children: [
+                _ActionTile(
+                  label: 'פתיחה מלאה',
+                  icon: Icons.vertical_align_top,
+                  enabled: !_busy && !staleBlocked,
+                  onPressed: () => _run(ControlKind.windowsOpen, 'חלונות'),
+                ),
+                _ActionTile(
+                  label: 'סגירה',
+                  icon: Icons.vertical_align_bottom,
+                  enabled: !_busy && !staleBlocked,
+                  onPressed: () => _run(ControlKind.windowsClose, 'חלונות'),
+                ),
+                _ActionTile(
+                  label: 'אוורור',
+                  icon: Icons.air,
+                  enabled: !_busy && !staleBlocked,
+                  onPressed: () => _run(ControlKind.windowsVent, 'אוורור'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _ControlSection(
+              title: 'מיזוג',
+              icon: Icons.ac_unit,
+              children: [
+                _ActionTile(
+                  label: snap.state.climate?.acOn == true ? 'כיבוי מיזוג' : 'הפעלת מיזוג',
+                  icon: Icons.thermostat,
+                  enabled: !_busy && !staleBlocked,
+                  onPressed: () => _run(
+                    snap.state.climate?.acOn == true
+                        ? ControlKind.climateOff
+                        : ControlKind.climateOn,
+                    'מיזוג',
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _ActionTile(
+                        label: 'טמפ׳ −',
+                        icon: Icons.remove,
+                        enabled: !_busy && !staleBlocked,
+                        compact: true,
+                        onPressed: () => _climateTemp(-1, snap),
                       ),
                     ),
-                  _ControlSection(
-                    title: 'גישה לרכב',
-                    icon: Icons.vpn_key,
-                    children: [
-                      _ActionTile(
-                        label: 'נעילה',
-                        icon: Icons.lock,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _ActionTile(
+                        label: 'טמפ׳ +',
+                        icon: Icons.add,
                         enabled: !_busy && !staleBlocked,
-                        onPressed: () => _run(ControlKind.lock, 'נעילה'),
+                        compact: true,
+                        onPressed: () => _climateTemp(1, snap),
                       ),
-                      _ActionTile(
-                        label: 'פתיחה',
-                        icon: Icons.lock_open,
-                        enabled: !_busy && !staleBlocked,
-                        onPressed: () => _run(ControlKind.unlock, 'פתיחה'),
-                      ),
-                      _ActionTile(
-                        label: 'פתיחת תא מטען',
-                        icon: Icons.luggage,
-                        enabled: !_busy && !staleBlocked,
-                        onPressed: () => _run(ControlKind.trunkOpen, 'תא מטען'),
-                      ),
-                      _ActionTile(
-                        label: 'מצא רכב (הבהוב)',
-                        icon: Icons.lightbulb_outline,
-                        enabled: !_busy && !staleBlocked,
-                        onPressed: () => _run(ControlKind.flash, 'הבהוב'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _ControlSection(
-                    title: 'חלונות',
-                    icon: Icons.filter_drama_outlined,
-                    children: [
-                      _ActionTile(
-                        label: 'פתיחה מלאה',
-                        icon: Icons.vertical_align_top,
-                        enabled: !_busy && !staleBlocked,
-                        onPressed: () => _run(ControlKind.windowsOpen, 'חלונות'),
-                      ),
-                      _ActionTile(
-                        label: 'סגירה',
-                        icon: Icons.vertical_align_bottom,
-                        enabled: !_busy && !staleBlocked,
-                        onPressed: () => _run(ControlKind.windowsClose, 'חלונות'),
-                      ),
-                      _ActionTile(
-                        label: 'אוורור',
-                        icon: Icons.air,
-                        enabled: !_busy && !staleBlocked,
-                        onPressed: () => _run(ControlKind.windowsVent, 'אוורור'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _ControlSection(
-                    title: 'מיזוג',
-                    icon: Icons.ac_unit,
-                    children: [
-                      _ActionTile(
-                        label: snap.state.climate?.acOn == true ? 'כיבוי מיזוג' : 'הפעלת מיזוג',
-                        icon: Icons.thermostat,
-                        enabled: !_busy && !staleBlocked,
-                        onPressed: () => _run(
-                          snap.state.climate?.acOn == true
-                              ? ControlKind.climateOff
-                              : ControlKind.climateOn,
-                          'מיזוג',
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _ActionTile(
-                              label: 'טמפ׳ −',
-                              icon: Icons.remove,
-                              enabled: !_busy && !staleBlocked,
-                              compact: true,
-                              onPressed: () => _climateTemp(-1, snap),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _ActionTile(
-                              label: 'טמפ׳ +',
-                              icon: Icons.add,
-                              enabled: !_busy && !staleBlocked,
-                              compact: true,
-                              onPressed: () => _climateTemp(1, snap),
-                            ),
-                          ),
-                        ],
-                      ),
-                      _ActionTile(
-                        label: snap.state.seats?.steeringHeat == true
-                            ? 'כיבוי חימום הגה'
-                            : 'חימום הגה',
-                        icon: Icons.touch_app,
-                        enabled: !_busy && !staleBlocked,
-                        onPressed: () => _run(ControlKind.steeringHeat, 'הגה'),
-                      ),
-                    ],
-                  ),
-                  if (_lastFeedback != null) ...[
-                    const SizedBox(height: 16),
-                    Text(_lastFeedback!, textAlign: TextAlign.center),
+                    ),
                   ],
-                ],
-              );
-            },
-          ),
-        ),
-      ],
+                ),
+                _ActionTile(
+                  label: snap.state.seats?.steeringHeat == true
+                      ? 'כיבוי חימום הגה'
+                      : 'חימום הגה',
+                  icon: Icons.touch_app,
+                  enabled: !_busy && !staleBlocked,
+                  onPressed: () => _run(ControlKind.steeringHeat, 'הגה'),
+                ),
+              ],
+            ),
+            if (_lastFeedback != null) ...[
+              const SizedBox(height: 16),
+              Text(_lastFeedback!, textAlign: TextAlign.center),
+            ],
+          ],
+        );
+      },
     );
   }
 
   ControlCapability _cap(ControlKind kind) =>
-      kStage1Controls.firstWhere((c) => c.kind == kind);
+      kCompanionControls.firstWhere((c) => c.kind == kind);
 
   Future<void> _run(ControlKind kind, String label) async {
     final snap = ref.read(vehicleSnapshotProvider).valueOrNull;
@@ -190,10 +183,6 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
         ? null
         : Map<String, dynamic>.from(_cap(kind).defaultBody!);
 
-    if (kind == ControlKind.readingLight) {
-      final on = snap?.state.lights?.readingLight != true;
-      body = {'target': 'readingLight', 'enable': on};
-    }
     if (kind == ControlKind.steeringHeat) {
       final on = snap?.state.seats?.steeringHeat != true;
       body = {'action': on ? 'steering_heat_on' : 'steering_heat_off'};

@@ -6,18 +6,20 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:overdrive_companion/app.dart';
 import 'package:overdrive_companion/core/config/app_settings.dart';
-import 'package:overdrive_companion/data/mock/mock_overdrive_backend.dart';
+import 'package:overdrive_companion/data/api/overdrive_api_client.dart';
 import 'package:overdrive_companion/data/models/vehicle_state.dart';
 import 'package:overdrive_companion/data/repositories/vehicle_repository.dart';
 import 'package:overdrive_companion/providers/app_providers.dart';
 import 'package:overdrive_companion/providers/settings_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../support/fixture_api_client.dart';
 import 'test_fonts.dart';
 
 late SettingsRepository _settingsRepo;
-late VehicleSnapshot _liveSnap;
+late VehicleSnapshot _fixtureSnap;
 late VehicleSnapshot _offlineSnap;
+late FixtureOverdriveApiClient _fixtureClient;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -28,15 +30,17 @@ void main() {
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
-    TestWidgetsFlutterBinding.ensureInitialized();
     await ensureScreenshotFonts();
     _settingsRepo = await SettingsRepository.create();
-
+    _fixtureClient = await FixtureOverdriveApiClient.create();
     final repo = VehicleRepository(
-      settings: AppSettings.defaults(),
-      mockBackend: MockOverdriveBackend(),
+      settings: const AppSettings(
+        baseUrl: 'https://fixture.test',
+        deviceToken: 'fixture-token',
+      ),
+      client: _fixtureClient,
     );
-    _liveSnap = await repo.fetchSnapshot();
+    _fixtureSnap = await repo.fetchSnapshot();
     _offlineSnap = VehicleSnapshot(
       state: VehicleState(success: false, error: 'אין רשת לשרת הרכב'),
       lastUpdated: DateTime.now(),
@@ -45,55 +49,65 @@ void main() {
     );
   });
 
-  testWidgets('01 dashboard demo golden', (tester) async {
-    _preparePhoneSurface(tester);
-    await _capture(tester, '01_dashboard_demo', _liveSnap);
-    _copyGolden('01_dashboard_demo', outDir);
-  });
-
-  testWidgets('02 controls golden', (tester) async {
+  testWidgets('01_setup_unconfigured golden', (tester) async {
     _preparePhoneSurface(tester);
     await _capture(
       tester,
-      '02_controls_demo',
-      _liveSnap,
-      afterPump: (t) async {
-        await t.tap(find.text('שליטה'));
-        await t.pump(const Duration(milliseconds: 400));
-      },
+      '01_setup_unconfigured',
+      settings: AppSettings.defaults(),
+      snapshot: null,
     );
-    _copyGolden('02_controls_demo', outDir);
+    _copyGolden('01_setup_unconfigured', outDir);
+    expect(find.text('התחבר למנהרה של Overdrive ברכב'), findsOneWidget);
   });
 
-  testWidgets('03 settings golden', (tester) async {
+  testWidgets('02_status_offline golden', (tester) async {
     _preparePhoneSurface(tester);
     await _capture(
       tester,
-      '03_settings_demo',
-      _liveSnap,
+      '02_status_offline',
+      settings: const AppSettings(
+        baseUrl: 'https://offline.example.com',
+        deviceToken: 'x',
+      ),
+      snapshot: _offlineSnap,
+    );
+    _copyGolden('02_status_offline', outDir);
+  });
+
+  testWidgets('03_status_fixture golden', (tester) async {
+    _preparePhoneSurface(tester);
+    await _capture(
+      tester,
+      '03_status_fixture',
+      settings: const AppSettings(
+        baseUrl: 'https://fixture.test',
+        deviceToken: 'fixture-token',
+      ),
+      snapshot: _fixtureSnap,
+      clientOverride: _fixtureClient,
+    );
+    _copyGolden('03_status_fixture', outDir);
+    expect(find.textContaining('%'), findsWidgets);
+  });
+
+  testWidgets('04_settings_configured golden', (tester) async {
+    _preparePhoneSurface(tester);
+    await _capture(
+      tester,
+      '04_settings_configured',
+      settings: const AppSettings(
+        baseUrl: 'https://fixture.test',
+        deviceToken: 'fixture-token',
+      ),
+      snapshot: _fixtureSnap,
+      clientOverride: _fixtureClient,
       afterPump: (t) async {
         await t.tap(find.text('הגדרות'));
         await t.pump(const Duration(milliseconds: 400));
       },
     );
-    _copyGolden('03_settings_demo', outDir);
-  });
-
-  testWidgets('04 dashboard offline golden', (tester) async {
-    _preparePhoneSurface(tester);
-    await _capture(
-      tester,
-      '04_dashboard_offline',
-      _offlineSnap,
-      afterPump: (t) async {
-        expect(find.text('אין חיבור לרכב'), findsOneWidget);
-        expect(find.text('BYD Atto 3'), findsNothing);
-      },
-    );
-    _copyGolden('04_dashboard_offline', outDir);
-    final s1 = File('test/screenshot/goldens/01_dashboard_demo.png').lengthSync();
-    final s4 = File('test/screenshot/goldens/04_dashboard_offline.png').lengthSync();
-    expect(s1, isNot(equals(s4)));
+    _copyGolden('04_settings_configured', outDir);
   });
 }
 
@@ -112,21 +126,24 @@ void _copyGolden(String name, Directory outDir) {
 
 Future<void> _capture(
   WidgetTester tester,
-  String name,
-  VehicleSnapshot snap, {
+  String name, {
+  required AppSettings settings,
+  required VehicleSnapshot? snapshot,
+  OverdriveApiClient? clientOverride,
   Future<void> Function(WidgetTester)? afterPump,
 }) async {
   await ensureScreenshotFonts();
   final boundaryKey = GlobalKey();
-  final settings = AppSettings.defaults();
+  _FixedAppSettings.pinned = settings;
 
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         settingsRepositoryProvider.overrideWithValue(_settingsRepo),
         appSettingsProvider.overrideWith(_FixedAppSettings.new),
-        vehicleSnapshotProvider.overrideWith(() => _FixedSnapshot(snap)),
-        mockBackendProvider.overrideWithValue(MockOverdriveBackend()),
+        if (clientOverride != null)
+          overdriveApiClientProvider.overrideWithValue(clientOverride),
+        vehicleSnapshotProvider.overrideWith(() => _FixedSnapshot(snapshot)),
       ],
       child: OverdriveApp(
         initialSettings: settings,
@@ -144,11 +161,10 @@ Future<void> _capture(
 }
 
 class _FixedAppSettings extends AppSettingsNotifier {
-  @override
-  AppSettings build() => AppSettings.defaults();
+  static AppSettings? pinned;
 
   @override
-  void applyInitial(AppSettings settings) {}
+  AppSettings build() => pinned ?? AppSettings.defaults();
 
   @override
   Future<void> bootstrap() async {}
@@ -156,7 +172,7 @@ class _FixedAppSettings extends AppSettingsNotifier {
 
 class _FixedSnapshot extends VehicleSnapshotNotifier {
   _FixedSnapshot(this._snap);
-  final VehicleSnapshot _snap;
+  final VehicleSnapshot? _snap;
 
   @override
   Future<VehicleSnapshot?> build() async => _snap;

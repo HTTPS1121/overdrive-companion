@@ -2,16 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/app_settings.dart';
-import '../../core/theme/app_text.dart';
-import '../../core/theme/app_theme.dart';
-import '../../core/widgets/demo_banner.dart';
 import '../../data/api/overdrive_api_client.dart';
+import '../../data/capabilities/companion_parity.dart';
 import '../../providers/app_providers.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key, required this.onComplete});
-
-  final VoidCallback onComplete;
+  const SettingsScreen({super.key});
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -20,45 +16,35 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late final TextEditingController _urlCtrl;
   late final TextEditingController _tokenCtrl;
-  ConnectionMode _mode = ConnectionMode.embeddedMock;
   bool _testing = false;
   String? _testMessage;
   bool _testOk = false;
-  bool _initialized = false;
+  bool _fieldsReady = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_initialized) return;
+    if (_fieldsReady) return;
     final s = ref.read(appSettingsProvider);
-    _mode = s.connectionMode;
-    _urlCtrl = TextEditingController(
-      text: s.connectionMode == ConnectionMode.live ? s.baseUrl : '',
-    );
+    _urlCtrl = TextEditingController(text: s.baseUrl);
     _tokenCtrl = TextEditingController(text: s.deviceToken);
-    _initialized = true;
+    _fieldsReady = true;
   }
 
   @override
   void dispose() {
-    if (_initialized) {
+    if (_fieldsReady) {
       _urlCtrl.dispose();
       _tokenCtrl.dispose();
     }
     super.dispose();
   }
 
-  AppSettings _draft() {
-    const port = 18080;
-    final base = _mode == ConnectionMode.embeddedMock
-        ? 'mock://embedded'
-        : normalizeBaseUrl(_urlCtrl.text);
-    return AppSettings(
-      baseUrl: _mode == ConnectionMode.localMockServer
-          ? 'http://127.0.0.1:$port'
-          : base,
+  AppSettings _draftFromFields() {
+    final current = ref.read(appSettingsProvider);
+    return current.copyWith(
+      baseUrl: normalizeBaseUrl(_urlCtrl.text),
       deviceToken: _tokenCtrl.text.trim(),
-      connectionMode: _mode,
     );
   }
 
@@ -67,18 +53,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _testing = true;
       _testMessage = null;
     });
-    final draft = _draft();
+    final draft = _draftFromFields();
+    if (!draft.isConfigured) {
+      setState(() {
+        _testing = false;
+        _testMessage = 'מלא כתובת ואסימון';
+        _testOk = false;
+      });
+      return;
+    }
     final repo = ref.read(vehicleRepositoryProvider);
     repo.updateSettings(draft);
     try {
-      final status = await repo.testConnection();
-      if (!status.ok) {
-        throw Exception('שרת לא זמין');
-      }
       await ref.read(vehicleRepositoryProvider.notifier).authenticateAndStoreJwt();
+      final status = await repo.testConnection();
+      if (!status.ok) throw Exception('שרת לא זמין');
       setState(() {
         _testOk = true;
-        _testMessage = 'מחובר. מזהה: ${status.deviceId ?? "--"}';
+        _testMessage = 'מחובר${status.deviceId != null ? " (${status.deviceId})" : ""}';
       });
     } catch (e) {
       setState(() {
@@ -91,180 +83,123 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _save() async {
-    final draft = _draft();
+    final draft = _draftFromFields();
     await ref.read(appSettingsProvider.notifier).persist(draft);
     await ref.read(vehicleRepositoryProvider.notifier).authenticateAndStoreJwt();
     ref.invalidate(vehicleSnapshotProvider);
-    widget.onComplete();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ההגדרות נשמרו')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = OverdriveColors.of(context);
-    return Column(
+    if (!_fieldsReady) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final settings = ref.watch(appSettingsProvider);
+    final theme = Theme.of(context);
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        DemoDataBanner(mode: _mode),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-            children: [
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'חיבור לשרת ',
-                      style: hebrewTextStyle(Theme.of(context).textTheme.titleLarge),
-                    ),
-                    TextSpan(
-                      text: 'Overdrive',
-                      style: numericTextStyle(Theme.of(context).textTheme.titleLarge),
-                    ),
-                    TextSpan(
-                      text: ' ברכב',
-                      style: hebrewTextStyle(Theme.of(context).textTheme.titleLarge),
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.start,
+        Text('חיבור', style: theme.textTheme.titleLarge),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _urlCtrl,
+          decoration: const InputDecoration(
+            labelText: 'כתובת שרת',
+            hintText: 'https://your-tunnel.example.com',
+          ),
+          keyboardType: TextInputType.url,
+          textDirection: TextDirection.ltr,
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _tokenCtrl,
+          decoration: const InputDecoration(labelText: 'אסימון מכשיר'),
+          obscureText: true,
+          textDirection: TextDirection.ltr,
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: FilledButton.tonalIcon(
+                onPressed: _testing ? null : _test,
+                icon: _testing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.link),
+                label: const Text('בדיקת חיבור'),
               ),
-              const SizedBox(height: 6),
-              Text.rich(
-                TextSpan(
-                  style: hebrewTextStyle(Theme.of(context).textTheme.bodySmall),
-                  children: [
-                    const TextSpan(text: 'רכב '),
-                    TextSpan(
-                      text: 'Atto 3',
-                      style: numericTextStyle(Theme.of(context).textTheme.bodySmall),
-                    ),
-                    const TextSpan(text: ' בישראל: פורט '),
-                    TextSpan(
-                      text: '8080',
-                      style: numericTextStyle(Theme.of(context).textTheme.bodySmall),
-                    ),
-                    const TextSpan(text: ' ברשת מקומית, או מנהרה מאובטחת עם אותם נתיבי שרת.'),
-                  ],
-                ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FilledButton(
+                onPressed: _save,
+                child: const Text('שמירה'),
               ),
-              const SizedBox(height: 20),
-              SegmentedButton<ConnectionMode>(
-                segments: [
-                  ButtonSegment(
-                    value: ConnectionMode.embeddedMock,
-                    label: Text('דמו', style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge)),
-                    icon: const Icon(Icons.science_outlined),
-                  ),
-                  ButtonSegment(
-                    value: ConnectionMode.live,
-                    label: Text('רכב', style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge)),
-                    icon: const Icon(Icons.directions_car),
-                  ),
-                  ButtonSegment(
-                    value: ConnectionMode.localMockServer,
-                    label: Text(
-                      'סימולטור',
-                      style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge),
-                    ),
-                    icon: const Icon(Icons.dns_outlined),
-                  ),
-                ],
-                selected: {_mode},
-                onSelectionChanged: (s) => setState(() => _mode = s.first),
-              ),
-              const SizedBox(height: 20),
-              if (_mode == ConnectionMode.live) ...[
-                TextField(
-                  controller: _urlCtrl,
-                  decoration: InputDecoration(
-                    labelText: 'כתובת בסיס שרת',
-                    labelStyle: hebrewTextStyle(Theme.of(context).textTheme.bodyLarge),
-                    helperText: 'מומלץ HTTPS במנהרה',
-                    helperStyle: hebrewTextStyle(Theme.of(context).textTheme.bodySmall),
-                    hintText: 'https://your-tunnel.example.com',
-                  ),
-                  keyboardType: TextInputType.url,
-                  textDirection: TextDirection.ltr,
-                ),
-                const SizedBox(height: 14),
-              ],
-              TextField(
-                controller: _tokenCtrl,
-                decoration: InputDecoration(
-                  labelText: 'אסימון מכשיר',
-                  helperStyle: hebrewTextStyle(Theme.of(context).textTheme.bodySmall),
-                  labelStyle: hebrewTextStyle(Theme.of(context).textTheme.bodyLarge),
-                  helper: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'נשמר מוצפן במכשיר. נתיב אימות ',
-                          style: hebrewTextStyle(Theme.of(context).textTheme.bodySmall),
-                        ),
-                        TextSpan(
-                          text: '/auth/token',
-                          style: numericTextStyle(Theme.of(context).textTheme.bodySmall),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                obscureText: true,
-                textDirection: TextDirection.ltr,
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: _testing ? null : _test,
-                      icon: _testing
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.link),
-                      label: Text(
-                        'בדיקת חיבור',
-                        style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: FilledButton.tonalIcon(
-                      onPressed: _save,
-                      icon: const Icon(Icons.check),
-                      label: Text(
-                        'שמירה',
-                        style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if (_testMessage != null) ...[
-                const SizedBox(height: 16),
-                MaterialBanner(
-                  content: Text(
-                    _testMessage!,
-                    style: hebrewTextStyle(Theme.of(context).textTheme.bodyMedium),
-                  ),
-                  backgroundColor: _testOk
-                      ? colors.accent.withValues(alpha: 0.15)
-                      : colors.danger.withValues(alpha: 0.15),
-                  actions: [
-                    TextButton(
-                      onPressed: () => setState(() => _testMessage = null),
-                      child: Text(
-                        'סגור',
-                        style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
+            ),
+          ],
+        ),
+        if (_testMessage != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            _testMessage!,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: _testOk ? theme.colorScheme.primary : theme.colorScheme.error,
+            ),
+          ),
+        ],
+        const SizedBox(height: 28),
+        Text('תצוגה', style: theme.textTheme.titleLarge),
+        const SizedBox(height: 8),
+        SegmentedButton<CompanionThemeMode>(
+          segments: const [
+            ButtonSegment(value: CompanionThemeMode.system, label: Text('מערכת')),
+            ButtonSegment(value: CompanionThemeMode.light, label: Text('בהיר')),
+            ButtonSegment(value: CompanionThemeMode.dark, label: Text('כהה')),
+          ],
+          selected: {settings.themeMode},
+          onSelectionChanged: (s) async {
+            final next = settings.copyWith(themeMode: s.first);
+            await ref.read(appSettingsProvider.notifier).persist(next);
+          },
+        ),
+        SwitchListTile(
+          title: const Text('צבע דינמי (Material You)'),
+          subtitle: const Text('Android 12+ — צבעים מהמערכת'),
+          value: settings.useDynamicColor,
+          onChanged: (v) async {
+            await ref.read(appSettingsProvider.notifier).persist(
+                  settings.copyWith(useDynamicColor: v),
+                );
+          },
+        ),
+        const SizedBox(height: 28),
+        Text('יכולות לעומת שרת', style: theme.textTheme.titleLarge),
+        const SizedBox(height: 8),
+        Text(
+          'רשימה זו משקפת את החוזה ב-Overdrive-release. פריטים לא ממומשים לא נשלחים מהאפליקציה.',
+          style: theme.textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        ...companionParityMatrix.map(
+          (e) => ListTile(
+            dense: true,
+            leading: Icon(
+              e.implemented ? Icons.check_circle_outline : Icons.remove_circle_outline,
+              color: e.implemented ? theme.colorScheme.primary : theme.colorScheme.outline,
+            ),
+            title: Text('${e.method} ${e.path}'),
+            subtitle: Text(e.noteHe ?? e.labelHe),
+            contentPadding: EdgeInsets.zero,
           ),
         ),
       ],

@@ -49,6 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  dynamic_color:
+    dependency: "direct main"
+    description:
+      name: dynamic_color
+      sha256: "4aeb76de323e8eb660bab5557d826ad7ebbf1434a598f0c6aa8a11a9696a6757"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.9.0"
   fake_async:
     dependency: transitive
     description:
@@ -390,7 +398,7 @@ packages:
     source: hosted
     version: "2.4.1"
   shelf:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: shelf
       sha256: e7dd780a7ffb623c57850b33f43309312fc863fb6aa3d276a754bb299839ef12
@@ -398,7 +406,7 @@ packages:
     source: hosted
     version: "1.4.2"
   shelf_router:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: shelf_router
       sha256: f5e5d492440a7fb165fe1e2e1a623f31f734d3370900070b2b1e0d0428d59864

@@ -1,13 +1,14 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'providers/app_providers.dart';
-
 import 'core/config/app_settings.dart';
 import 'core/layout/phone_viewport.dart';
-import 'core/theme/app_theme.dart';
-import 'features/shell/main_shell.dart';
+import 'core/theme/companion_color_schemes.dart';
+import 'core/theme/companion_theme.dart';
+import 'features/shell/app_root.dart';
+import 'providers/app_providers.dart';
 
 class OverdriveApp extends ConsumerStatefulWidget {
   const OverdriveApp({
@@ -21,6 +22,7 @@ class OverdriveApp extends ConsumerStatefulWidget {
   final AppSettings initialSettings;
   final GlobalKey? screenshotBoundaryKey;
   final bool lockPhoneViewport;
+  /// Test-only: skip bootstrap that would overwrite Riverpod overrides.
   final bool screenshotMode;
 
   @override
@@ -41,7 +43,9 @@ class _OverdriveAppState extends ConsumerState<OverdriveApp> {
 
   @override
   Widget build(BuildContext context) {
-    Widget home = const MainShell();
+    final settings = ref.watch(appSettingsProvider);
+
+    Widget home = const AppRoot();
     if (widget.lockPhoneViewport) {
       home = PhoneViewport(child: home);
     }
@@ -49,24 +53,58 @@ class _OverdriveAppState extends ConsumerState<OverdriveApp> {
       home = RepaintBoundary(key: widget.screenshotBoundaryKey, child: home);
     }
 
-    return MaterialApp(
-      title: 'Overdrive Companion',
-      debugShowCheckedModeBanner: false,
-      theme: buildOverdriveTheme(),
-      locale: const Locale('he'),
-      supportedLocales: const [Locale('he'), Locale('en')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      builder: (context, child) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: child ?? const SizedBox.shrink(),
+    if (!settings.useDynamicColor) {
+      return MaterialApp(
+        title: 'מלווה Overdrive',
+        debugShowCheckedModeBanner: false,
+        locale: const Locale('he'),
+        supportedLocales: const [Locale('he'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        theme: companionLightTheme(),
+        darkTheme: companionDarkTheme(),
+        themeMode: settings.materialThemeMode,
+        builder: (context, child) {
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
+        home: home,
+      );
+    }
+
+    return DynamicColorBuilder(
+      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        return MaterialApp(
+          title: 'מלווה Overdrive',
+          debugShowCheckedModeBanner: false,
+          locale: const Locale('he'),
+          supportedLocales: const [Locale('he'), Locale('en')],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          theme: companionLightTheme(
+            colorScheme: lightDynamic ?? CompanionColorSchemes.light,
+          ),
+          darkTheme: companionDarkTheme(
+            colorScheme: darkDynamic ?? CompanionColorSchemes.dark,
+          ),
+          themeMode: settings.materialThemeMode,
+          builder: (context, child) {
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
+          home: home,
         );
       },
-      home: home,
     );
   }
 }

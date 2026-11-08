@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config/app_settings.dart';
-import '../data/mock/mock_overdrive_backend.dart';
+import '../data/api/overdrive_api_client.dart';
 import '../data/repositories/vehicle_repository.dart';
 import 'settings_repository.dart';
 
@@ -25,6 +25,10 @@ class AppSettingsNotifier extends Notifier<AppSettings> {
 
   Future<void> bootstrap() async {
     final repo = ref.read(settingsRepositoryProvider);
+    final token = await repo.loadDeviceToken();
+    if (token.isNotEmpty) {
+      state = state.copyWith(deviceToken: token);
+    }
     final jwt = await repo.loadJwt();
     if (jwt != null && jwt.isNotEmpty) {
       ref.read(vehicleRepositoryProvider).setJwt(jwt);
@@ -41,8 +45,10 @@ class AppSettingsNotifier extends Notifier<AppSettings> {
   }
 }
 
-final mockBackendProvider = Provider<MockOverdriveBackend>((ref) {
-  return MockOverdriveBackend();
+final overdriveApiClientProvider = Provider<OverdriveApiClient>((ref) {
+  final settings = ref.watch(appSettingsProvider);
+  final base = settings.baseUrl.trim().isEmpty ? 'http://127.0.0.1' : settings.baseUrl;
+  return OverdriveApiClient(baseUrl: base);
 });
 
 final vehicleRepositoryProvider =
@@ -54,8 +60,8 @@ class VehicleRepositoryNotifier extends Notifier<VehicleRepository> {
   @override
   VehicleRepository build() {
     final settings = ref.watch(appSettingsProvider);
-    final mock = ref.watch(mockBackendProvider);
-    final repo = VehicleRepository(settings: settings, mockBackend: mock);
+    final client = ref.watch(overdriveApiClientProvider);
+    final repo = VehicleRepository(settings: settings, client: client);
     ref.read(settingsRepositoryProvider).loadJwt().then(repo.setJwt);
     return repo;
   }
@@ -84,6 +90,10 @@ class VehicleSnapshotNotifier extends AsyncNotifier<VehicleSnapshot?> {
   @override
   Future<VehicleSnapshot?> build() async {
     ref.onDispose(() => _timer?.cancel());
+    final configured = ref.watch(appSettingsProvider.select((s) => s.isConfigured));
+    if (!configured) {
+      return null;
+    }
     _schedulePoll();
     return _refresh();
   }
@@ -95,6 +105,10 @@ class VehicleSnapshotNotifier extends AsyncNotifier<VehicleSnapshot?> {
   }
 
   Future<void> refresh() async {
+    if (!ref.read(appSettingsProvider).isConfigured) {
+      state = const AsyncData(null);
+      return;
+    }
     state = const AsyncLoading<VehicleSnapshot?>();
     state = AsyncData(await _refresh());
   }

@@ -1,6 +1,5 @@
 import '../../core/config/app_settings.dart';
 import '../api/overdrive_api_client.dart';
-import '../mock/mock_overdrive_backend.dart';
 import '../models/cloud_status.dart';
 import '../models/gps_snapshot.dart';
 import '../models/vehicle_state.dart';
@@ -64,7 +63,6 @@ class CommandResult {
   final String? outcome;
   final bool? commandSuccess;
 
-  /// User-visible verdict — never treat HTTP 200 + unconfirmed lock as «done».
   bool get userConfirmed =>
       success && (confirmation == null || confirmation == 'local');
 
@@ -82,22 +80,20 @@ class CommandResult {
 class VehicleRepository {
   VehicleRepository({
     required AppSettings settings,
-    OverdriveApiClient? client,
-    MockOverdriveBackend? mockBackend,
+    required OverdriveApiClient client,
   })  : _settings = settings,
-        _client = client ?? OverdriveApiClient(baseUrl: settings.baseUrl),
-        _mock = mockBackend ?? MockOverdriveBackend();
+        _client = client {
+    _client.baseUrl = settings.baseUrl;
+  }
 
   AppSettings _settings;
   final OverdriveApiClient _client;
-  final MockOverdriveBackend _mock;
 
   AppSettings get settings => _settings;
 
   void updateSettings(AppSettings settings) {
     _settings = settings;
     _client.baseUrl = settings.baseUrl;
-    _mock.authRequired = settings.mockRequireAuth;
   }
 
   void setJwt(String? jwt) => _client.jwt = jwt;
@@ -105,53 +101,28 @@ class VehicleRepository {
   String? get sessionJwt => _client.jwt;
 
   Future<void> ensureAuthenticated() async {
-    if (_settings.connectionMode == ConnectionMode.embeddedMock) {
-      if (_settings.mockRequireAuth) {
-        await _mockLogin();
-      }
-      return;
+    if (!_settings.isConfigured) {
+      throw OverdriveApiException('חיבור לשרת לא הוגדר');
     }
-
-    if (_settings.deviceToken.isNotEmpty && (_client.jwt == null || _client.jwt!.isEmpty)) {
+    if (_settings.deviceToken.isNotEmpty &&
+        (_client.jwt == null || _client.jwt!.isEmpty)) {
       await _client.loginWithDeviceToken(_settings.deviceToken);
     }
   }
 
-  Future<void> _mockLogin() async {
-    final token = _settings.deviceToken.isEmpty ? 'mock-device-token' : _settings.deviceToken;
-    final res = _mock.login(token);
-    if (res['success'] != true) {
-      throw OverdriveApiException(res['error'] as String? ?? 'mock auth failed');
-    }
-    _client.jwt = res['token'] as String?;
-  }
-
-  Future<AuthStatusResult> testConnection() async {
-    if (_settings.connectionMode == ConnectionMode.embeddedMock) {
-      final m = _mock.authStatus();
-      return AuthStatusResult(
-        ok: m['success'] == true || m['status'] == 'ok',
-        deviceId: m['deviceId'] as String?,
-        raw: m,
-      );
-    }
-    return _client.testConnection();
-  }
+  Future<AuthStatusResult> testConnection() => _client.testConnection();
 
   Future<VehicleSnapshot> fetchSnapshot() async {
+    if (!_settings.isConfigured) {
+      return VehicleSnapshot(
+        state: VehicleState(success: false, error: 'לא הוגדר חיבור'),
+        offline: true,
+        errorMessage: 'הגדר כתובת מנהרה ואסימון מכשיר',
+      );
+    }
     try {
       await ensureAuthenticated();
 
-      if (_settings.connectionMode == ConnectionMode.embeddedMock) {
-        return VehicleSnapshot(
-          state: _mock.parseVehicleState(),
-          cloud: _mock.cloudStatus(),
-          gps: _mock.gps(),
-          lastUpdated: DateTime.now(),
-        );
-      }
-
-      // live + localMockServer both hit HTTP (mock server or real car).
       final stateJson = await _client.getJson(OverdriveEndpoints.vehicleState);
       final state = VehicleState.fromJson(stateJson);
 
@@ -200,12 +171,7 @@ class VehicleRepository {
     final before = verifyWithRefresh ? await _peekLockState() : null;
     try {
       await ensureAuthenticated();
-      Map<String, dynamic> json;
-      if (_settings.connectionMode == ConnectionMode.embeddedMock) {
-        json = _mock.handlePost(cap.path, payload);
-      } else {
-        json = await _client.postJson(cap.path, body: payload);
-      }
+      final json = await _client.postJson(cap.path, body: payload);
       var result = CommandResult.fromJson(json);
       if (verifyWithRefresh && result.success && _isLockKind(cap.kind)) {
         result = await _reconcileLockCommand(cap.kind, result, before);
@@ -223,9 +189,6 @@ class VehicleRepository {
 
   Future<bool?> _peekLockState() async {
     try {
-      if (_settings.connectionMode == ConnectionMode.embeddedMock) {
-        return _mock.parseVehicleState().isLocked;
-      }
       final json = await _client.getJson(OverdriveEndpoints.vehicleState);
       return VehicleState.fromJson(json).isLocked;
     } catch (_) {
@@ -259,7 +222,7 @@ class VehicleRepository {
         confirmation: 'none',
         outcome: 'unconfirmed',
         message: server.message,
-        error: server.message ?? 'לא אושר ע״י קריאת מצב',
+        error: server.message ?? 'לא אושר בעקבות קריאת מצב',
         path: server.path,
       );
     }
@@ -274,7 +237,7 @@ class VehicleRepository {
   }
 
   List<ControlCapability> availableControls(VehicleSnapshot? snapshot) {
-    return kStage1Controls.where((c) {
+    return kCompanionControls.where((c) {
       if (c.requiresTyres && snapshot?.state.tyres?.available != true) {
         return false;
       }

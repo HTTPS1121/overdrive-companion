@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:overdrive_companion/core/config/app_settings.dart';
-import 'package:overdrive_companion/core/theme/app_theme.dart';
-import 'package:overdrive_companion/data/mock/mock_overdrive_backend.dart';
+import 'package:overdrive_companion/core/theme/companion_theme.dart';
 import 'package:overdrive_companion/data/repositories/vehicle_repository.dart';
-import 'package:overdrive_companion/features/dashboard/dashboard_screen.dart';
+import 'package:overdrive_companion/features/status/vehicle_status_screen.dart';
 import 'package:overdrive_companion/providers/app_providers.dart';
+
 import '../screenshot/test_fonts.dart';
+import '../support/fixture_api_client.dart';
 
 void main() {
   setUpAll(() async {
@@ -15,11 +16,14 @@ void main() {
     await ensureScreenshotFonts();
   });
 
-  testWidgets('dashboard shows demo banner and quick actions', (tester) async {
-    final mock = MockOverdriveBackend();
+  testWidgets('status shows SOC from fixture client', (tester) async {
+    final client = await FixtureOverdriveApiClient.create();
     final repo = VehicleRepository(
-      settings: AppSettings.defaults(),
-      mockBackend: mock,
+      settings: const AppSettings(
+        baseUrl: 'https://fixture.test',
+        deviceToken: 'fixture-token',
+      ),
+      client: client,
     );
     final snap = await repo.fetchSnapshot();
 
@@ -27,28 +31,31 @@ void main() {
       ProviderScope(
         overrides: [
           appSettingsProvider.overrideWith(_StaticSettings.new),
+          overdriveApiClientProvider.overrideWithValue(client),
           vehicleSnapshotProvider.overrideWith(() => _FixedSnapshot(snap)),
         ],
         child: MaterialApp(
-          theme: buildOverdriveTheme(),
+          theme: companionLightTheme(),
           home: const Directionality(
             textDirection: TextDirection.rtl,
-            child: Scaffold(body: DashboardScreen()),
+            child: Scaffold(body: VehicleStatusScreen()),
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('מצב הדגמה מובנה'), findsOneWidget);
-    expect(find.text('נעילה'), findsOneWidget);
-    expect(find.textContaining('72%'), findsWidgets);
+    expect(find.textContaining('%'), findsWidgets);
+    expect(find.text('דמו'), findsNothing);
   });
 }
 
 class _StaticSettings extends AppSettingsNotifier {
   @override
-  AppSettings build() => AppSettings.defaults();
+  AppSettings build() => const AppSettings(
+        baseUrl: 'https://fixture.test',
+        deviceToken: 'fixture-token',
+      );
 }
 
 class _FixedSnapshot extends VehicleSnapshotNotifier {
