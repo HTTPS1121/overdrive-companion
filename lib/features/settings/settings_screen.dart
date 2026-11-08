@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/app_settings.dart';
 import '../../data/api/overdrive_api_client.dart';
-import '../../data/capabilities/companion_parity.dart';
 import '../../providers/app_providers.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -57,7 +56,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (!draft.isConfigured) {
       setState(() {
         _testing = false;
-        _testMessage = 'מלא כתובת ואסימון';
+        _testMessage = 'נא למלא כתובת שרת ואסימון';
         _testOk = false;
       });
       return;
@@ -67,10 +66,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     try {
       await ref.read(vehicleRepositoryProvider.notifier).authenticateAndStoreJwt();
       final status = await repo.testConnection();
-      if (!status.ok) throw Exception('שרת לא זמין');
+      if (!status.ok) throw Exception('השרת לא ענה');
       setState(() {
         _testOk = true;
-        _testMessage = 'מחובר${status.deviceId != null ? " (${status.deviceId})" : ""}';
+        _testMessage = status.deviceId != null
+            ? 'החיבור תקין (מזהה המכשיר בשרת: ${status.deviceId})'
+            : 'החיבור תקין';
       });
     } catch (e) {
       setState(() {
@@ -92,6 +93,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SnackBar(content: Text('ההגדרות נשמרו')),
       );
     }
+  }
+
+  Future<void> _setThemeMode(CompanionThemeMode mode) async {
+    final settings = ref.read(appSettingsProvider);
+    await ref.read(appSettingsProvider.notifier).persist(settings.copyWith(themeMode: mode));
   }
 
   @override
@@ -160,49 +166,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 28),
         Text('תצוגה', style: theme.textTheme.titleLarge),
         const SizedBox(height: 8),
-        SegmentedButton<CompanionThemeMode>(
-          segments: const [
-            ButtonSegment(value: CompanionThemeMode.system, label: Text('מערכת')),
-            ButtonSegment(value: CompanionThemeMode.light, label: Text('בהיר')),
-            ButtonSegment(value: CompanionThemeMode.dark, label: Text('כהה')),
-          ],
-          selected: {settings.themeMode},
-          onSelectionChanged: (s) async {
-            final next = settings.copyWith(themeMode: s.first);
-            await ref.read(appSettingsProvider.notifier).persist(next);
-          },
-        ),
-        SwitchListTile(
-          title: const Text('צבע דינמי (Material You)'),
-          subtitle: const Text('Android 12+ — צבעים מהמערכת'),
-          value: settings.useDynamicColor,
-          onChanged: (v) async {
-            await ref.read(appSettingsProvider.notifier).persist(
-                  settings.copyWith(useDynamicColor: v),
-                );
-          },
-        ),
-        const SizedBox(height: 28),
-        Text('יכולות לעומת שרת', style: theme.textTheme.titleLarge),
-        const SizedBox(height: 8),
         Text(
-          'רשימה זו משקפת את החוזה ב-Overdrive-release. פריטים לא ממומשים לא נשלחים מהאפליקציה.',
+          'מצב בהיר / כהה / לפי המערכת. צבע דינמי דורש Android 12+.',
           style: theme.textTheme.bodySmall,
         ),
-        const SizedBox(height: 8),
-        ...companionParityMatrix.map(
-          (e) => ListTile(
-            dense: true,
-            leading: Icon(
-              e.implemented ? Icons.check_circle_outline : Icons.remove_circle_outline,
-              color: e.implemented ? theme.colorScheme.primary : theme.colorScheme.outline,
-            ),
-            title: Text('${e.method} ${e.path}'),
-            subtitle: Text(e.noteHe ?? e.labelHe),
-            contentPadding: EdgeInsets.zero,
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final mode in CompanionThemeMode.values)
+              FilterChip(
+                label: Text(_themeLabel(mode)),
+                selected: settings.themeMode == mode,
+                onSelected: (_) => _setThemeMode(mode),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('צבעים דינמיים (Material You)'),
+          subtitle: const Text('לפי ערכת הצבעים של המכשיר'),
+          trailing: Switch(
+            value: settings.useDynamicColor,
+            onChanged: (v) async {
+              await ref.read(appSettingsProvider.notifier).persist(
+                    settings.copyWith(useDynamicColor: v),
+                  );
+            },
           ),
         ),
       ],
     );
   }
+
+  static String _themeLabel(CompanionThemeMode mode) => switch (mode) {
+        CompanionThemeMode.system => 'מערכת',
+        CompanionThemeMode.light => 'בהיר',
+        CompanionThemeMode.dark => 'כהה',
+      };
 }

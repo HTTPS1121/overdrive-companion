@@ -237,13 +237,34 @@ class TyreBlock {
 }
 
 class SeatInfo {
-  SeatInfo({this.steeringHeat});
+  SeatInfo({
+    this.steeringHeat,
+    this.heat = const [0, 0],
+    this.cool = const [0, 0],
+    this.ventilatedSupported,
+  });
 
   factory SeatInfo.fromJson(Map<String, dynamic> json) {
-    return SeatInfo(steeringHeat: json['steeringHeat'] as bool?);
+    List<int> levels(String key) {
+      final raw = json[key];
+      if (raw is List) {
+        return raw.map((e) => (e as num).toInt()).toList();
+      }
+      return const [0, 0];
+    }
+
+    return SeatInfo(
+      steeringHeat: json['steeringHeat'] as bool?,
+      heat: levels('heat'),
+      cool: levels('cool'),
+      ventilatedSupported: json['ventilatedSupported'] as bool?,
+    );
   }
 
   final bool? steeringHeat;
+  final List<int> heat;
+  final List<int> cool;
+  final bool? ventilatedSupported;
 }
 
 class LightInfo {

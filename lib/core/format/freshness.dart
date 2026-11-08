@@ -28,12 +28,30 @@ class DataFreshness {
     return a > staleAfter || a.isNegative;
   }
 
+  /// Hebrew age of server timestamp relative to local fetch time.
   String ageLabelHe() {
     final a = age;
     if (a == null) return 'מקור זמן לא ידוע';
-    if (a.isNegative) return 'שעון רכב מקדים';
-    if (a.inSeconds < 90) return 'לפני ${a.inSeconds} שנ׳';
-    if (a.inMinutes < 60) return 'לפני ${a.inMinutes} דק׳';
-    return 'לפני ${a.inHours} שע׳';
+    if (a.isNegative) return 'שעון הרכב מקדים את המכשיר';
+    return _relativeHe(a);
+  }
+
+  /// How long ago we finished the last successful poll (always meaningful in UI).
+  String fetchedAgoLabelHe(DateTime? lastFetch) {
+    if (lastFetch == null) return 'לא עודכן עדיין';
+    return 'עודכן ${_relativeHe(DateTime.now().difference(lastFetch))}';
+  }
+
+  static String _relativeHe(Duration d) {
+    if (d.inSeconds < 5) return 'עכשיו';
+    if (d.inSeconds < 60) return 'לפני ${d.inSeconds} שניות';
+    if (d.inMinutes < 60) {
+      final m = d.inMinutes;
+      return m == 1 ? 'לפני דקה' : 'לפני $m דקות';
+    }
+    final h = d.inHours;
+    if (h < 24) return h == 1 ? 'לפני שעה' : 'לפני $h שעות';
+    final days = d.inDays;
+    return days == 1 ? 'לפני יום' : 'לפני $days ימים';
   }
 }

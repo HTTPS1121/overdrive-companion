@@ -16,6 +16,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../support/fixture_api_client.dart';
 import 'test_fonts.dart';
 
+const _artifactRoot = '/opt/cursor/artifacts/v2.1-0/screenshots';
+const _goldenRoot = 'goldens/v2.1';
+
 late SettingsRepository _settingsRepo;
 late VehicleSnapshot _fixtureSnap;
 late VehicleSnapshot _offlineSnap;
@@ -23,9 +26,6 @@ late FixtureOverdriveApiClient _fixtureClient;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-
-  final outDir = Directory('/opt/cursor/artifacts/screenshots');
-  outDir.createSync(recursive: true);
 
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
@@ -37,6 +37,7 @@ void main() {
       settings: const AppSettings(
         baseUrl: 'https://fixture.test',
         deviceToken: 'fixture-token',
+        useDynamicColor: false,
       ),
       client: _fixtureClient,
     );
@@ -49,79 +50,146 @@ void main() {
     );
   });
 
-  testWidgets('01_setup_unconfigured golden', (tester) async {
-    _preparePhoneSurface(tester);
+  testWidgets('v2.1 setup unconfigured light', (tester) async {
     await _capture(
       tester,
-      '01_setup_unconfigured',
-      settings: AppSettings.defaults(),
+      '01_setup_unconfigured_light',
+      settings: AppSettings.defaults().copyWith(
+        themeMode: CompanionThemeMode.light,
+        useDynamicColor: false,
+      ),
       snapshot: null,
     );
-    _copyGolden('01_setup_unconfigured', outDir);
-    expect(find.text('התחבר למנהרה של Overdrive ברכב'), findsOneWidget);
   });
 
-  testWidgets('02_status_offline golden', (tester) async {
-    _preparePhoneSurface(tester);
+  testWidgets('v2.1 status fixture dark', (tester) async {
     await _capture(
       tester,
-      '02_status_offline',
-      settings: const AppSettings(
-        baseUrl: 'https://offline.example.com',
-        deviceToken: 'x',
-      ),
-      snapshot: _offlineSnap,
-    );
-    _copyGolden('02_status_offline', outDir);
-  });
-
-  testWidgets('03_status_fixture golden', (tester) async {
-    _preparePhoneSurface(tester);
-    await _capture(
-      tester,
-      '03_status_fixture',
+      '02_status_fixture_dark',
       settings: const AppSettings(
         baseUrl: 'https://fixture.test',
         deviceToken: 'fixture-token',
+        themeMode: CompanionThemeMode.dark,
+        useDynamicColor: false,
       ),
       snapshot: _fixtureSnap,
       clientOverride: _fixtureClient,
     );
-    _copyGolden('03_status_fixture', outDir);
-    expect(find.textContaining('%'), findsWidgets);
   });
 
-  testWidgets('04_settings_configured golden', (tester) async {
-    _preparePhoneSurface(tester);
+  testWidgets('v2.1 controls fixture light', (tester) async {
     await _capture(
       tester,
-      '04_settings_configured',
+      '03_controls_fixture_light',
       settings: const AppSettings(
         baseUrl: 'https://fixture.test',
         deviceToken: 'fixture-token',
+        themeMode: CompanionThemeMode.light,
+        useDynamicColor: false,
       ),
       snapshot: _fixtureSnap,
       clientOverride: _fixtureClient,
       afterPump: (t) async {
-        await t.tap(find.text('הגדרות'));
-        await t.pump(const Duration(milliseconds: 400));
+        await _tapNav(t, 'שליטה');
       },
     );
-    _copyGolden('04_settings_configured', outDir);
+  });
+
+  testWidgets('v2.1 location fixture light', (tester) async {
+    await _capture(
+      tester,
+      '04_location_fixture_light',
+      settings: const AppSettings(
+        baseUrl: 'https://fixture.test',
+        deviceToken: 'fixture-token',
+        themeMode: CompanionThemeMode.light,
+        useDynamicColor: false,
+      ),
+      snapshot: _fixtureSnap,
+      clientOverride: _fixtureClient,
+      afterPump: (t) async {
+        await _tapNav(t, 'מיקום');
+      },
+    );
+  });
+
+  testWidgets('v2.1 schedules fixture dark', (tester) async {
+    await _capture(
+      tester,
+      '05_schedules_fixture_dark',
+      settings: const AppSettings(
+        baseUrl: 'https://fixture.test',
+        deviceToken: 'fixture-token',
+        themeMode: CompanionThemeMode.dark,
+        useDynamicColor: false,
+      ),
+      snapshot: _fixtureSnap,
+      clientOverride: _fixtureClient,
+      afterPump: (t) async {
+        await _tapNav(t, 'תזמונים');
+      },
+    );
+  });
+
+  testWidgets('v2.1 comfort fixture light', (tester) async {
+    await _capture(
+      tester,
+      '06_comfort_fixture_light',
+      settings: const AppSettings(
+        baseUrl: 'https://fixture.test',
+        deviceToken: 'fixture-token',
+        themeMode: CompanionThemeMode.light,
+        useDynamicColor: false,
+      ),
+      snapshot: _fixtureSnap,
+      clientOverride: _fixtureClient,
+      afterPump: (t) async {
+        await _tapNav(t, 'נוחות');
+      },
+    );
+  });
+
+  testWidgets('v2.1 settings configured light', (tester) async {
+    await _capture(
+      tester,
+      '07_settings_light',
+      settings: const AppSettings(
+        baseUrl: 'https://fixture.test',
+        deviceToken: 'fixture-token',
+        themeMode: CompanionThemeMode.light,
+        useDynamicColor: false,
+      ),
+      snapshot: _fixtureSnap,
+      clientOverride: _fixtureClient,
+      afterPump: (t) async {
+        await _tapNav(t, 'הגדרות');
+      },
+    );
+  });
+
+  testWidgets('v2.1 status offline dark', (tester) async {
+    await _capture(
+      tester,
+      '08_status_offline_dark',
+      settings: const AppSettings(
+        baseUrl: 'https://offline.example.com',
+        deviceToken: 'x',
+        themeMode: CompanionThemeMode.dark,
+        useDynamicColor: false,
+      ),
+      snapshot: _offlineSnap,
+    );
   });
 }
 
-void _preparePhoneSurface(WidgetTester tester) {
-  tester.view.physicalSize = const Size(1170, 2532);
-  tester.view.devicePixelRatio = 3.0;
-  addTearDown(tester.view.resetPhysicalSize);
-  addTearDown(tester.view.resetDevicePixelRatio);
-}
-
-void _copyGolden(String name, Directory outDir) {
-  final golden = File('test/screenshot/goldens/$name.png');
-  final dest = File('${outDir.path}/$name.png');
-  dest.writeAsBytesSync(golden.readAsBytesSync());
+Future<void> _tapNav(WidgetTester tester, String label) async {
+  await tester.tap(
+    find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.text(label),
+    ),
+  );
+  await tester.pump(const Duration(milliseconds: 400));
 }
 
 Future<void> _capture(
@@ -132,6 +200,11 @@ Future<void> _capture(
   OverdriveApiClient? clientOverride,
   Future<void> Function(WidgetTester)? afterPump,
 }) async {
+  tester.view.physicalSize = const Size(1170, 2532);
+  tester.view.devicePixelRatio = 3.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
   await ensureScreenshotFonts();
   final boundaryKey = GlobalKey();
   _FixedAppSettings.pinned = settings;
@@ -157,7 +230,13 @@ Future<void> _capture(
   await tester.pump(const Duration(milliseconds: 600));
   if (afterPump != null) await afterPump(tester);
 
-  await expectLater(find.byKey(boundaryKey), matchesGoldenFile('goldens/$name.png'));
+  final golden = '$_goldenRoot/$name.png';
+  await expectLater(find.byKey(boundaryKey), matchesGoldenFile(golden));
+
+  final artifactDir = Directory(_artifactRoot);
+  artifactDir.createSync(recursive: true);
+  final src = File('test/screenshot/$golden');
+  File('${artifactDir.path}/$name.png').writeAsBytesSync(src.readAsBytesSync());
 }
 
 class _FixedAppSettings extends AppSettingsNotifier {

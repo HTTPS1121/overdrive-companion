@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/widgets/ltr_metric.dart';
 import '../../providers/app_providers.dart';
 
 class GpsScreen extends ConsumerWidget {
@@ -49,9 +50,9 @@ class GpsScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     if (gps.canSpeedKmh != null)
-                      Text(
-                        '${gps.canSpeedKmh!.toStringAsFixed(0)} km/h',
-                        textDirection: TextDirection.ltr,
+                      LtrMetricRow(
+                        label: 'מהירות',
+                        value: '${gps.canSpeedKmh!.toStringAsFixed(0)} km/h',
                       ),
                   ],
                 ),

@@ -52,7 +52,9 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
                 child: ListTile(
                   leading: Icon(Icons.schedule, color: Theme.of(context).colorScheme.onTertiaryContainer),
                   title: const Text('נתונים ישנים'),
-                  subtitle: Text('רענן את המצב לפני שליחת פקודה (${freshness.ageLabelHe()})'),
+                        subtitle: Text(
+                          'רענן את המצב לפני שליחת פקודה (${freshness.fetchedAgoLabelHe(snap.lastUpdated)})',
+                        ),
                 ),
               ),
             _ControlSection(
@@ -82,6 +84,12 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
                   icon: Icons.lightbulb_outline,
                   enabled: !_busy && !staleBlocked,
                   onPressed: () => _run(ControlKind.flash, 'הבהוב'),
+                ),
+                _ActionTile(
+                  label: 'מציאת רכב',
+                  icon: Icons.my_location,
+                  enabled: !_busy && !staleBlocked,
+                  onPressed: () => _run(ControlKind.findCar, 'מציאת רכב'),
                 ),
               ],
             ),

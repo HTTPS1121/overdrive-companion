@@ -15,6 +15,14 @@ abstract final class OverdriveEndpoints {
   static const climate = '/api/vehicle/climate';
   static const lights = '/api/vehicle/lights';
   static const findCar = '/api/vehicle/find-car';
+  static const climateSchedule = '/api/vehicle/climate-schedule';
+  static const chargingSchedule = '/api/vehicle/charging-schedule';
+  static const startCharging = '/api/vehicle/start-charging';
+  static const seat = '/api/vehicle/seat';
+  static const adas = '/api/vehicle/adas';
+  static const vehicleSetting = '/api/vehicle/setting';
+  static const media = '/api/vehicle/media';
+  static const chargeCap = '/api/vehicle/charge-cap';
 }
 
 enum ControlKind {
@@ -26,6 +34,7 @@ enum ControlKind {
   windowsClose,
   windowsVent,
   flash,
+  findCar,
   climateOn,
   climateOff,
   tempUp,
@@ -98,6 +107,11 @@ const kCompanionControls = <ControlCapability>[
     kind: ControlKind.flash,
     path: OverdriveEndpoints.flash,
     labelHe: 'הבהוב אורות',
+  ),
+  ControlCapability(
+    kind: ControlKind.findCar,
+    path: OverdriveEndpoints.findCar,
+    labelHe: 'מציאת רכב',
   ),
   ControlCapability(
     kind: ControlKind.climateOn,

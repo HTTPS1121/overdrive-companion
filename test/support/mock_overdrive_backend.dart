@@ -123,8 +123,58 @@ class MockOverdriveBackend {
         return _handleClimate(body);
       case '/api/vehicle/lights':
         return _handleLights(body);
+      case '/api/vehicle/find-car':
+        return _ok('find-car', message: 'find-car');
+      case '/api/vehicle/seat':
+        return _ok('seat', message: body['action']?.toString());
+      case '/api/vehicle/media':
+        return _ok('media', message: body['target']?.toString());
+      case '/api/vehicle/adas':
+        return _ok('adas', message: body['target']?.toString());
+      case '/api/vehicle/setting':
+        return _ok('setting');
+      case '/api/vehicle/climate-schedule':
+        return _ok('climate-schedule');
+      case '/api/vehicle/charging-schedule':
+        return _ok('charging-schedule');
+      case '/api/vehicle/start-charging':
+        return _ok('start-charging');
+      case '/api/vehicle/charge-cap':
+        return _ok('charge-cap');
       default:
         return {'success': false, 'error': 'unsupported path $path'};
+    }
+  }
+
+  Map<String, dynamic> handleGet(String path) {
+    switch (path) {
+      case '/api/vehicle/climate-schedule':
+        return {
+          'success': true,
+          'supported': true,
+          'source': 'cloud',
+          'bookings': [],
+        };
+      case '/api/vehicle/charging-schedule':
+        return {
+          'success': true,
+          'supported': true,
+          'enabled': false,
+          'startChargeTime': '22:00',
+          'endChargeTime': '06:00',
+          'chargeWay': 'e',
+          'source': 'cache',
+        };
+      case '/api/vehicle/adas':
+        return {
+          'success': true,
+          'esp': {'raw': 0, 'on': true},
+          'itac': {'raw': 0, 'on': false},
+        };
+      case '/api/vehicle/charge-cap':
+        return {'success': true, 'supported': true, 'percent': 100, 'enabled': false};
+      default:
+        return {'success': false, 'error': 'unsupported GET $path'};
     }
   }
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format/freshness.dart';
+import '../../core/widgets/ltr_metric.dart';
+import '../../data/models/gps_snapshot.dart';
 import '../../data/models/vehicle_state.dart';
 import '../../providers/app_providers.dart';
 
@@ -57,9 +59,14 @@ class VehicleStatusScreen extends ConsumerWidget {
                   children: [
                     Text('מחובר לשרת', style: Theme.of(context).textTheme.titleMedium),
                     Text(
-                      freshness.ageLabelHe(),
+                      freshness.fetchedAgoLabelHe(snap.lastUpdated),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
+                    if (freshness.age != null && freshness.age!.inSeconds >= 5)
+                      Text(
+                        'זמן בשרת: ${freshness.ageLabelHe()}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     if (freshness.isStale)
                       Text(
                         'נתונים ישנים — רענן לפני פקודות',
@@ -79,6 +86,10 @@ class VehicleStatusScreen extends ConsumerWidget {
               if (snap.state.tyres?.available == true) ...[
                 const SizedBox(height: 12),
                 _TyresSection(tyres: snap.state.tyres!),
+              ],
+              if (snap.gps != null) ...[
+                const SizedBox(height: 12),
+                _GpsSection(gps: snap.gps!, drivingLabel: snap.drivingLabelHe),
               ],
               if (snap.cloud != null) ...[
                 const SizedBox(height: 12),
@@ -173,17 +184,17 @@ class _BatterySection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            soc != null ? '${soc.round()}%' : 'לא ידוע',
-            style: Theme.of(context).textTheme.headlineMedium,
-            textDirection: TextDirection.ltr,
-          ),
-          if (range != null)
-            Text(
-              '$range km',
-              style: Theme.of(context).textTheme.bodyLarge,
-              textDirection: TextDirection.ltr,
-            ),
+          if (soc != null)
+            LtrMetricText(
+              '${soc.round()}%',
+              style: Theme.of(context).textTheme.headlineMedium,
+            )
+          else
+            const Text('לא ידוע'),
+          if (range != null) ...[
+            const SizedBox(height: 4),
+            LtrMetricRow(label: 'טווח', value: '$range km'),
+          ],
           if (locked != null)
             Text(locked! ? 'נעול' : 'פתוח', style: Theme.of(context).textTheme.bodyMedium),
         ],
@@ -220,10 +231,12 @@ class _WindowsSection extends StatelessWidget {
     String p(int? v) => v == null || v < 0 ? '--' : '$v%';
     return _SectionCard(
       title: 'חלונות',
-      child: Text(
-        'קדמי ${p(windows?.lf)} | אחורי ${p(windows?.lr)}',
-        style: Theme.of(context).textTheme.bodyLarge,
-        textDirection: TextDirection.rtl,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LtrMetricRow(label: 'חלון קדמי', value: p(windows?.lf)),
+          LtrMetricRow(label: 'חלון אחורי', value: p(windows?.lr)),
+        ],
       ),
     );
   }
@@ -236,15 +249,43 @@ class _TyresSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String line(TyreCorner? t) =>
-        t?.kPa != null ? '${t!.kPa} kPa' : 'אין נתון';
+    String line(TyreCorner? t) => t?.kPa != null ? '${t!.kPa} kPa' : '—';
     return _SectionCard(
       title: 'צמיגים',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('קדמי שמאל: ${line(tyres.fl)}'),
-          Text('קדמי ימין: ${line(tyres.fr)}'),
+          LtrMetricRow(label: 'קדמי שמאל', value: line(tyres.fl)),
+          LtrMetricRow(label: 'קדמי ימין', value: line(tyres.fr)),
+        ],
+      ),
+    );
+  }
+}
+
+class _GpsSection extends StatelessWidget {
+  const _GpsSection({required this.gps, this.drivingLabel});
+
+  final GpsSnapshot gps;
+  final String? drivingLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SectionCard(
+      title: 'מיקום',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            gps.hasLocation ? 'מיקום זמין מהשרת' : 'אין מיקום בגוף התשובה',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          if (drivingLabel != null) Text(drivingLabel!),
+          if (gps.canSpeedKmh != null)
+            LtrMetricRow(
+              label: 'מהירות',
+              value: '${gps.canSpeedKmh!.toStringAsFixed(0)} km/h',
+            ),
         ],
       ),
     );

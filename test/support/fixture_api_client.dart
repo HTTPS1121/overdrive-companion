@@ -25,6 +25,11 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
         return _backend.cloudStatus().toJson();
       case OverdriveEndpoints.gps:
         return _backend.gps().toJson();
+      case OverdriveEndpoints.climateSchedule:
+      case OverdriveEndpoints.chargingSchedule:
+      case OverdriveEndpoints.adas:
+      case OverdriveEndpoints.chargeCap:
+        return _backend.handleGet(path);
       default:
         throw OverdriveApiException('fixture: unknown GET $path');
     }

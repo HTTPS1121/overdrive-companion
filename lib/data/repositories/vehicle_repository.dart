@@ -2,6 +2,7 @@ import '../../core/config/app_settings.dart';
 import '../api/overdrive_api_client.dart';
 import '../models/cloud_status.dart';
 import '../models/gps_snapshot.dart';
+import '../models/remote_feature_models.dart';
 import '../models/vehicle_state.dart';
 import 'overdrive_endpoints.dart';
 
@@ -243,5 +244,124 @@ class VehicleRepository {
       }
       return true;
     }).toList(growable: false);
+  }
+
+  Future<CommandResult> postJsonCommand(
+    String path, {
+    Map<String, dynamic> body = const {},
+  }) async {
+    await ensureAuthenticated();
+    try {
+      final json = await _client.postJson(path, body: body);
+      return CommandResult.fromJson(json);
+    } on OverdriveApiException catch (e) {
+      return CommandResult(success: false, error: e.message, path: path);
+    }
+  }
+
+  Future<ClimateScheduleState> fetchClimateSchedule() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.climateSchedule);
+    return ClimateScheduleState.fromJson(json);
+  }
+
+  Future<ChargingScheduleState> fetchChargingSchedule() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.chargingSchedule);
+    return ChargingScheduleState.fromJson(json);
+  }
+
+  Future<AdasState> fetchAdasState() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.adas);
+    return AdasState.fromJson(json);
+  }
+
+  Future<ChargeCapState> fetchChargeCap() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.chargeCap);
+    return ChargeCapState.fromJson(json);
+  }
+
+  Future<CommandResult> findCar() => postJsonCommand(OverdriveEndpoints.findCar);
+
+  Future<CommandResult> startCharging() =>
+      postJsonCommand(OverdriveEndpoints.startCharging);
+
+  Future<CommandResult> saveClimateSchedule(Map<String, dynamic> body) =>
+      postJsonCommand(OverdriveEndpoints.climateSchedule, body: body);
+
+  Future<CommandResult> saveChargingSchedule(Map<String, dynamic> body) =>
+      postJsonCommand(OverdriveEndpoints.chargingSchedule, body: body);
+
+  Future<CommandResult> postSeat({
+    required String action,
+    required int position,
+    int? level,
+    List<int>? seatHeat,
+    List<int>? seatCool,
+  }) {
+    final body = <String, dynamic>{
+      'action': action,
+      'position': position,
+      if (level != null) 'level': level,
+      if (seatHeat != null && seatCool != null) ...{
+        'driverHeat': seatHeat[0],
+        'driverVent': seatCool[0],
+        'passengerHeat': seatHeat[1],
+        'passengerVent': seatCool[1],
+      },
+    };
+    return postJsonCommand(OverdriveEndpoints.seat, body: body);
+  }
+
+  Future<CommandResult> postAdas({
+    required String target,
+    bool? enable,
+    int? mode,
+  }) {
+    return postJsonCommand(
+      OverdriveEndpoints.adas,
+      body: {
+        'target': target,
+        if (enable != null) 'enable': enable,
+        if (mode != null) 'mode': mode,
+      },
+    );
+  }
+
+  Future<CommandResult> postVehicleSetting({
+    required String target,
+    required int value,
+  }) {
+    return postJsonCommand(
+      OverdriveEndpoints.vehicleSetting,
+      body: {'target': target, 'value': value},
+    );
+  }
+
+  Future<CommandResult> postMedia({
+    required String target,
+    int? value,
+    String? key,
+  }) {
+    return postJsonCommand(
+      OverdriveEndpoints.media,
+      body: {
+        'target': target,
+        if (value != null) 'value': value,
+        if (key != null) 'key': key,
+      },
+    );
+  }
+
+  Future<CommandResult> postChargeCap({int? percent, bool? enabled}) {
+    return postJsonCommand(
+      OverdriveEndpoints.chargeCap,
+      body: {
+        if (percent != null) 'percent': percent,
+        if (enabled != null) 'enabled': enabled,
+      },
+    );
   }
 }
