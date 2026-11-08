@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/models/vehicle_state.dart';
+import '../theme/app_text.dart';
 import '../theme/app_theme.dart';
 
 class BatteryHero extends StatelessWidget {
@@ -29,10 +30,9 @@ class BatteryHero extends StatelessWidget {
           children: [
             Text(
               'BYD Atto 3',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: colors.muted,
-                    letterSpacing: 0.4,
-                  ),
+              style: numericTextStyle(
+                Theme.of(context).textTheme.labelLarge,
+              ).copyWith(color: colors.muted, letterSpacing: 0.4),
             ),
             const SizedBox(height: 16),
             Row(
@@ -49,9 +49,10 @@ class BatteryHero extends StatelessWidget {
                     child: Center(
                       child: Text(
                         soc != null ? '${soc.round()}%' : '—',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
+                        style: numericTextStyle(
+                          Theme.of(context).textTheme.headlineMedium,
+                          weight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
@@ -66,10 +67,11 @@ class BatteryHero extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       Text(
-                        range != null ? '$range ק״מ' : '—',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                        range != null ? '$range km' : '—',
+                        style: numericTextStyle(
+                          Theme.of(context).textTheme.headlineSmall,
+                          weight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Wrap(

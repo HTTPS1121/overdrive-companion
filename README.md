@@ -52,8 +52,11 @@ LAN example: `http://192.168.x.x:8080`
 
 ### Build APK
 
+Tested toolchain: **Flutter 3.47.9** (Dart 3.13), **JDK 17**, Android SDK **build-tools 36**.
+
 ```bash
-export PATH="/path/to/flutter/bin:$PATH"
+export PATH="/path/to/flutter-347/bin:$PATH"
+export ANDROID_HOME="$HOME/android-sdk"
 flutter pub get
 flutter analyze
 flutter test
@@ -61,7 +64,13 @@ flutter build apk --release
 ```
 
 APK: `build/app/outputs/flutter-apk/app-release.apk`  
-Package id: `com.https1121.overdrive.companion`
+Package id: `com.https1121.overdrive.companion`  
+**Signing:** debug keystore (see `android/app/build.gradle.kts`) until you add release keys.
+
+### Screenshots (portrait 390×844, real Flutter goldens)
+
+Bundled **NotoSansHebrew** (Hebrew) + **NotoSans** (digits/Latin) + **MaterialIcons** in `assets/fonts/`.  
+`flutter test test/screenshot/` renders `MainShell` and copies PNGs to `test/screenshot/goldens/`.
 
 ### Mock server (optional)
 

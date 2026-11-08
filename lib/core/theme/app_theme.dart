@@ -12,10 +12,11 @@ ThemeData buildOverdriveTheme() {
   const onSurface = Color(0xFFE8EDF4);
   const muted = Color(0xFF8B9BB0);
 
+  const fontFamily = 'NotoSansHebrew';
   final base = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
-    fontFamily: 'Roboto',
+    fontFamily: fontFamily,
     scaffoldBackgroundColor: bg,
     colorScheme: const ColorScheme.dark(
       surface: surface,
@@ -37,13 +38,37 @@ ThemeData buildOverdriveTheme() {
       displayColor: onSurface,
     ).copyWith(
       headlineLarge: base.textTheme.headlineLarge?.copyWith(
+        fontFamily: fontFamily,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.5,
       ),
-      titleLarge: base.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-      titleMedium: base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-      bodyMedium: base.textTheme.bodyMedium?.copyWith(color: muted, height: 1.35),
-      labelLarge: base.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+      headlineMedium: base.textTheme.headlineMedium?.copyWith(
+        fontFamily: fontFamily,
+        fontWeight: FontWeight.w700,
+      ),
+      headlineSmall: base.textTheme.headlineSmall?.copyWith(fontFamily: fontFamily),
+      titleLarge: base.textTheme.titleLarge?.copyWith(
+        fontFamily: fontFamily,
+        fontWeight: FontWeight.w600,
+      ),
+      titleMedium: base.textTheme.titleMedium?.copyWith(
+        fontFamily: fontFamily,
+        fontWeight: FontWeight.w600,
+      ),
+      titleSmall: base.textTheme.titleSmall?.copyWith(fontFamily: fontFamily),
+      bodyLarge: base.textTheme.bodyLarge?.copyWith(fontFamily: fontFamily),
+      bodyMedium: base.textTheme.bodyMedium?.copyWith(
+        fontFamily: fontFamily,
+        color: muted,
+        height: 1.35,
+      ),
+      bodySmall: base.textTheme.bodySmall?.copyWith(fontFamily: fontFamily, color: muted),
+      labelLarge: base.textTheme.labelLarge?.copyWith(
+        fontFamily: fontFamily,
+        fontWeight: FontWeight.w600,
+      ),
+      labelMedium: base.textTheme.labelMedium?.copyWith(fontFamily: fontFamily),
+      labelSmall: base.textTheme.labelSmall?.copyWith(fontFamily: fontFamily),
     ),
     appBarTheme: AppBarTheme(
       centerTitle: true,
@@ -51,7 +76,10 @@ ThemeData buildOverdriveTheme() {
       foregroundColor: onSurface,
       elevation: 0,
       scrolledUnderElevation: 0,
-      titleTextStyle: base.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      titleTextStyle: base.textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+        fontFamily: fontFamily,
+      ),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: surface,
@@ -59,6 +87,7 @@ ThemeData buildOverdriveTheme() {
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         final selected = states.contains(WidgetState.selected);
         return base.textTheme.labelMedium?.copyWith(
+          fontFamily: fontFamily,
           fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           color: selected ? accent : muted,
         );

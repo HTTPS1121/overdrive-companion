@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format/freshness.dart';
+import '../../core/theme/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/battery_hero.dart';
 import '../../core/widgets/connection_status_bar.dart';
@@ -30,7 +31,7 @@ class DashboardScreen extends ConsumerWidget {
                 return const _ErrorState(message: 'אין נתונים');
               }
               if (snap.offline || !snap.state.success) {
-                return _ErrorState(message: snap.errorMessage ?? 'לא מחובר');
+                return _OfflineDashboard(message: snap.errorMessage ?? 'לא מחובר');
               }
 
               final freshness = DataFreshness(
@@ -66,7 +67,7 @@ class DashboardScreen extends ConsumerWidget {
                     _WindowsCard(windows: snap.state.windows, doors: snap.state.doors),
                     if (snap.state.tyres?.available == true) ...[
                       const SizedBox(height: 14),
-                      _SectionTitle(title: 'צמיגים (TPMS)'),
+                      const _SectionTitle(title: 'צמיגים · TPMS'),
                       const SizedBox(height: 8),
                       _TyresGrid(tyres: snap.state.tyres!),
                     ],
@@ -95,7 +96,63 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(title, style: Theme.of(context).textTheme.titleMedium);
+    final parts = title.split(' · ');
+    if (parts.length == 1) {
+      return Text(title, style: hebrewTextStyle(Theme.of(context).textTheme.titleMedium));
+    }
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: '${parts[0]} · ',
+            style: hebrewTextStyle(Theme.of(context).textTheme.titleMedium),
+          ),
+          TextSpan(
+            text: parts[1],
+            style: numericTextStyle(Theme.of(context).textTheme.titleMedium),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ClimateDetailLine extends StatelessWidget {
+  const _ClimateDetailLine({required this.climate});
+
+  final ClimateInfo? climate;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = climate;
+    final he = Theme.of(context).textTheme.bodySmall;
+    final numStyle = numericTextStyle(he);
+    return Text.rich(
+      TextSpan(
+        style: hebrewTextStyle(he),
+        children: [
+          if (c?.setpointDriver != null) ...[
+            const TextSpan(text: 'יעד: '),
+            TextSpan(
+              text: '${c!.setpointDriver!.toStringAsFixed(0)}°C',
+              style: numStyle,
+            ),
+          ],
+          if (c?.insideTempC != null) ...[
+            if (c?.setpointDriver != null) const TextSpan(text: ' · '),
+            const TextSpan(text: 'בתוך הרכב: '),
+            TextSpan(
+              text: '${c!.insideTempC!.toStringAsFixed(1)}°C',
+              style: numStyle,
+            ),
+          ],
+          if (c?.fanLevel != null) ...[
+            const TextSpan(text: ' · מאוורר: '),
+            TextSpan(text: '${c!.fanLevel}', style: numStyle),
+          ],
+        ],
+      ),
+    );
   }
 }
 
@@ -122,16 +179,7 @@ class _ClimateCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(c?.acOn == true ? 'מיזוג פעיל' : 'מיזוג כבוי'),
-                  Text(
-                    [
-                      if (c?.setpointDriver != null)
-                        'יעד: ${c!.setpointDriver!.toStringAsFixed(0)}°C',
-                      if (c?.insideTempC != null)
-                        'בתוך הרכב: ${c!.insideTempC!.toStringAsFixed(1)}°C',
-                      if (c?.fanLevel != null) 'מאוורר: ${c!.fanLevel}',
-                    ].join(' · '),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                  _ClimateDetailLine(climate: c),
                 ],
               ),
             ),
@@ -173,9 +221,17 @@ class _WindowsCard extends StatelessWidget {
               const SizedBox(height: 12),
               Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: Text(
-                  'מקור נעילה: ${doors!.source}',
-                  style: Theme.of(context).textTheme.bodySmall,
+                child: Text.rich(
+                  TextSpan(
+                    style: hebrewTextStyle(Theme.of(context).textTheme.bodySmall),
+                    children: [
+                      const TextSpan(text: 'מקור נעילה: '),
+                      TextSpan(
+                        text: doors!.source,
+                        style: numericTextStyle(Theme.of(context).textTheme.bodySmall),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -201,7 +257,10 @@ class _MiniMetric extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label, style: Theme.of(context).textTheme.bodySmall),
-            Text(value, style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              value,
+              style: numericTextStyle(Theme.of(context).textTheme.titleLarge),
+            ),
           ],
         ),
       ),
@@ -214,7 +273,7 @@ class _TyresGrid extends StatelessWidget {
 
   final TyreBlock tyres;
 
-  Widget _corner(String label, TyreCorner? t) {
+  Widget _corner(BuildContext context, String label, TyreCorner? t) {
     final v = t;
     final text = v != null && v.available == true && v.kPa != null
         ? '${v.kPa} kPa · ${v.temperatureC}°C'
@@ -222,8 +281,8 @@ class _TyresGrid extends StatelessWidget {
     return ListTile(
       dense: true,
       contentPadding: EdgeInsets.zero,
-      title: Text(label),
-      subtitle: Text(text),
+      title: Text(label, style: hebrewTextStyle(Theme.of(context).textTheme.titleSmall)),
+      subtitle: Text(text, style: numericTextStyle(Theme.of(context).textTheme.bodySmall)),
     );
   }
 
@@ -234,10 +293,10 @@ class _TyresGrid extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           children: [
-            _corner('קדמי שמאל', tyres.fl),
-            _corner('קדמי ימין', tyres.fr),
-            _corner('אחורי שמאל', tyres.rl),
-            _corner('אחורי ימין', tyres.rr),
+            _corner(context, 'קדמי שמאל', tyres.fl),
+            _corner(context, 'קדמי ימין', tyres.fr),
+            _corner(context, 'אחורי שמאל', tyres.rl),
+            _corner(context, 'אחורי ימין', tyres.rr),
           ],
         ),
       ),
@@ -265,6 +324,52 @@ class _ErrorState extends StatelessWidget {
             const SizedBox(height: 8),
             Text(message, textAlign: TextAlign.center),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Full-area offline panel (distinct from live dashboard in screenshots).
+class _OfflineDashboard extends StatelessWidget {
+  const _OfflineDashboard({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = OverdriveColors.of(context);
+    return ColoredBox(
+      color: const Color(0xFF0B0F14),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cloud_off, size: 88, color: colors.danger),
+              const SizedBox(height: 20),
+              Text(
+                'אין חיבור לרכב',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                message,
+                style: Theme.of(context).textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'בדוק מנהרה או רשת בית ורענן בהגדרות',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colors.muted),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );

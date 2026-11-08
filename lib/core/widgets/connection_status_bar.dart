@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../data/models/cloud_status.dart';
 import '../../data/repositories/vehicle_repository.dart';
 import '../format/freshness.dart';
+import '../theme/app_text.dart';
 import '../theme/app_theme.dart';
 
 class ConnectionStatusBar extends StatelessWidget {
@@ -27,16 +29,7 @@ class ConnectionStatusBar extends StatelessWidget {
     final statusColor = offline ? colors.danger : colors.accent;
     final statusText = offline ? 'מנותק' : 'מחובר לשרת';
 
-    String? sub;
-    if (offline) {
-      sub = snapshot.errorMessage ?? 'אין תקשורת';
-    } else if (freshness.isStale) {
-      sub = 'נתונים ישנים · ${freshness.ageLabelHe()}';
-    } else if (cloud != null) {
-      sub = 'BYD Cloud: ${cloud.configured && cloud.verified ? 'פעיל' : 'חלקי'}';
-    } else {
-      sub = freshness.ageLabelHe();
-    }
+    final Widget subtitle = _buildSubtitle(context, offline, cloud, freshness, colors);
 
     return Card(
       child: Padding(
@@ -62,13 +55,11 @@ class ConnectionStatusBar extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(statusText, style: Theme.of(context).textTheme.titleSmall),
                   Text(
-                      sub,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: freshness.isStale ? colors.warn : colors.muted,
-                          ),
-                    ),
+                    statusText,
+                    style: hebrewTextStyle(Theme.of(context).textTheme.titleSmall),
+                  ),
+                  subtitle,
                 ],
               ),
             ),
@@ -87,5 +78,49 @@ class ConnectionStatusBar extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildSubtitle(
+    BuildContext context,
+    bool offline,
+    CloudStatus? cloud,
+    DataFreshness freshness,
+    OverdriveColors colors,
+  ) {
+    final base = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: freshness.isStale ? colors.warn : colors.muted,
+        );
+    final he = hebrewTextStyle(base);
+    final num = numericTextStyle(base);
+
+    if (offline) {
+      return Text(
+        snapshot.errorMessage ?? 'אין תקשורת',
+        style: he,
+      );
+    }
+    if (freshness.isStale) {
+      return Text.rich(
+        TextSpan(
+          style: he,
+          children: [
+            const TextSpan(text: 'נתונים ישנים · '),
+            TextSpan(text: freshness.ageLabelHe(), style: num),
+          ],
+        ),
+      );
+    }
+    if (cloud != null) {
+      final state = cloud.configured && cloud.verified ? 'פעיל' : 'חלקי';
+      return Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: 'BYD Cloud: ', style: num),
+            TextSpan(text: state, style: he),
+          ],
+        ),
+      );
+    }
+    return Text(freshness.ageLabelHe(), style: num);
   }
 }

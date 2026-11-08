@@ -45,7 +45,7 @@ class _MainShellState extends ConsumerState<MainShell> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Overdrive Companion'),
+          title: const Text('מלווה Overdrive'),
           actions: [
             if (settings.connectionMode != ConnectionMode.live)
               const Padding(
