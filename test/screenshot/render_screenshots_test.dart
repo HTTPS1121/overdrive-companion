@@ -19,17 +19,17 @@ import '../support/fixture_api_client.dart';
 import 'test_fonts.dart';
 
 const _artifactRoots = [
-  '/opt/cursor/artifacts/v2.4-0/screenshots',
-  '/cursor/stores/self/artifacts/v2.4-0/screenshots',
+  '/opt/cursor/artifacts/v2.5-0/screenshots',
+  '/cursor/stores/self/artifacts/v2.5-0/screenshots',
 ];
-const _goldenRoot = 'goldens/v2.4';
+const _goldenRoot = 'goldens/v2.5';
 
 late SettingsRepository _settingsRepo;
 late VehicleSnapshot _fixtureSnap;
 late VehicleSnapshot _offlineSnap;
 late FixtureOverdriveApiClient _fixtureClient;
 
-const _navLabels = ['מצב', 'שליטה', 'מיקום', 'הגדרות'];
+const _navLabels = ['מצב', 'שליטה', 'מצלמות', 'מיקום', 'הגדרות'];
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -93,13 +93,33 @@ void main() {
     );
   });
 
+  testWidgets('v2.5 cameras fixture light', (tester) async {
+    await _capture(
+      tester,
+      '12_camera_hub_fixture_light',
+      settings: _fixtureSettings(),
+      snapshot: _fixtureSnap,
+      expectNavIndex: 2,
+      afterPump: (t) async {
+        for (var i = 0; i < 40; i++) {
+          await t.pump(const Duration(milliseconds: 100));
+          if (find.text('שידור חי').evaluate().isNotEmpty &&
+              find.byType(CircularProgressIndicator).evaluate().isEmpty) {
+            break;
+          }
+        }
+        expect(find.text('שידור חי'), findsOneWidget);
+      },
+    );
+  });
+
   testWidgets('v2.4 location fixture light', (tester) async {
     await _capture(
       tester,
       '04_location_fixture_light',
       settings: _fixtureSettings(),
       snapshot: _fixtureSnap,
-      expectNavIndex: 2,
+      expectNavIndex: 3,
       afterPump: (t) async {
         expect(find.text('פתיחה בניווט'), findsOneWidget);
         expect(find.textContaining('32.08530'), findsOneWidget);
@@ -183,7 +203,7 @@ void main() {
       '07_settings_light',
       settings: _fixtureSettings(),
       snapshot: _fixtureSnap,
-      expectNavIndex: 3,
+      expectNavIndex: 4,
       afterPump: (t) async {
         expect(find.text('חיבור'), findsOneWidget);
       },

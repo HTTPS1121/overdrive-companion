@@ -9,6 +9,8 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
 
   final MockOverdriveBackend _backend;
 
+  void setAuthRequired(bool value) => _backend.authRequired = value;
+
   static Future<FixtureOverdriveApiClient> create() async {
     final backend = await MockOverdriveBackend.fromFixture();
     return FixtureOverdriveApiClient(backend);
@@ -30,6 +32,9 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
       case OverdriveEndpoints.adas:
       case OverdriveEndpoints.chargeCap:
       case OverdriveEndpoints.acChargeCurrentLimit:
+      case OverdriveEndpoints.streamStatus:
+      case OverdriveEndpoints.recordings:
+      case OverdriveEndpoints.surveillanceStatus:
         return _backend.handleGet(path);
       default:
         throw OverdriveApiException('fixture: unknown GET $path');
@@ -50,8 +55,7 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
 
   @override
   Future<void> loginWithDeviceToken(String token) async {
-    final res = await postJson(OverdriveEndpoints.authToken, body: {'token': token});
-    jwt = (res['jwt'] ?? res['token']) as String?;
+    await super.loginWithDeviceToken(token);
   }
 
   @override

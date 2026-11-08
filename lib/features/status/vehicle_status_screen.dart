@@ -52,8 +52,15 @@ class VehicleStatusScreen extends ConsumerWidget {
         return RefreshIndicator(
           onRefresh: () => ref.read(vehicleSnapshotProvider.notifier).refresh(),
           child: ListView(
-            padding: scrollBottomPadding(context),
+            padding: scrollBottomPadding(context, extra: 88),
             children: [
+              _HeroStatusCard(
+                soc: snap.state.battery?.soc,
+                rangeKm: snap.state.battery?.displayRangeKm,
+                locked: snap.state.isLocked,
+                driving: snap.drivingLabelHe,
+              ),
+              const SizedBox(height: 12),
               _SectionCard(
                 title: 'חיבור',
                 child: Column(
@@ -140,6 +147,77 @@ class _CenteredMessage extends StatelessWidget {
             const SizedBox(height: 8),
             Text(body, textAlign: TextAlign.center),
             if (action != null) ...[const SizedBox(height: 20), action!],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroStatusCard extends StatelessWidget {
+  const _HeroStatusCard({
+    required this.soc,
+    required this.rangeKm,
+    required this.locked,
+    this.driving,
+  });
+
+  final double? soc;
+  final int? rangeKm;
+  final bool? locked;
+  final String? driving;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      color: scheme.surfaceContainerLow,
+      elevation: 0,
+      borderRadius: BorderRadius.circular(24),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'רכב Overdrive',
+              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            if (driving != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(driving!, style: theme.textTheme.bodyMedium),
+              ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (soc != null)
+                  Text(
+                    '${soc!.round()}%',
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: scheme.primary,
+                    ),
+                  )
+                else
+                  Text('—', style: theme.textTheme.displaySmall),
+                const SizedBox(width: 16),
+                if (rangeKm != null)
+                  Expanded(
+                    child: Text(
+                      '$rangeKm km',
+                      style: theme.textTheme.titleLarge,
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (locked != null)
+              Text(locked! ? 'נעול' : 'פתוח', style: theme.textTheme.labelLarge),
           ],
         ),
       ),

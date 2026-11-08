@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../core/auth/tunnel_credentials.dart';
 import '../repositories/overdrive_endpoints.dart';
 
 class OverdriveApiException implements Exception {
@@ -58,9 +59,22 @@ class OverdriveApiClient {
   }
 
   Map<String, dynamic> _decode(http.Response response) {
+    final body = response.body;
+    final trimmed = body.trimLeft();
+    if (trimmed.startsWith('<!') || trimmed.startsWith('<html')) {
+      throw OverdriveApiException(
+        'השרת החזיר דף HTML (${response.statusCode}) — כנראה כתובת מנהרה שגויה או הפניה לדף התחברות.',
+        statusCode: response.statusCode,
+      );
+    }
+
     Map<String, dynamic> json;
     try {
-      json = jsonDecode(response.body) as Map<String, dynamic>;
+      final parsed = jsonDecode(body);
+      if (parsed is! Map<String, dynamic>) {
+        throw const FormatException('not an object');
+      }
+      json = parsed;
     } catch (_) {
       throw OverdriveApiException(
         'תגובה לא תקינה מהשרת (${response.statusCode})',
@@ -86,6 +100,12 @@ class OverdriveApiClient {
     return json;
   }
 
+  /// Public endpoint — no JWT (AuthApiHandler PUBLIC_PATHS).
+  Future<AuthStatusResult> fetchAuthStatus() async {
+    final json = await getJson(OverdriveEndpoints.authStatus);
+    return AuthStatusResult.fromJson(json);
+  }
+
   Future<void> loginWithDeviceToken(String token) async {
     final result = await postJson(
       OverdriveEndpoints.authToken,
@@ -94,12 +114,27 @@ class OverdriveApiClient {
     if (result['success'] != true) {
       throw OverdriveApiException(result['error'] as String? ?? 'אימות נכשל');
     }
-    // Overdrive AuthApiHandler returns `jwt` (web login.html); older mocks used `token`.
     final session = (result['jwt'] ?? result['token']) as String?;
     if (session == null || session.isEmpty) {
       throw OverdriveApiException('לא התקבל JWT');
     }
     jwt = session;
+  }
+
+  /// PWA flow: status.deviceId + access code → full token.
+  Future<void> loginWithAccessCode({
+    required String deviceId,
+    required String accessCode,
+  }) async {
+    if (deviceId.trim().isEmpty) {
+      throw OverdriveApiException('מזהה המכשיר לא נטען מהמנהרה');
+    }
+    if (!isPlausibleAccessCode(accessCode)) {
+      throw OverdriveApiException('קוד הגישה קצר מדי (נדרש לפחות 8 תווים)');
+    }
+    await loginWithDeviceToken(
+      composeDeviceToken(deviceId: deviceId, accessCode: accessCode),
+    );
   }
 
   Future<AuthStatusResult> testConnection() async {
@@ -109,13 +144,18 @@ class OverdriveApiClient {
 }
 
 class AuthStatusResult {
-  AuthStatusResult({required this.ok, this.deviceId, this.raw = const {}});
+  AuthStatusResult({
+    required this.ok,
+    this.deviceId,
+    this.raw = const {},
+  });
 
   factory AuthStatusResult.fromJson(Map<String, dynamic> json) {
     final ok = json['status'] == 'ok' || json['success'] == true;
+    final id = json['deviceId']?.toString();
     return AuthStatusResult(
       ok: ok,
-      deviceId: json['deviceId'] as String?,
+      deviceId: (id != null && id != 'unknown' && id.isNotEmpty) ? id : null,
       raw: json,
     );
   }
@@ -130,7 +170,7 @@ String normalizeBaseUrl(String input) {
   var url = input.trim();
   if (url.isEmpty) return url;
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    url = 'http://$url';
+    url = 'https://$url';
   }
   while (url.endsWith('/')) {
     url = url.substring(0, url.length - 1);
@@ -154,4 +194,3 @@ bool isLocalHttpUrl(String input) {
   }
   return n.startsWith('http://');
 }
-

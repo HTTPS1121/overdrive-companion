@@ -1,0 +1,19 @@
+{
+  "@@locale": "en",
+  "appTitle": "Overdrive Companion",
+  "navStatus": "Status",
+  "navControls": "Controls",
+  "navCameras": "Cameras",
+  "navLocation": "Location",
+  "navSettings": "Settings",
+  "connectionTitle": "Tunnel connection",
+  "connectionIntro": "Same flow as the car login page: tunnel URL, Device ID from the server, then your access code.",
+  "tunnelUrlLabel": "Tunnel URL (HTTPS)",
+  "deviceIdLabel": "Device ID",
+  "deviceIdHint": "Tap refresh after entering the tunnel URL",
+  "accessCodeLabel": "Access code",
+  "accessCodeHelper": "Access code only — the app sends deviceId-accessCode to /auth/token",
+  "connectSave": "Connect and save",
+  "errorHtmlTunnel": "Server returned HTML instead of JSON. Check the tunnel URL.",
+  "errorAuthRejected": "Access code rejected. Refresh Device ID and try again."
+}

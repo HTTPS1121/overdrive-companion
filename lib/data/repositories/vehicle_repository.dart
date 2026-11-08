@@ -1,5 +1,8 @@
+import '../../core/auth/connection_errors.dart';
+import '../../core/auth/tunnel_credentials.dart';
 import '../../core/config/app_settings.dart';
 import '../api/overdrive_api_client.dart';
+import '../models/camera_models.dart';
 import '../models/cloud_status.dart';
 import '../models/gps_snapshot.dart';
 import '../models/remote_feature_models.dart';
@@ -105,13 +108,49 @@ class VehicleRepository {
     if (!_settings.isConfigured) {
       throw OverdriveApiException('חיבור לשרת לא הוגדר');
     }
-    if (_settings.deviceToken.isNotEmpty &&
-        (_client.jwt == null || _client.jwt!.isEmpty)) {
-      await _client.loginWithDeviceToken(_settings.deviceToken);
+    if (_client.jwt != null && _client.jwt!.isNotEmpty) return;
+    try {
+      await loginWithStoredCredentials();
+    } on ConnectionFailure {
+      rethrow;
+    } on OverdriveApiException catch (e) {
+      if (e.authRequired) _client.jwt = null;
+      throw ConnectionFailure.fromApi(e);
     }
   }
 
   Future<AuthStatusResult> testConnection() => _client.testConnection();
+
+  /// Probe tunnel without JWT — returns car `deviceId` for login.html parity.
+  Future<AuthStatusResult> fetchTunnelDeviceId() async {
+    try {
+      return await _client.fetchAuthStatus();
+    } on OverdriveApiException catch (e) {
+      throw ConnectionFailure.fromApi(e);
+    }
+  }
+
+  Future<void> loginWithStoredCredentials() async {
+    final id = _settings.deviceId.trim();
+    final code = _settings.accessCode;
+    try {
+      if (id.isNotEmpty && code.isNotEmpty) {
+        await _client.loginWithAccessCode(deviceId: id, accessCode: code);
+        return;
+      }
+      final legacy = _settings.resolvedDeviceToken();
+      if (legacy.isNotEmpty) {
+        await _client.loginWithDeviceToken(legacy);
+        return;
+      }
+      throw ConnectionFailure(
+        ConnectionFailureKind.deviceIdMissing,
+        'טען מזהה מכשיר מהמנהרה לפני ההתחברות (כמו במסך login.html ברכב).',
+      );
+    } on OverdriveApiException catch (e) {
+      throw ConnectionFailure.fromApi(e);
+    }
+  }
 
   Future<VehicleSnapshot> fetchSnapshot() async {
     if (!_settings.isConfigured) {
@@ -389,4 +428,34 @@ class VehicleRepository {
         OverdriveEndpoints.acChargeCurrentLimit,
         body: {'state': state},
       );
+
+  Future<StreamStatusState> fetchStreamStatus() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.streamStatus);
+    return StreamStatusState.fromJson(json);
+  }
+
+  Future<RecordingsListState> fetchRecordingsList() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.recordings);
+    return RecordingsListState.fromJson(json);
+  }
+
+  Future<SurveillanceStatusState> fetchSurveillanceStatus() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.surveillanceStatus);
+    return SurveillanceStatusState.fromJson(json);
+  }
+
+  Future<void> enableStream() async {
+    await postJsonCommand(OverdriveEndpoints.streamEnable);
+  }
+
+  Future<void> disableStream() async {
+    await postJsonCommand(OverdriveEndpoints.streamDisable);
+  }
+
+  Future<void> setStreamViewMode(int mode) async {
+    await _client.postJson('${OverdriveEndpoints.streamView}/$mode');
+  }
 }

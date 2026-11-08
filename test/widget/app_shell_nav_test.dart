@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:overdrive_companion/core/config/app_settings.dart';
 import 'package:overdrive_companion/data/repositories/vehicle_repository.dart';
 import 'package:overdrive_companion/features/shell/app_shell.dart';
+import 'package:overdrive_companion/l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:overdrive_companion/providers/app_providers.dart';
 import 'package:overdrive_companion/providers/settings_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,8 +43,16 @@ void main() {
           vehicleRepositoryProvider.overrideWith(() => _Repo(client)),
           vehicleSnapshotProvider.overrideWith(() => _Snap(snap)),
         ],
-        child: const MaterialApp(
-          home: Directionality(
+        child: MaterialApp(
+          locale: const Locale('he'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Directionality(
             textDirection: TextDirection.rtl,
             child: AppShell(),
           ),
@@ -51,7 +61,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    const labels = ['מצב', 'שליטה', 'מיקום', 'הגדרות'];
+    const labels = ['מצב', 'שליטה', 'מצלמות', 'מיקום', 'הגדרות'];
     for (var i = 0; i < labels.length; i++) {
       await tester.tap(
         find.descendant(

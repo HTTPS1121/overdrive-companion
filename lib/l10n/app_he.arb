@@ -1,0 +1,19 @@
+{
+  "@@locale": "he",
+  "appTitle": "מלווה Overdrive",
+  "navStatus": "מצב",
+  "navControls": "שליטה",
+  "navCameras": "מצלמות",
+  "navLocation": "מיקום",
+  "navSettings": "הגדרות",
+  "connectionTitle": "חיבור למנהרה",
+  "connectionIntro": "אותו תהליך כמו login.html: כתובת מנהרה, מזהה מכשיר מהשרת, וקוד גישה.",
+  "tunnelUrlLabel": "כתובת מנהרה (HTTPS)",
+  "deviceIdLabel": "מזהה מכשיר",
+  "deviceIdHint": "לחץ רענן לאחר הזנת כתובת המנהרה",
+  "accessCodeLabel": "קוד גישה",
+  "accessCodeHelper": "קוד בלבד — האפליקציה שולחת deviceId-accessCode ל־/auth/token",
+  "connectSave": "התחבר ושמור",
+  "errorHtmlTunnel": "השרת החזיר HTML במקום JSON. בדוק את כתובת המנהרה.",
+  "errorAuthRejected": "קוד הגישה לא התקבל. רענן מזהה מכשיר ונסה שוב."
+}

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/config/app_settings.dart';
-import '../../data/api/overdrive_api_client.dart';
+import '../../core/auth/tunnel_credentials.dart';
 import '../../providers/app_providers.dart';
+import 'connection_form.dart';
 
-/// First-run / unconfigured flow — no demo data, real tunnel URL + device token.
+/// First-run — tunnel URL, Device ID from /auth/status, access code (login.html parity).
 class ConnectionSetupScreen extends ConsumerStatefulWidget {
   const ConnectionSetupScreen({super.key});
 
@@ -15,138 +15,61 @@ class ConnectionSetupScreen extends ConsumerStatefulWidget {
 
 class _ConnectionSetupScreenState extends ConsumerState<ConnectionSetupScreen> {
   late final TextEditingController _urlCtrl = TextEditingController();
-  late final TextEditingController _tokenCtrl = TextEditingController();
-  bool _busy = false;
+  late final TextEditingController _codeCtrl = TextEditingController();
   String? _error;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_fieldsReady) return;
+    if (_initialized) return;
     final s = ref.read(appSettingsProvider);
     _urlCtrl.text = s.baseUrl;
-    _tokenCtrl.text = s.deviceToken;
-    _fieldsReady = true;
+    if (s.accessCode.isNotEmpty) {
+      _codeCtrl.text = s.accessCode;
+    } else {
+      final parsed = parseDeviceToken(s.deviceToken);
+      if (parsed != null) _codeCtrl.text = parsed.accessCode;
+    }
+    _initialized = true;
   }
 
-  bool _fieldsReady = false;
+  bool _initialized = false;
 
   @override
   void dispose() {
-    if (_fieldsReady) {
+    if (_initialized) {
       _urlCtrl.dispose();
-      _tokenCtrl.dispose();
+      _codeCtrl.dispose();
     }
     super.dispose();
-  }
-
-  AppSettings _draft() {
-    return AppSettings(
-      baseUrl: normalizeBaseUrl(_urlCtrl.text),
-      deviceToken: _tokenCtrl.text.trim(),
-      themeMode: ref.read(appSettingsProvider).themeMode,
-      useDynamicColor: ref.read(appSettingsProvider).useDynamicColor,
-      pollIntervalSeconds: ref.read(appSettingsProvider).pollIntervalSeconds,
-    );
-  }
-
-  Future<void> _save() async {
-    final draft = _draft();
-    if (!draft.isConfigured) {
-      setState(() => _error = 'נא למלא כתובת שרת ואסימון מכשיר');
-      return;
-    }
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      await ref.read(appSettingsProvider.notifier).persist(draft);
-      final repo = ref.read(vehicleRepositoryProvider.notifier);
-      repo.rebind(draft);
-      await repo.authenticateAndStoreJwt();
-      final status = await ref.read(vehicleRepositoryProvider).testConnection();
-      if (!status.ok) {
-        throw Exception('השרת לא ענה כמצופה');
-      }
-      ref.invalidate(vehicleSnapshotProvider);
-    } catch (e) {
-      setState(() => _error = e.toString());
-    } finally {
-      setState(() => _busy = false);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('חיבור לשרת')),
+      appBar: AppBar(title: const Text('חיבור למנהרה')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
           children: [
-            Text(
-              'התחבר למנהרה של Overdrive ברכב',
-              style: theme.textTheme.headlineSmall,
-            ),
+            Text('התחברות לרכב מרחוק', style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
-              'מומלץ HTTPS למנהרה מרחוק. חיבור HTTP מקומי (רשת ביתית/LAN) בלבד — לא לשלוח אסימונים דרך HTTP ציבורי.',
+              'ב־Overdrive בדפדפן: פתח את כתובת המנהרה → login.html מציג Device ID → הזן קוד גישה.',
               style: theme.textTheme.bodyMedium,
             ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _urlCtrl,
-              onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
-                labelText: 'כתובת שרת (מנהרה)',
-                hintText: 'https://example.trycloudflare.com',
-                helperText: 'מומלץ: כתובת HTTPS של המנהרה',
-              ),
-              keyboardType: TextInputType.url,
-              textDirection: TextDirection.ltr,
-              autocorrect: false,
-            ),
-            if (isLocalHttpUrl(_urlCtrl.text)) ...[
-              const SizedBox(height: 8),
-              Card(
-                color: theme.colorScheme.tertiaryContainer,
-                child: ListTile(
-                  leading: Icon(Icons.warning_amber, color: theme.colorScheme.onTertiaryContainer),
-                  title: const Text('שימוש מקומי בלבד'),
-                  subtitle: Text(
-                    'כתובת HTTP ללא הצפנה — מתאימה לרשת מקומית בלבד, לא למנהרה ציבורית.',
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(height: 16),
-            TextField(
-              controller: _tokenCtrl,
-              decoration: const InputDecoration(
-                labelText: 'אסימון מכשיר',
-              ),
-              obscureText: true,
-              textDirection: TextDirection.ltr,
-              autocorrect: false,
+            const SizedBox(height: 20),
+            ConnectionForm(
+              urlController: _urlCtrl,
+              accessCodeController: _codeCtrl,
+              onError: (e) => setState(() => _error = e),
+              onSuccess: () => setState(() => _error = null),
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),
               Text(_error!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error)),
             ],
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: _busy ? null : _save,
-              child: _busy
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('התחבר ושמור'),
-            ),
           ],
         ),
       ),

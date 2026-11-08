@@ -78,8 +78,14 @@ class MockOverdriveBackend {
       };
 
   Map<String, dynamic> login(String token) {
+    const deviceId = 'mock-atto3-demo';
     if (authRequired && token != 'mock-device-token') {
-      return {'success': false, 'error': 'invalid token'};
+      const allowedCodes = {'validcode1', 'testcode99'};
+      final suffix =
+          token.startsWith('$deviceId-') ? token.substring(deviceId.length + 1) : '';
+      if (!allowedCodes.contains(suffix)) {
+        return {'success': false, 'error': 'invalid device token'};
+      }
     }
     _jwt = 'mock.jwt.$token';
     return {
@@ -192,6 +198,10 @@ class MockOverdriveBackend {
         };
       case '/api/vehicle/ac-charge-current-limit':
         return _handleAcChargeCurrentLimitPost(body);
+      case '/api/stream/enable':
+        return _ok('stream-enable');
+      case '/api/stream/disable':
+        return _ok('stream-disable');
       case '/api/vehicle/system':
         if (body['target'] == 'screenshot') {
           final d = body['display'] ?? 0;
@@ -205,6 +215,9 @@ class MockOverdriveBackend {
         }
         return {'success': false, 'error': 'unsupported system target'};
       default:
+        if (path.startsWith('/api/stream/view/')) {
+          return _ok('stream-view');
+        }
         return {'success': false, 'error': 'unsupported path $path'};
     }
   }
@@ -246,6 +259,28 @@ class MockOverdriveBackend {
         };
       case '/api/vehicle/ac-charge-current-limit':
         return _acChargeCurrentGet();
+      case '/api/stream/status':
+        return {
+          'success': true,
+          'enabled': true,
+          'connected': true,
+          'view': 0,
+          'quality': 'HIGH',
+        };
+      case '/api/recordings':
+        return {
+          'success': true,
+          'recordings': [
+            {
+              'filename': '2025-11-07_12-30-00_front.mp4',
+              'place': 'front',
+              'timestamp': '1730986200',
+              'sizeBytes': 12_000_000,
+            },
+          ],
+        };
+      case '/api/surveillance/status':
+        return {'success': true, 'enabled': false};
       default:
         return {'success': false, 'error': 'unsupported GET $path'};
     }

@@ -28,6 +28,15 @@ abstract final class OverdriveEndpoints {
   static const batteryHeat = '/api/vehicle/battery-heat';
   static const system = '/api/vehicle/system';
   static const acChargeCurrentLimit = '/api/vehicle/ac-charge-current-limit';
+
+  static const streamStatus = '/api/stream/status';
+  static const streamEnable = '/api/stream/enable';
+  static const streamDisable = '/api/stream/disable';
+  static const streamView = '/api/stream/view';
+  static const streamQuality = '/api/stream/quality';
+
+  static const recordings = '/api/recordings';
+  static const surveillanceStatus = '/api/surveillance/status';
 }
 
 enum ControlKind {

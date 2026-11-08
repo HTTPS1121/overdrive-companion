@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../auth/tunnel_credentials.dart';
+
 enum CompanionThemeMode { system, light, dark }
 
 class AppSettings {
   const AppSettings({
     this.baseUrl = '',
     this.deviceToken = '',
+    this.deviceId = '',
+    this.accessCode = '',
     this.pollIntervalSeconds = 15,
     this.themeMode = CompanionThemeMode.system,
     this.useDynamicColor = true,
@@ -24,7 +28,7 @@ class AppSettings {
     }
     return AppSettings(
       baseUrl: baseUrl,
-      deviceToken: json['deviceToken'] as String? ?? '',
+      deviceId: json['deviceId'] as String? ?? '',
       pollIntervalSeconds: (json['pollIntervalSeconds'] as num?)?.toInt() ?? 15,
       themeMode: CompanionThemeMode.values.byName(
         json['themeMode'] as String? ?? CompanionThemeMode.system.name,
@@ -34,13 +38,27 @@ class AppSettings {
   }
 
   final String baseUrl;
+  /// Full `{deviceId}-{accessCode}` sent to `POST /auth/token`.
   final String deviceToken;
+  /// From public `GET /auth/status` (login.html "Device ID").
+  final String deviceId;
+  /// User-entered access code only (login.html token field).
+  final String accessCode;
   final int pollIntervalSeconds;
   final CompanionThemeMode themeMode;
   final bool useDynamicColor;
 
-  bool get isConfigured =>
-      baseUrl.trim().isNotEmpty && deviceToken.trim().isNotEmpty;
+  bool get isConfigured {
+    if (baseUrl.trim().isEmpty) return false;
+    if (resolvedDeviceToken().isNotEmpty) return true;
+    return false;
+  }
+
+  String resolvedDeviceToken() {
+    final direct = deviceToken.trim();
+    if (direct.isNotEmpty) return direct;
+    return composeDeviceToken(deviceId: deviceId, accessCode: accessCode);
+  }
 
   ThemeMode get materialThemeMode => switch (themeMode) {
         CompanionThemeMode.light => ThemeMode.light,
@@ -51,6 +69,8 @@ class AppSettings {
   AppSettings copyWith({
     String? baseUrl,
     String? deviceToken,
+    String? deviceId,
+    String? accessCode,
     int? pollIntervalSeconds,
     CompanionThemeMode? themeMode,
     bool? useDynamicColor,
@@ -58,6 +78,8 @@ class AppSettings {
     return AppSettings(
       baseUrl: baseUrl ?? this.baseUrl,
       deviceToken: deviceToken ?? this.deviceToken,
+      deviceId: deviceId ?? this.deviceId,
+      accessCode: accessCode ?? this.accessCode,
       pollIntervalSeconds: pollIntervalSeconds ?? this.pollIntervalSeconds,
       themeMode: themeMode ?? this.themeMode,
       useDynamicColor: useDynamicColor ?? this.useDynamicColor,
@@ -66,6 +88,7 @@ class AppSettings {
 
   Map<String, dynamic> toJson() => {
         'baseUrl': baseUrl,
+        'deviceId': deviceId,
         'pollIntervalSeconds': pollIntervalSeconds,
         'themeMode': themeMode.name,
         'useDynamicColor': useDynamicColor,

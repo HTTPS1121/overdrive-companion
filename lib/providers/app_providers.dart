@@ -23,6 +23,8 @@ class AppSettingsNotifier extends Notifier<AppSettings> {
 
   void applyInitial(AppSettings settings) => state = settings;
 
+  void patchDeviceId(String deviceId) => state = state.copyWith(deviceId: deviceId);
+
   Future<void> bootstrap() async {
     final repo = ref.read(settingsRepositoryProvider);
     final token = await repo.loadDeviceToken();
@@ -35,10 +37,17 @@ class AppSettingsNotifier extends Notifier<AppSettings> {
     }
   }
 
-  Future<void> persist(AppSettings settings, {String? jwt}) async {
+  Future<void> persist(AppSettings settings, {String? jwt, bool clearJwt = false}) async {
     state = settings;
-    await ref.read(settingsRepositoryProvider).saveFull(settings, jwt: jwt);
-    ref.read(vehicleRepositoryProvider.notifier).rebind(settings);
+    if (clearJwt) {
+      await ref.read(settingsRepositoryProvider).saveJwt(null);
+      ref.read(vehicleRepositoryProvider).setJwt(null);
+    }
+    await ref.read(settingsRepositoryProvider).saveFull(
+          settings.copyWith(deviceToken: settings.resolvedDeviceToken()),
+          jwt: jwt,
+        );
+    ref.read(vehicleRepositoryProvider.notifier).rebind(state);
     if (jwt != null) {
       ref.read(vehicleRepositoryProvider).setJwt(jwt);
     }
@@ -71,7 +80,7 @@ class VehicleRepositoryNotifier extends Notifier<VehicleRepository> {
   }
 
   Future<void> authenticateAndStoreJwt() async {
-    await state.ensureAuthenticated();
+    await state.loginWithStoredCredentials();
     final token = state.sessionJwt;
     if (token != null && token.isNotEmpty) {
       await ref.read(settingsRepositoryProvider).saveJwt(token);

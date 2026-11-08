@@ -1,5 +1,6 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:overdrive_companion/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -57,26 +58,35 @@ class _OverdriveAppState extends ConsumerState<OverdriveApp> {
       home = RepaintBoundary(key: widget.screenshotBoundaryKey, child: home);
     }
 
+    final localizations = const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ];
+
+    Locale? localeResolution(Locale? locale, Iterable<Locale> supported) {
+      if (locale == null) return const Locale('en');
+      for (final s in supported) {
+        if (s.languageCode == locale.languageCode) return s;
+      }
+      return const Locale('en');
+    }
+
+    final screenshotLocale =
+        widget.screenshotMode ? const Locale('he') : null;
+
     if (!settings.useDynamicColor) {
       return MaterialApp(
-        title: 'מלווה Overdrive',
+        title: 'Overdrive Companion',
         debugShowCheckedModeBanner: false,
-        locale: const Locale('he'),
-        supportedLocales: const [Locale('he'), Locale('en')],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: screenshotLocale,
+        localeResolutionCallback: localeResolution,
+        localizationsDelegates: localizations,
         theme: companionLightTheme(),
         darkTheme: companionDarkTheme(),
         themeMode: settings.materialThemeMode,
-        builder: (context, child) {
-          return Directionality(
-            textDirection: TextDirection.rtl,
-            child: child ?? const SizedBox.shrink(),
-          );
-        },
         home: home,
       );
     }
@@ -84,15 +94,12 @@ class _OverdriveAppState extends ConsumerState<OverdriveApp> {
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
         return MaterialApp(
-          title: 'מלווה Overdrive',
+          title: 'Overdrive Companion',
           debugShowCheckedModeBanner: false,
-          locale: const Locale('he'),
-          supportedLocales: const [Locale('he'), Locale('en')],
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: screenshotLocale,
+          localeResolutionCallback: localeResolution,
+          localizationsDelegates: localizations,
           theme: companionLightTheme(
             colorScheme: lightDynamic ?? CompanionColorSchemes.light,
           ),
@@ -100,12 +107,6 @@ class _OverdriveAppState extends ConsumerState<OverdriveApp> {
             colorScheme: darkDynamic ?? CompanionColorSchemes.dark,
           ),
           themeMode: settings.materialThemeMode,
-          builder: (context, child) {
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child: child ?? const SizedBox.shrink(),
-            );
-          },
           home: home,
         );
       },

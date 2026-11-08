@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/auth/tunnel_credentials.dart';
 import '../../core/config/app_settings.dart';
 import '../../data/api/overdrive_api_client.dart';
 import '../../providers/app_providers.dart';
+import '../setup/connection_form.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -14,10 +16,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late final TextEditingController _urlCtrl;
-  late final TextEditingController _tokenCtrl;
-  bool _testing = false;
-  String? _testMessage;
-  bool _testOk = false;
+  late final TextEditingController _codeCtrl;
   bool _fieldsReady = false;
 
   @override
@@ -26,7 +25,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (_fieldsReady) return;
     final s = ref.read(appSettingsProvider);
     _urlCtrl = TextEditingController(text: s.baseUrl);
-    _tokenCtrl = TextEditingController(text: s.deviceToken);
+    _codeCtrl = TextEditingController(
+      text: s.accessCode.isNotEmpty
+          ? s.accessCode
+          : (parseDeviceToken(s.deviceToken)?.accessCode ?? ''),
+    );
     _fieldsReady = true;
   }
 
@@ -34,58 +37,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void dispose() {
     if (_fieldsReady) {
       _urlCtrl.dispose();
-      _tokenCtrl.dispose();
+      _codeCtrl.dispose();
     }
     super.dispose();
   }
 
-  AppSettings _draftFromFields() {
-    final current = ref.read(appSettingsProvider);
-    return current.copyWith(
-      baseUrl: normalizeBaseUrl(_urlCtrl.text),
-      deviceToken: _tokenCtrl.text.trim(),
-    );
-  }
-
-  Future<void> _test() async {
-    setState(() {
-      _testing = true;
-      _testMessage = null;
-    });
-    final draft = _draftFromFields();
-    if (!draft.isConfigured) {
-      setState(() {
-        _testing = false;
-        _testMessage = 'נא למלא כתובת שרת ואסימון';
-        _testOk = false;
-      });
-      return;
-    }
-    final repo = ref.read(vehicleRepositoryProvider);
-    repo.updateSettings(draft);
-    try {
-      await ref.read(vehicleRepositoryProvider.notifier).authenticateAndStoreJwt();
-      final status = await repo.testConnection();
-      if (!status.ok) throw Exception('השרת לא ענה');
-      setState(() {
-        _testOk = true;
-        _testMessage = status.deviceId != null
-            ? 'החיבור תקין (מזהה המכשיר בשרת: ${status.deviceId})'
-            : 'החיבור תקין';
-      });
-    } catch (e) {
-      setState(() {
-        _testOk = false;
-        _testMessage = e.toString();
-      });
-    } finally {
-      setState(() => _testing = false);
-    }
-  }
-
   Future<void> _save() async {
-    final draft = _draftFromFields();
-    await ref.read(appSettingsProvider.notifier).persist(draft);
+    final current = ref.read(appSettingsProvider);
+    final deviceId = current.deviceId;
+    final composed = composeDeviceToken(deviceId: deviceId, accessCode: _codeCtrl.text.trim());
+    final draft = current.copyWith(
+      baseUrl: normalizeBaseUrl(_urlCtrl.text),
+      accessCode: _codeCtrl.text.trim(),
+      deviceToken: composed,
+    );
+    await ref.read(appSettingsProvider.notifier).persist(draft, clearJwt: true);
     await ref.read(vehicleRepositoryProvider.notifier).authenticateAndStoreJwt();
     ref.invalidate(vehicleSnapshotProvider);
     if (mounted) {
@@ -113,56 +79,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       children: [
         Text('חיבור', style: theme.textTheme.titleLarge),
         const SizedBox(height: 12),
-        TextField(
-          controller: _urlCtrl,
-          decoration: const InputDecoration(
-            labelText: 'כתובת שרת',
-            hintText: 'https://your-tunnel.example.com',
-          ),
-          keyboardType: TextInputType.url,
-          textDirection: TextDirection.ltr,
+        ConnectionForm(
+          urlController: _urlCtrl,
+          accessCodeController: _codeCtrl,
+          showSaveButton: false,
         ),
         const SizedBox(height: 12),
-        TextField(
-          controller: _tokenCtrl,
-          decoration: const InputDecoration(labelText: 'אסימון מכשיר'),
-          obscureText: true,
-          textDirection: TextDirection.ltr,
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: FilledButton.tonalIcon(
-                onPressed: _testing ? null : _test,
-                icon: _testing
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.link),
-                label: const Text('בדיקת חיבור'),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: FilledButton(
-                onPressed: _save,
-                child: const Text('שמירה'),
-              ),
-            ),
-          ],
-        ),
-        if (_testMessage != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            _testMessage!,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: _testOk ? theme.colorScheme.primary : theme.colorScheme.error,
-            ),
-          ),
-        ],
+        FilledButton(onPressed: _save, child: const Text('שמירה והתחברות')),
         const SizedBox(height: 28),
         Text('תצוגה', style: theme.textTheme.titleLarge),
         const SizedBox(height: 8),
