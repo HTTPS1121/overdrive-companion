@@ -36,7 +36,16 @@ abstract final class OverdriveEndpoints {
   static const streamQuality = '/api/stream/quality';
 
   static const recordings = '/api/recordings';
+  static const recordingsStats = '/api/recordings/stats';
   static const surveillanceStatus = '/api/surveillance/status';
+  static const surveillanceConfig = '/api/surveillance/config';
+  static const surveillanceEnable = '/api/surveillance/enable';
+  static const surveillanceDisable = '/api/surveillance/disable';
+
+  static String videoById(String recordingId) => '/video/id/$recordingId';
+  static String thumbById(String recordingId) => '/thumb/id/$recordingId';
+  static String recordingDeleteById(String recordingId) => '/api/recordings/id/$recordingId';
+  static String surveillanceSnapshot(int quadrant) => '/api/surveillance/snapshot/$quadrant';
 }
 
 enum ControlKind {

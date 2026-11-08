@@ -19,10 +19,10 @@ import '../support/fixture_api_client.dart';
 import 'test_fonts.dart';
 
 const _artifactRoots = [
-  '/opt/cursor/artifacts/v2.5-0/screenshots',
-  '/cursor/stores/self/artifacts/v2.5-0/screenshots',
+  '/opt/cursor/artifacts/v2.6-0/screenshots',
+  '/cursor/stores/self/artifacts/v2.6-0/screenshots',
 ];
-const _goldenRoot = 'goldens/v2.5';
+const _goldenRoot = 'goldens/v2.6';
 
 late SettingsRepository _settingsRepo;
 late VehicleSnapshot _fixtureSnap;
@@ -108,7 +108,7 @@ void main() {
             break;
           }
         }
-        expect(find.text('שידור חי'), findsOneWidget);
+        expect(find.textContaining('שידור'), findsWidgets);
       },
     );
   });

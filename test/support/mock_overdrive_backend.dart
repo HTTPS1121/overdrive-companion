@@ -202,6 +202,13 @@ class MockOverdriveBackend {
         return _ok('stream-enable');
       case '/api/stream/disable':
         return _ok('stream-disable');
+      case '/api/stream/quality':
+        return _ok('stream-quality', message: body['quality']?.toString());
+      case '/api/surveillance/config':
+        return _ok('surveillance-config');
+      case '/api/surveillance/enable':
+      case '/api/surveillance/disable':
+        return _ok('surveillance-toggle');
       case '/api/vehicle/system':
         if (body['target'] == 'screenshot') {
           final d = body['display'] ?? 0;
@@ -272,6 +279,7 @@ class MockOverdriveBackend {
           'success': true,
           'recordings': [
             {
+              'id': 'a1b2c3d4e5f6789012345678abcdef01',
               'filename': '2025-11-07_12-30-00_front.mp4',
               'place': 'front',
               'timestamp': '1730986200',
@@ -281,7 +289,17 @@ class MockOverdriveBackend {
         };
       case '/api/surveillance/status':
         return {'success': true, 'enabled': false};
+      case '/api/surveillance/config':
+        return {
+          'success': true,
+          'enabled': false,
+          'sensitivity': 3,
+          'distance': 3,
+        };
       default:
+        if (path.startsWith('/api/surveillance/snapshot/')) {
+          return {'success': false, 'error': 'use binary fixture via getBytes'};
+        }
         return {'success': false, 'error': 'unsupported GET $path'};
     }
   }

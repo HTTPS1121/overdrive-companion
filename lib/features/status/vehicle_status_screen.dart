@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/l10n/l10n_x.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format/freshness.dart';
@@ -182,7 +183,7 @@ class _HeroStatusCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'רכב Overdrive',
+              context.l10n.statusHeroTitle,
               style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
             if (driving != null)
@@ -217,7 +218,10 @@ class _HeroStatusCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             if (locked != null)
-              Text(locked! ? 'נעול' : 'פתוח', style: theme.textTheme.labelLarge),
+              Text(
+                locked! ? context.l10n.statusLocked : context.l10n.statusUnlocked,
+                style: theme.textTheme.labelLarge,
+              ),
           ],
         ),
       ),

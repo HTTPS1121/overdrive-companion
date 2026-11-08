@@ -458,4 +458,64 @@ class VehicleRepository {
   Future<void> setStreamViewMode(int mode) async {
     await _client.postJson('${OverdriveEndpoints.streamView}/$mode');
   }
+
+  Future<void> setStreamQuality(String quality) async {
+    await _client.postJson(OverdriveEndpoints.streamQuality, body: {'quality': quality});
+  }
+
+  Uri videoUrlForRecording(RecordingEntry entry) {
+    final id = entry.canonicalRecordingId;
+    if (id != null) return _client.uri(OverdriveEndpoints.videoById(id));
+    return _client.uri('/api/recordings/${Uri.encodeComponent(entry.filename)}');
+  }
+
+  Uri thumbUrlForRecording(RecordingEntry entry) {
+    final id = entry.canonicalRecordingId;
+    if (id != null) return _client.uri(OverdriveEndpoints.thumbById(id));
+    return _client.uri('/thumb/${Uri.encodeComponent(entry.filename)}');
+  }
+
+  Future<List<int>> downloadRecordingBytes(RecordingEntry entry) async {
+    await ensureAuthenticated();
+    final path = entry.canonicalRecordingId != null
+        ? OverdriveEndpoints.videoById(entry.canonicalRecordingId!)
+        : '/api/recordings/${Uri.encodeComponent(entry.filename)}';
+    return _client.getBytes(path);
+  }
+
+  Future<CommandResult> deleteRecording(RecordingEntry entry) async {
+    await ensureAuthenticated();
+    if (entry.canonicalRecordingId != null) {
+      final json =
+          await _client.deleteJson(OverdriveEndpoints.recordingDeleteById(entry.canonicalRecordingId!));
+      return CommandResult.fromJson(json);
+    }
+    return CommandResult.fromJson(
+      await _client.deleteJson('/api/recordings/${Uri.encodeComponent(entry.filename)}'),
+    );
+  }
+
+  Future<SurveillanceConfigState> fetchSurveillanceConfig() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.surveillanceConfig);
+    return SurveillanceConfigState.fromJson(json);
+  }
+
+  Future<void> postSurveillanceConfig(Map<String, dynamic> body) async {
+    await ensureAuthenticated();
+    await _client.postJson(OverdriveEndpoints.surveillanceConfig, body: body);
+  }
+
+  Future<void> enableSurveillance() async {
+    await postJsonCommand(OverdriveEndpoints.surveillanceEnable);
+  }
+
+  Future<void> disableSurveillance() async {
+    await postJsonCommand(OverdriveEndpoints.surveillanceDisable);
+  }
+
+  Future<List<int>> fetchSurveillanceSnapshot(int quadrant) async {
+    await ensureAuthenticated();
+    return _client.getBytes(OverdriveEndpoints.surveillanceSnapshot(quadrant));
+  }
 }

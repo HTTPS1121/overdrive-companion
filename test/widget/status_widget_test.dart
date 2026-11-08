@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:overdrive_companion/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:overdrive_companion/core/config/app_settings.dart';
 import 'package:overdrive_companion/core/theme/companion_theme.dart';
@@ -35,6 +37,14 @@ void main() {
           vehicleSnapshotProvider.overrideWith(() => _FixedSnapshot(snap)),
         ],
         child: MaterialApp(
+          locale: const Locale('he'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           theme: companionLightTheme(),
           home: const Directionality(
             textDirection: TextDirection.rtl,

@@ -27,12 +27,14 @@ class OverdriveApiClient {
   String? jwt;
   final http.Client _http;
 
-  Uri _uri(String path) {
+  Uri uri(String path) {
     final normalized = baseUrl.endsWith('/')
         ? baseUrl.substring(0, baseUrl.length - 1)
         : baseUrl;
     return Uri.parse('$normalized$path');
   }
+
+  Uri _uri(String path) => uri(path);
 
   Map<String, String> _headers({bool jsonBody = false}) {
     return {
@@ -43,6 +45,32 @@ class OverdriveApiClient {
 
   Future<Map<String, dynamic>> getJson(String path) async {
     final response = await _http.get(_uri(path), headers: _headers());
+    return _decode(response);
+  }
+
+  Future<List<int>> getBytes(
+    String path, {
+    Map<String, String>? extraHeaders,
+    int? offset,
+    int? length,
+  }) async {
+    final headers = {..._headers(), if (extraHeaders != null) ...extraHeaders};
+    if (offset != null || length != null) {
+      final end = length != null && offset != null ? offset + length - 1 : null;
+      headers['Range'] = 'bytes=$offset-${end ?? ''}';
+    }
+    final response = await _http.get(_uri(path), headers: headers);
+    if (response.statusCode == 401) {
+      throw OverdriveApiException('נדרש אימות', statusCode: 401, authRequired: true);
+    }
+    if (response.statusCode >= 400) {
+      throw OverdriveApiException('שגיאת שרת ${response.statusCode}', statusCode: response.statusCode);
+    }
+    return response.bodyBytes;
+  }
+
+  Future<Map<String, dynamic>> deleteJson(String path) async {
+    final response = await _http.delete(_uri(path), headers: _headers());
     return _decode(response);
   }
 

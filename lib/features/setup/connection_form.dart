@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/auth/connection_errors.dart';
+import '../../core/l10n/l10n_x.dart';
 import '../../core/auth/tunnel_credentials.dart';
 import '../../core/config/app_settings.dart';
 import '../../data/api/overdrive_api_client.dart';
@@ -144,20 +145,21 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'אותו תהליך כמו בדפדפן: מזהה מכשיר מהמנהרה + קוד גישה (login.html).',
+          l10n.connectionIntro,
           style: theme.textTheme.bodyMedium,
         ),
         const SizedBox(height: 16),
         TextField(
           controller: widget.urlController,
-          decoration: const InputDecoration(
-            labelText: 'כתובת מנהרה (HTTPS)',
-            hintText: 'https://your-tunnel.trycloudflare.com',
-            helperText: 'כתובת שמפנה לשרת Overdrive ברכב — לא לרשת מקומית בלבד',
+          decoration: InputDecoration(
+            labelText: l10n.tunnelUrlLabel,
+            hintText: l10n.tunnelUrlHint,
+            helperText: l10n.tunnelUrlHelper,
           ),
           keyboardType: TextInputType.url,
           textDirection: TextDirection.ltr,
@@ -170,16 +172,16 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
             color: theme.colorScheme.tertiaryContainer,
             child: ListTile(
               leading: Icon(Icons.warning_amber, color: theme.colorScheme.onTertiaryContainer),
-              title: const Text('HTTP מקומי בלבד'),
-              subtitle: const Text('למנהרה מרחוק נדרש HTTPS.'),
+              title: Text(l10n.localHttpWarningTitle),
+              subtitle: Text(l10n.localHttpWarningBody),
             ),
           ),
         ],
         const SizedBox(height: 16),
         InputDecorator(
           decoration: InputDecoration(
-            labelText: 'מזהה מכשיר (Device ID)',
-            helperText: 'נטען מ־GET /auth/status — מוצג גם במסך ההתחברות ברכב',
+            labelText: l10n.deviceIdLabelLong,
+            helperText: l10n.deviceIdHelper,
             suffixIcon: _loadingId
                 ? const Padding(
                     padding: EdgeInsets.all(12),
@@ -187,12 +189,12 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
                   )
                 : IconButton(
                     icon: const Icon(Icons.refresh),
-                    tooltip: 'טען מזהה מהמנהרה',
+                    tooltip: l10n.refreshDeviceId,
                     onPressed: _loadingId ? null : _fetchDeviceId,
                   ),
           ),
           child: SelectableText(
-            _deviceId.isEmpty ? 'לחץ רענן לאחר הזנת כתובת המנהרה' : _deviceId,
+            _deviceId.isEmpty ? l10n.deviceIdPlaceholder : _deviceId,
             style: theme.textTheme.bodyLarge?.copyWith(fontFamily: 'monospace'),
             textDirection: TextDirection.ltr,
           ),
@@ -204,9 +206,9 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
         const SizedBox(height: 16),
         TextField(
           controller: widget.accessCodeController,
-          decoration: const InputDecoration(
-            labelText: 'קוד גישה',
-            helperText: 'רק הקוד — לא מזהה המכשיר. השרת משלב: מזהה-קוד',
+          decoration: InputDecoration(
+            labelText: l10n.accessCodeLabel,
+            helperText: l10n.accessCodeHelper,
           ),
           obscureText: true,
           textDirection: TextDirection.ltr,
@@ -222,7 +224,7 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
                     height: 22,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('התחבר ושמור'),
+                : Text(l10n.connectSave),
           ),
         ],
       ],

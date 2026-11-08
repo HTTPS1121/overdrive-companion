@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/l10n_x.dart';
 import '../../core/auth/tunnel_credentials.dart';
 import '../../providers/app_providers.dart';
 import 'connection_form.dart';
@@ -48,7 +49,7 @@ class _ConnectionSetupScreenState extends ConsumerState<ConnectionSetupScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('חיבור למנהרה')),
+      appBar: AppBar(title: Text(context.l10n.connectionTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
