@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/command_result_l10n.dart';
+import '../../core/l10n/l10n_x.dart';
 import '../../core/layout/scroll_insets.dart';
 import '../../core/widgets/requires_connection.dart';
 import 'seat_controls.dart';
@@ -35,15 +37,16 @@ class _ComfortScreenState extends State<ComfortScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       children: [
         Material(
           color: Theme.of(context).colorScheme.surfaceContainerLow,
           child: TabBar(
             controller: _tabs,
-            tabs: const [
-              Tab(text: 'מושבים'),
-              Tab(text: 'מדיה ובטיחות'),
+            tabs: [
+              Tab(text: l10n.comfortTabSeats),
+              Tab(text: l10n.comfortTabMediaSafety),
             ],
           ),
         ),
@@ -100,7 +103,7 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
     if (!mounted) return;
     setState(() => _busy = false);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(r.userMessageHe(actionLabel: 'מושב'))),
+      SnackBar(content: Text(r.userMessage(context.l10n, actionLabel: context.l10n.actionSeat))),
     );
     if (r.success) await ref.read(vehicleSnapshotProvider.notifier).refresh();
   }
@@ -114,7 +117,14 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
     if (!mounted) return;
     setState(() => _busy = false);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(r.userMessageHe(actionLabel: save ? 'שמירת מושב' : 'קריאת מושב'))),
+      SnackBar(
+        content: Text(
+          r.userMessage(
+            context.l10n,
+            actionLabel: save ? context.l10n.seatSaveMemory : context.l10n.seatRecallMemory,
+          ),
+        ),
+      ),
     );
   }
 
@@ -173,7 +183,7 @@ class _MediaSafetyTabState extends ConsumerState<_MediaSafetyTab> {
     final r = await ref.read(vehicleRepositoryProvider).postMedia(target: target, value: value);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(r.userMessageHe(actionLabel: 'מדיה'))),
+      SnackBar(content: Text(r.userMessage(context.l10n, actionLabel: context.l10n.actionMedia))),
     );
   }
 
@@ -181,7 +191,7 @@ class _MediaSafetyTabState extends ConsumerState<_MediaSafetyTab> {
     final r = await ref.read(vehicleRepositoryProvider).postAdas(target: target, enable: enable);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(r.userMessageHe(actionLabel: 'ADAS'))),
+      SnackBar(content: Text(r.userMessage(context.l10n, actionLabel: context.l10n.actionAdas))),
     );
     if (r.success) await _loadAdas();
   }
@@ -193,16 +203,17 @@ class _MediaSafetyTabState extends ConsumerState<_MediaSafetyTab> {
         );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(r.userMessageHe(actionLabel: 'CPD'))),
+      SnackBar(content: Text(r.userMessage(context.l10n, actionLabel: context.l10n.actionCpd))),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return ListView(
       padding: scrollBottomPadding(context),
       children: [
-        Text('עוצמת מדיה ובהירות מסך', style: Theme.of(context).textTheme.titleMedium),
+        Text(l10n.comfortMediaTitle, style: Theme.of(context).textTheme.titleMedium),
         Slider(
           value: _brightness.toDouble(),
           min: 0,
@@ -227,13 +238,17 @@ class _MediaSafetyTabState extends ConsumerState<_MediaSafetyTab> {
           ],
         ),
         const Divider(height: 32),
-        Text('בטיחות', style: Theme.of(context).textTheme.titleMedium),
+        Text(l10n.comfortSafetyTitle, style: Theme.of(context).textTheme.titleMedium),
         if (_loading)
           const LinearProgressIndicator()
         else if (_adas != null) ...[
           ListTile(
             title: const Text('ESP'),
-            subtitle: Text(_adas!.espOn == null ? 'לא זמין' : (_adas!.espOn! ? 'פעיל' : 'כבוי')),
+            subtitle: Text(
+              _adas!.espOn == null
+                  ? l10n.comfortUnavailable
+                  : (_adas!.espOn! ? l10n.stateActive : l10n.stateInactive),
+            ),
             trailing: Switch(
               value: _adas!.espOn ?? false,
               onChanged: _adas!.espOn == null
@@ -243,12 +258,12 @@ class _MediaSafetyTabState extends ConsumerState<_MediaSafetyTab> {
           ),
         ],
         SwitchListTile(
-          title: const Text('התרעת מהירות (SLW)'),
+          title: Text(l10n.comfortSlw),
           value: false,
           onChanged: (v) => _adasToggle('speedLimitWarning', v),
         ),
         SwitchListTile(
-          title: const Text('זיהוי ילד ברכב (CPD)'),
+          title: Text(l10n.comfortCpd),
           value: false,
           onChanged: _cpd,
         ),

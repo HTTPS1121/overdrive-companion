@@ -6,6 +6,7 @@ import '../models/camera_models.dart';
 import '../models/cloud_status.dart';
 import '../models/gps_snapshot.dart';
 import '../models/remote_feature_models.dart';
+import '../models/remote_services_models.dart';
 import '../models/vehicle_state.dart';
 import 'overdrive_endpoints.dart';
 
@@ -29,10 +30,12 @@ class VehicleSnapshot {
   final bool offline;
   final String? errorMessage;
 
-  String? get drivingLabelHe {
+  bool? get isDriving {
     final driving = gps?.isDriving;
-    if (driving == null) return null;
-    return driving ? 'בנסיעה' : 'בחנייה';
+    if (driving != null) return driving;
+    final speed = gps?.canSpeedKmh;
+    if (speed != null) return speed > 1;
+    return null;
   }
 }
 
@@ -70,15 +73,6 @@ class CommandResult {
   bool get userConfirmed =>
       success && (confirmation == null || confirmation == 'local');
 
-  String userMessageHe({required String actionLabel}) {
-    if (!success) {
-      return error ?? message ?? 'פקודת $actionLabel נכשלה';
-    }
-    if (confirmation == 'none' || outcome == 'unconfirmed') {
-      return message ?? 'פקודת $actionLabel נשלחה אך לא אושרה ברכב';
-    }
-    return message ?? 'פקודת $actionLabel בוצעה';
-  }
 }
 
 class VehicleRepository {
@@ -143,10 +137,7 @@ class VehicleRepository {
         await _client.loginWithDeviceToken(legacy);
         return;
       }
-      throw ConnectionFailure(
-        ConnectionFailureKind.deviceIdMissing,
-        'טען מזהה מכשיר מהמנהרה לפני ההתחברות (כמו במסך login.html ברכב).',
-      );
+      throw ConnectionFailure(ConnectionFailureKind.deviceIdMissing);
     } on OverdriveApiException catch (e) {
       throw ConnectionFailure.fromApi(e);
     }
@@ -155,9 +146,9 @@ class VehicleRepository {
   Future<VehicleSnapshot> fetchSnapshot() async {
     if (!_settings.isConfigured) {
       return VehicleSnapshot(
-        state: VehicleState(success: false, error: 'לא הוגדר חיבור'),
+        state: VehicleState(success: false, error: 'not configured'),
         offline: true,
-        errorMessage: 'הגדר כתובת מנהרה ואסימון מכשיר',
+        errorMessage: 'connection not configured',
       );
     }
     try {
@@ -517,5 +508,94 @@ class VehicleRepository {
   Future<List<int>> fetchSurveillanceSnapshot(int quadrant) async {
     await ensureAuthenticated();
     return _client.getBytes(OverdriveEndpoints.surveillanceSnapshot(quadrant));
+  }
+
+  Future<SurveillanceHeatmapState> fetchSurveillanceHeatmap() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.surveillanceHeatmap);
+    return SurveillanceHeatmapState.fromJson(json);
+  }
+
+  Future<SurveillanceFilterLogState> fetchSurveillanceFilterLog() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.surveillanceFilterLog);
+    return SurveillanceFilterLogState.fromJson(json);
+  }
+
+  Future<List<int>> fetchScreenDeterrentImage() async {
+    await ensureAuthenticated();
+    return _client.getBytes(OverdriveEndpoints.surveillanceScreenDeterrentImage);
+  }
+
+  Future<CommandResult> postScreenDeterrentTest() async {
+    await ensureAuthenticated();
+    final json = await _client.postJson(OverdriveEndpoints.surveillanceScreenDeterrentTest);
+    return CommandResult.fromJson(json);
+  }
+
+  Future<CommunicateStatusState> fetchCommunicateStatus() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.communicateStatus);
+    return CommunicateStatusState.fromJson(json);
+  }
+
+  Future<CommandResult> postCommunicateMessage(String text) async {
+    await ensureAuthenticated();
+    final json = await _client.postJson(
+      OverdriveEndpoints.communicateMessage,
+      body: {'text': text},
+    );
+    return CommandResult.fromJson(json);
+  }
+
+  Future<CommandResult> postCommunicateTestSpeaker() async {
+    await ensureAuthenticated();
+    final json = await _client.postJson(OverdriveEndpoints.communicateTestSpeaker);
+    return CommandResult.fromJson(json);
+  }
+
+  Future<CommandResult> postCommunicateEmergencyStop() async {
+    await ensureAuthenticated();
+    final json = await _client.postJson(OverdriveEndpoints.communicateEmergencyStop);
+    return CommandResult.fromJson(json);
+  }
+
+  Future<GenAiStatusState> fetchGenAiStatus() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.genaiStatus);
+    return GenAiStatusState.fromJson(json);
+  }
+
+  Future<GenAiChatResult> postGenAiChat(String message) async {
+    await ensureAuthenticated();
+    final json = await _client.postJson(
+      OverdriveEndpoints.genaiChat,
+      body: {
+        'messages': [
+          {'role': 'user', 'content': message},
+        ],
+      },
+    );
+    return GenAiChatResult.fromJson(json);
+  }
+
+  Future<Map<String, dynamic>> fetchGenAiInsightsDashboard() async {
+    await ensureAuthenticated();
+    return _client.getJson(OverdriveEndpoints.genaiInsightsDashboard);
+  }
+
+  Future<WireGuardStatusState> fetchWireGuardStatus() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.wireguardStatus);
+    return WireGuardStatusState.fromJson(json);
+  }
+
+  Future<CommandResult> postWireGuardExpose({required bool enabled}) async {
+    await ensureAuthenticated();
+    final json = await _client.postJson(
+      OverdriveEndpoints.wireguardExpose,
+      body: {'enabled': enabled},
+    );
+    return CommandResult.fromJson(json);
   }
 }

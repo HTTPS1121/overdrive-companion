@@ -486,13 +486,40 @@ class AppLocalizationsHe extends AppLocalizations {
   String get actionCancel => 'ביטול';
 
   @override
+  String get actionScheduleClimate => 'תזמון מיזוג';
+
+  @override
+  String get actionScheduleCharging => 'תזמון טעינה';
+
+  @override
+  String get actionStartCharging => 'התחלת טעינה';
+
+  @override
+  String get actionSeat => 'מושב';
+
+  @override
+  String get actionMedia => 'מדיה';
+
+  @override
+  String get actionAdas => 'ADAS';
+
+  @override
+  String get actionCpd => 'CPD';
+
+  @override
+  String get actionBatteryHeat => 'חימום סוללה';
+
+  @override
+  String get actionChargeCap => 'מגבלת טעינה';
+
+  @override
   String get settingsSectionConnection => 'חיבור';
 
   @override
   String get settingsSectionAppearance => 'תצוגה';
 
   @override
-  String get settingsSectionRemote => 'Remote services';
+  String get settingsSectionRemote => 'שירותים מרחוק';
 
   @override
   String get settingsAppearanceHint =>
@@ -520,11 +547,10 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settingsThemeDark => 'כהה';
 
   @override
-  String get settingsOpenRemoteServices => 'Cabin audio, GenAI, WireGuard';
+  String get settingsOpenRemoteServices => 'שמע ברכב, GenAI, WireGuard';
 
   @override
-  String get settingsOpenCapabilityInventory =>
-      'API coverage vs Overdrive server';
+  String get settingsOpenCapabilityInventory => 'מפת יכולות מול שרת Overdrive';
 
   @override
   String get controlsTabCommands => 'פקודות';
@@ -539,10 +565,10 @@ class AppLocalizationsHe extends AppLocalizations {
   String get controlsTabCharging => 'טעינה';
 
   @override
-  String get scheduleTabClimate => 'Pre-climate';
+  String get scheduleTabClimate => 'מיזוג מראש';
 
   @override
-  String get scheduleTabCharging => 'Smart charge';
+  String get scheduleTabCharging => 'טעינה חכמה';
 
   @override
   String get gpsNoLocationServer => 'אין מיקום — נדרש חיבור פעיל לשרת';
@@ -627,195 +653,195 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String get extendedPowerSection => 'Power';
+  String get extendedPowerSection => 'הדלקה וכיבוי';
 
   @override
   String get extendedPowerDrivingBlocked =>
-      'Vehicle reports driving — power on/off blocked until stopped (server guard).';
+      'הרכב מדווח בנסיעה — הדלקה/כיבוי חסומים עד עצירה (שומר בשרת).';
 
   @override
-  String get extendedPowerOn => 'Power on';
+  String get extendedPowerOn => 'הדלקת רכב';
 
   @override
-  String get extendedPowerOff => 'Power off';
+  String get extendedPowerOff => 'כיבוי רכב';
 
   @override
-  String get extendedBatteryHeatSection => 'Battery heat';
+  String get extendedBatteryHeatSection => 'חימום סוללה';
 
   @override
   String get extendedBatteryHeatUnknown =>
-      'Server did not report battery heat — toggle unavailable.';
+      'השרת לא דיווח מצב חימום סוללה — הפעלה לא זמינה.';
 
   @override
-  String get extendedBatteryPreheat => 'Battery preconditioning';
+  String get extendedBatteryPreheat => 'חימום מקדים לסוללה';
 
   @override
-  String get extendedBatteryHeatOn => 'Active per server';
+  String get extendedBatteryHeatOn => 'פעיל לפי השרת';
 
   @override
-  String get extendedBatteryHeatOff => 'Off per server';
+  String get extendedBatteryHeatOff => 'כבוי לפי השרת';
 
   @override
-  String get extendedScreenshotsSection => 'In-vehicle displays';
+  String get extendedScreenshotsSection => 'צילום מסכי הרכב';
 
   @override
   String get extendedScreenshotsHint =>
-      'PNG capture is stored on the vehicle (HU or cluster). Not auto-downloaded to phone.';
+      'PNG נשמר במכשיר הרכב (מולטימדיה או לוח שעונים). לא מורד אוטומטית לטלפון.';
 
   @override
-  String get extendedScreenshotHu => 'Multimedia screenshot';
+  String get extendedScreenshotHu => 'צילום מסך מולטימדיה';
 
   @override
-  String get extendedScreenshotCluster => 'Cluster screenshot';
+  String get extendedScreenshotCluster => 'צילום מסך לוח שעונים';
 
   @override
-  String get extendedConfirmPowerOnTitle => 'Power on vehicle?';
+  String get extendedConfirmPowerOnTitle => 'להדליק את הרכב?';
 
   @override
-  String get extendedConfirmPowerOffTitle => 'Power off vehicle?';
+  String get extendedConfirmPowerOffTitle => 'לכבות את הרכב?';
 
   @override
   String get extendedConfirmPowerOnBody =>
-      'Sent only when parked with no motion (server SDK guard).';
+      'נשלח רק כשהרכב חונה וללא תנועה (שומר SDK בשרת).';
 
   @override
   String get extendedConfirmPowerOffBody =>
-      'Vehicle will shut down — ensure occupants are clear.';
+      'הרכב ייכבה — ודא שאין נוסעים ברכב.';
 
   @override
   String extendedConfirmScreenshotTitle(String label) {
-    return 'Confirm $label?';
+    return 'לאשר $label?';
   }
 
   @override
   String get extendedConfirmScreenshotBody =>
-      'Server captures on the vehicle and saves a PNG file.';
+      'השרת יצלם במכשיר הרכב וישמור קובץ PNG.';
 
   @override
-  String get extendedConfirmCapture => 'Capture';
+  String get extendedConfirmCapture => 'צילום';
 
   @override
-  String get scheduleClimateTitle => 'Climate schedules from server';
+  String get scheduleClimateTitle => 'תזמוני מיזוג מהשרת';
 
   @override
-  String get scheduleClimateEmpty => 'No active schedules — create one below.';
+  String get scheduleClimateEmpty => 'אין תזמונים פעילים — צור תזמון חדש למטה.';
 
   @override
   String scheduleClimateUnsupported(String reason) {
-    return 'Not supported: $reason';
+    return 'לא נתמך: $reason';
   }
 
   @override
   String scheduleClimateListUnavailable(String reason) {
-    return 'Schedule list unavailable ($reason).\nAn empty list is not shown as proof of no schedules.';
+    return 'רשימת תזמונים לא זמינה כעת ($reason).\nלא מוצגת רשימה ריקה כהוכחה להיעדר תזמונים.';
   }
 
   @override
-  String get scheduleInvalidResponse => 'Invalid server response';
+  String get scheduleInvalidResponse => 'תגובת שרת לא תקינה';
 
   @override
-  String get scheduleDurationMinutes => 'Duration (minutes)';
+  String get scheduleDurationMinutes => 'משך פעולה (דקות)';
 
   @override
-  String get scheduleCreate => 'Create';
+  String get scheduleCreate => 'יצירה';
 
   @override
-  String get scheduleUpdate => 'Update';
+  String get scheduleUpdate => 'עדכון';
 
   @override
-  String get scheduleCancelEdit => 'Cancel edit';
+  String get scheduleCancelEdit => 'ביטול עריכה';
 
   @override
-  String get scheduleDeleteTooltip => 'Delete';
+  String get scheduleDeleteTooltip => 'מחיקה';
 
   @override
   String scheduleChargingUnsupported(Object reason) {
-    return 'Not supported: $reason';
+    return 'לא נתמך: $reason';
   }
 
   @override
-  String get scheduleChargingStatus => 'Status';
+  String get scheduleChargingStatus => 'סטטוס';
 
   @override
-  String get scheduleChargingEnabled => 'Scheduled charging on';
+  String get scheduleChargingEnabled => 'טעינה מתוזמנת פעילה';
 
   @override
-  String get scheduleChargingStart => 'Start (HH:mm)';
+  String get scheduleChargingStart => 'התחלה (HH:mm)';
 
   @override
-  String get scheduleChargingEnd => 'End (HH:mm or full)';
+  String get scheduleChargingEnd => 'סיום (HH:mm או full)';
 
   @override
-  String get scheduleChargingRepeat => 'Repeat';
+  String get scheduleChargingRepeat => 'סוג חזרה';
 
   @override
-  String get scheduleRepeatDaily => 'Every day';
+  String get scheduleRepeatDaily => 'חוזר בכל יום';
 
   @override
-  String get scheduleRepeatOnce => 'One time';
+  String get scheduleRepeatOnce => 'חד־פעמי';
 
   @override
-  String get scheduleChargingSaveWindow => 'Save window';
+  String get scheduleChargingSaveWindow => 'שמירת חלון';
 
   @override
-  String get scheduleChargingStartNow => 'Start charging now';
+  String get scheduleChargingStartNow => 'התחל טעינה עכשיו';
 
   @override
-  String get stateActive => 'Active';
+  String get stateActive => 'פעיל';
 
   @override
-  String get stateInactive => 'Off';
+  String get stateInactive => 'כבוי';
 
   @override
-  String get comfortTabSeats => 'Seats';
+  String get comfortTabSeats => 'מושבים';
 
   @override
-  String get comfortTabMediaSafety => 'Media & safety';
+  String get comfortTabMediaSafety => 'מדיה ובטיחות';
 
   @override
-  String get comfortMediaTitle => 'Media volume & screen brightness';
+  String get comfortMediaTitle => 'עוצמת מדיה ובהירות מסך';
 
   @override
-  String get comfortSafetyTitle => 'Safety';
+  String get comfortSafetyTitle => 'בטיחות';
 
   @override
-  String get comfortEsp => 'Stability (ESP)';
+  String get comfortEsp => 'יציבות (ESP)';
 
   @override
-  String get comfortItac => 'Traction (ITAC)';
+  String get comfortItac => 'אחיזה (ITAC)';
 
   @override
-  String get comfortUnavailable => 'Unavailable';
+  String get comfortUnavailable => 'לא זמין';
 
   @override
-  String get comfortSlw => 'Speed limit warning (SLW)';
+  String get comfortSlw => 'התרעת מהירות (SLW)';
 
   @override
-  String get comfortCpd => 'Child presence (CPD)';
+  String get comfortCpd => 'זיהוי ילד ברכב (CPD)';
 
   @override
-  String get seatHint => 'Heat and vent levels as reported by the vehicle';
+  String get seatHint => 'רמות חימום ואוורור כפי שדווחו מהרכב';
 
   @override
-  String get seatDriver => 'Driver seat';
+  String get seatDriver => 'מושב נהג';
 
   @override
-  String get seatPassenger => 'Passenger seat';
+  String get seatPassenger => 'מושב נוסע';
 
   @override
-  String get seatHeat => 'Heat';
+  String get seatHeat => 'חימום';
 
   @override
-  String get seatVent => 'Vent';
+  String get seatVent => 'אוורור';
 
   @override
-  String get seatVentUnsupported => 'Vent not supported on this vehicle';
+  String get seatVentUnsupported => 'אוורור לא נתמך ברכב זה';
 
   @override
-  String get seatRecallMemory => 'Recall memory';
+  String get seatRecallMemory => 'קריאת זיכרון';
 
   @override
-  String get seatSaveMemory => 'Save seat';
+  String get seatSaveMemory => 'שמירת מושב';
 
   @override
   String commandFailed(String action) {
@@ -839,105 +865,171 @@ class AppLocalizationsHe extends AppLocalizations {
   String get commandUnlockConfirmed => 'הרכב נפתח';
 
   @override
-  String get surveillanceHeatmapTitle => 'Parking heatmap';
+  String get surveillanceHeatmapTitle => 'מפת חום חניה';
 
   @override
-  String get surveillanceHeatmapLoad => 'Load heatmap';
+  String get surveillanceHeatmapLoad => 'טען מפת חום';
 
   @override
-  String get surveillanceFilterLogTitle => 'Filter log';
+  String get surveillanceFilterLogTitle => 'יומן מסנן';
 
   @override
-  String get surveillanceFilterLogLoad => 'Load log';
+  String get surveillanceFilterLogLoad => 'טען יומן';
 
   @override
-  String get surveillanceScreenDeterrentTitle => 'Screen deterrent';
+  String get surveillanceScreenDeterrentTitle => 'הרתעת מסך';
 
   @override
-  String get surveillanceScreenDeterrentTest => 'Test on vehicle';
+  String get surveillanceScreenDeterrentTest => 'בדיקה ברכב';
 
   @override
-  String get surveillanceScreenDeterrentFetch => 'Preview image';
+  String get surveillanceScreenDeterrentFetch => 'תצוגת תמונה';
 
   @override
-  String get remoteCommunicateTitle => 'Cabin communication';
+  String get remoteCommunicateTitle => 'תקשורת לתא הנוסעים';
 
   @override
-  String get remoteGenAiTitle => 'GenAI assistant';
+  String get remoteGenAiTitle => 'עוזר GenAI';
 
   @override
-  String get remoteWireGuardTitle => 'WireGuard tunnel';
+  String get remoteWireGuardTitle => 'מנהרת WireGuard';
 
   @override
-  String get communicateAudioReady => 'Voice ready';
+  String get communicateAudioReady => 'קול מוכן';
 
   @override
-  String get communicateMessagesReady => 'Messages ready';
+  String get communicateMessagesReady => 'הודעות מוכנות';
 
   @override
-  String get communicateListenerReady => 'Listener ready';
+  String get communicateListenerReady => 'האזנה מוכנה';
 
   @override
-  String get communicateSendMessage => 'Send message';
+  String get communicateSendMessage => 'שליחת הודעה';
 
   @override
-  String get communicateMessageHint => 'Text shown on vehicle';
+  String get communicateMessageHint => 'טקסט שיוצג ברכב';
 
   @override
-  String get communicateTestSpeaker => 'Test speaker';
+  String get communicateTestSpeaker => 'בדיקת רמקול';
 
   @override
-  String get communicateEmergencyStop => 'Emergency stop';
+  String get communicateEmergencyStop => 'עצירת חירום';
 
   @override
-  String get communicateLoadStatus => 'Refresh status';
+  String get communicateLoadStatus => 'רענון מצב';
 
   @override
-  String get genAiLoadStatus => 'Refresh status';
+  String get genAiLoadStatus => 'רענון מצב';
 
   @override
-  String get genAiSendChat => 'Send';
+  String get genAiSendChat => 'שליחה';
 
   @override
-  String get genAiChatHint => 'Ask the vehicle assistant';
+  String get genAiChatHint => 'שאל את העוזר ברכב';
 
   @override
-  String get genAiInsightsOpen => 'Insights dashboard';
+  String get genAiInsightsOpen => 'לוח תובנות';
 
   @override
-  String get wireGuardLoadStatus => 'Refresh status';
+  String get wireGuardLoadStatus => 'רענון מצב';
 
   @override
-  String get wireGuardExposeOn => 'Expose dashboard';
+  String get wireGuardExposeOn => 'חשיפת לוח';
 
   @override
-  String get wireGuardExposeOff => 'Hide dashboard';
+  String get wireGuardExposeOff => 'הסתרת לוח';
 
   @override
-  String get inventoryTitle => 'Server capability map';
+  String get inventoryTitle => 'מפת יכולות שרת';
 
   @override
-  String get inventoryImplemented => 'In app';
+  String get inventoryImplemented => 'באפליקציה';
 
   @override
-  String get inventoryPartial => 'Partial';
+  String get inventoryPartial => 'חלקי';
 
   @override
-  String get inventoryNotInApp => 'HTTP only / not in UI';
+  String get inventoryNotInApp => 'HTTP בלבד / ללא מסך';
 
   @override
-  String get errorFreshnessUnknown => 'Unknown time source';
+  String get errorFreshnessUnknown => 'מקור זמן לא ידוע';
 
   @override
-  String get errorFreshnessClockSkew => 'Vehicle clock ahead of device';
+  String get errorFreshnessClockSkew => 'שעון הרכב מקדים את המכשיר';
 
   @override
-  String get errorConnectionNotConfigured => 'Server connection not configured';
+  String get errorConnectionNotConfigured => 'חיבור לשרת לא הוגדר';
 
   @override
-  String get errorDeviceIdBeforeLogin =>
-      'Load Device ID from tunnel before sign-in';
+  String get errorDeviceIdBeforeLogin => 'טען מזהה מכשיר מהמנהרה לפני ההתחברות';
 
   @override
-  String get errorConfigureTunnel => 'Set tunnel URL and device token';
+  String get errorConfigureTunnel => 'הגדר כתובת מנהרה ואסימון מכשיר';
+
+  @override
+  String get remoteServicesTitle => 'שירותים מרחוק';
+
+  @override
+  String get drivingInMotion => 'בנסיעה';
+
+  @override
+  String get drivingParked => 'בחנייה';
+
+  @override
+  String heatmapQuadrantSummary(String name, String active) {
+    return 'פינה $name: $active בלוקים פעילים';
+  }
+
+  @override
+  String get filterLogEmpty => 'אין רשומות ביומן';
+
+  @override
+  String get genAiReplyTitle => 'תשובה';
+
+  @override
+  String get wireGuardConfigured => 'מוגדר';
+
+  @override
+  String get wireGuardRunning => 'פועל';
+
+  @override
+  String get wireGuardNotConfigured => 'לא מוגדר';
+
+  @override
+  String get communicateCarState => 'מצב רכב';
+
+  @override
+  String get seatLevelOff => 'כבוי';
+
+  @override
+  String get seatLevelLow => 'נמוך';
+
+  @override
+  String get seatLevelHigh => 'גבוה';
+
+  @override
+  String celsiusDegrees(String temp) {
+    return '$temp מעלות צלזיוס';
+  }
+
+  @override
+  String get scheduleUnknownTime => 'שעה לא ידועה';
+
+  @override
+  String get scheduleNewTitle => 'תזמון חדש';
+
+  @override
+  String get scheduleEditTitle => 'עריכת תזמון';
+
+  @override
+  String scheduleMinutesShort(String minutes) {
+    return '$minutes דק׳';
+  }
+
+  @override
+  String get rateLimitError => 'יותר מדי ניסיונות התחברות. המתן דקה ונסה שוב.';
+
+  @override
+  String get authHtmlRejected =>
+      'השרת החזיר דף HTML במקום JSON — בדוק את כתובת המנהרה.';
 }

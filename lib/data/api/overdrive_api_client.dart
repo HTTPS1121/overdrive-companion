@@ -61,10 +61,10 @@ class OverdriveApiClient {
     }
     final response = await _http.get(_uri(path), headers: headers);
     if (response.statusCode == 401) {
-      throw OverdriveApiException('נדרש אימות', statusCode: 401, authRequired: true);
+      throw OverdriveApiException('auth required', statusCode: 401, authRequired: true);
     }
     if (response.statusCode >= 400) {
-      throw OverdriveApiException('שגיאת שרת ${response.statusCode}', statusCode: response.statusCode);
+      throw OverdriveApiException('server error ${response.statusCode}', statusCode: response.statusCode);
     }
     return response.bodyBytes;
   }
@@ -91,7 +91,7 @@ class OverdriveApiClient {
     final trimmed = body.trimLeft();
     if (trimmed.startsWith('<!') || trimmed.startsWith('<html')) {
       throw OverdriveApiException(
-        'השרת החזיר דף HTML (${response.statusCode}) — כנראה כתובת מנהרה שגויה או הפניה לדף התחברות.',
+        'server returned HTML (${response.statusCode}) — check tunnel URL',
         statusCode: response.statusCode,
       );
     }
@@ -105,14 +105,14 @@ class OverdriveApiClient {
       json = parsed;
     } catch (_) {
       throw OverdriveApiException(
-        'תגובה לא תקינה מהשרת (${response.statusCode})',
+        'invalid JSON from server (${response.statusCode})',
         statusCode: response.statusCode,
       );
     }
 
     if (response.statusCode == 401) {
       throw OverdriveApiException(
-        json['error'] as String? ?? 'נדרש אימות',
+        json['error'] as String? ?? 'auth required',
         statusCode: 401,
         authRequired: true,
       );
@@ -120,7 +120,7 @@ class OverdriveApiClient {
 
     if (response.statusCode >= 400) {
       throw OverdriveApiException(
-        json['error'] as String? ?? 'שגיאת שרת ${response.statusCode}',
+        json['error'] as String? ?? 'server error ${response.statusCode}',
         statusCode: response.statusCode,
       );
     }
@@ -140,11 +140,11 @@ class OverdriveApiClient {
       body: {'token': token},
     );
     if (result['success'] != true) {
-      throw OverdriveApiException(result['error'] as String? ?? 'אימות נכשל');
+      throw OverdriveApiException(result['error'] as String? ?? 'auth failed');
     }
     final session = (result['jwt'] ?? result['token']) as String?;
     if (session == null || session.isEmpty) {
-      throw OverdriveApiException('לא התקבל JWT');
+      throw OverdriveApiException('missing jwt in response');
     }
     jwt = session;
   }
@@ -155,10 +155,10 @@ class OverdriveApiClient {
     required String accessCode,
   }) async {
     if (deviceId.trim().isEmpty) {
-      throw OverdriveApiException('מזהה המכשיר לא נטען מהמנהרה');
+      throw OverdriveApiException('device id missing from tunnel');
     }
     if (!isPlausibleAccessCode(accessCode)) {
-      throw OverdriveApiException('קוד הגישה קצר מדי (נדרש לפחות 8 תווים)');
+      throw OverdriveApiException('access code too short (min 8 chars)');
     }
     await loginWithDeviceToken(
       composeDeviceToken(deviceId: deviceId, accessCode: accessCode),

@@ -36,6 +36,12 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
       case OverdriveEndpoints.recordings:
       case OverdriveEndpoints.surveillanceStatus:
       case OverdriveEndpoints.surveillanceConfig:
+      case OverdriveEndpoints.surveillanceHeatmap:
+      case OverdriveEndpoints.surveillanceFilterLog:
+      case OverdriveEndpoints.communicateStatus:
+      case OverdriveEndpoints.genaiStatus:
+      case OverdriveEndpoints.genaiInsightsDashboard:
+      case OverdriveEndpoints.wireguardStatus:
         return _backend.handleGet(path);
       default:
         if (path.startsWith(OverdriveEndpoints.streamView)) {
@@ -53,6 +59,14 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
     if (path == OverdriveEndpoints.authToken) {
       final token = body['token'] as String? ?? '';
       return _backend.login(token);
+    }
+    if (path == OverdriveEndpoints.surveillanceScreenDeterrentTest ||
+        path == OverdriveEndpoints.communicateMessage ||
+        path == OverdriveEndpoints.communicateTestSpeaker ||
+        path == OverdriveEndpoints.communicateEmergencyStop ||
+        path == OverdriveEndpoints.genaiChat ||
+        path == OverdriveEndpoints.wireguardExpose) {
+      return _backend.handlePost(path, body);
     }
     return _backend.handlePost(path, body);
   }
@@ -79,6 +93,9 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
   @override
   Future<List<int>> getBytes(String path, {Map<String, String>? extraHeaders, int? offset, int? length}) async {
     if (path.startsWith('/api/surveillance/snapshot/')) return _tinyJpeg;
+    if (path == OverdriveEndpoints.surveillanceScreenDeterrentImage) {
+      return _backend.screenDeterrentJpeg();
+    }
     if (path.startsWith('/video/id/')) {
       return [0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70]; // minimal ftyp header stub
     }

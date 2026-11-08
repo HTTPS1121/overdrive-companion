@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/command_result_l10n.dart';
+import '../../core/l10n/l10n_x.dart';
 import '../../core/format/booking_labels.dart';
 import '../../core/format/seat_levels.dart';
 import '../../core/layout/scroll_insets.dart';
@@ -18,16 +20,17 @@ class SchedulesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return DefaultTabController(
       length: 2,
       child: Column(
         children: [
           Material(
             color: Theme.of(context).colorScheme.surfaceContainerLow,
-            child: const TabBar(
+            child: TabBar(
               tabs: [
-                Tab(text: 'מיזוג מראש'),
-                Tab(text: 'טעינה חכמה'),
+                Tab(text: l10n.scheduleTabClimate),
+                Tab(text: l10n.scheduleTabCharging),
               ],
             ),
           ),
@@ -132,7 +135,7 @@ class _ClimateScheduleTabState extends ConsumerState<_ClimateScheduleTab> {
 
   void _snack(CommandResult r) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(r.userMessageHe(actionLabel: 'תזמון'))),
+      SnackBar(content: Text(r.userMessage(context.l10n, actionLabel: context.l10n.actionScheduleClimate))),
     );
   }
 
@@ -156,20 +159,21 @@ class _ClimateScheduleTabState extends ConsumerState<_ClimateScheduleTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (_loading) return const Center(child: CircularProgressIndicator());
     final s = _state;
     if (_error != null) {
       return Center(child: Text(_error!));
     }
     if (s == null || !s.success) {
-      return const Center(child: Text('תגובת שרת לא תקינה'));
+      return Center(child: Text(l10n.scheduleInvalidResponse));
     }
     if (!s.supported) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'לא נתמך: ${s.reason ?? 'ענן BYD לא מוגדר'}',
+            l10n.scheduleClimateUnsupported(s.reason ?? '—'),
             textAlign: TextAlign.center,
           ),
         ),
@@ -181,8 +185,7 @@ class _ClimateScheduleTabState extends ConsumerState<_ClimateScheduleTab> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'רשימת תזמונים לא זמינה כעת (${s.reason ?? "הרכב לא נגיש"}).\n'
-            'לא מוצגת רשימה ריקה כהוכחה להיעדר תזמונים.',
+            l10n.scheduleClimateListUnavailable(s.reason ?? '—'),
             textAlign: TextAlign.center,
           ),
         ),
@@ -192,25 +195,25 @@ class _ClimateScheduleTabState extends ConsumerState<_ClimateScheduleTab> {
     return ListView(
       padding: scrollBottomPadding(context),
       children: [
-        Text('תזמוני מיזוג מהשרת', style: Theme.of(context).textTheme.titleMedium),
+        Text(l10n.scheduleClimateTitle, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         if (s.bookings.isEmpty)
-          const Text('אין תזמונים פעילים — צור תזמון חדש למטה.')
+          Text(l10n.scheduleClimateEmpty)
         else
           ...s.bookings.map(
             (b) => Card(
               child: ListTile(
                 selected: _bookingId == b.bookingId,
                 onTap: () => _selectForEdit(b),
-                title: Text(formatClimateBookingWhen(b)),
+                title: Text(formatClimateBookingWhen(b, l10n: l10n)),
                 subtitle: Text(
-                  '${celsiusLabelHe(b.temp ?? _temp)} · ${b.durationMinutes ?? 0} דק׳',
+                  '${celsiusLabel(l10n, b.temp ?? _temp)} · ${l10n.scheduleMinutesShort('${b.durationMinutes ?? 0}')}',
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      tooltip: 'מחיקה',
+                      tooltip: l10n.scheduleDeleteTooltip,
                       onPressed: () async {
                         _bookingId = b.bookingId;
                         await _delete();
@@ -224,33 +227,36 @@ class _ClimateScheduleTabState extends ConsumerState<_ClimateScheduleTab> {
           ),
         const Divider(height: 28),
         Text(
-          climateEditorTitle(isNew: _bookingId == null, selected: _selectedBooking),
+          climateEditorTitle(l10n, isNew: _bookingId == null, selected: _selectedBooking),
           style: Theme.of(context).textTheme.titleSmall,
         ),
         const SizedBox(height: 8),
-        Text(celsiusLabelHe(_temp)),
+        Text(celsiusLabel(l10n, _temp)),
         Slider(
           value: _temp.toDouble(),
           min: 15,
           max: 31,
           divisions: 16,
-          label: celsiusLabelHe(_temp),
+          label: celsiusLabel(l10n, _temp),
           onChanged: (v) => setState(() => _temp = v.round()),
         ),
         DropdownButtonFormField<int>(
           initialValue: _duration,
-          decoration: const InputDecoration(labelText: 'משך פעולה (דקות)'),
+          decoration: InputDecoration(labelText: l10n.scheduleDurationMinutes),
           items: const [10, 15, 20, 25, 30]
-              .map((m) => DropdownMenuItem(value: m, child: Text('$m דק׳')))
+              .map((m) => DropdownMenuItem(value: m, child: Text(l10n.scheduleMinutesShort('$m'))))
               .toList(),
           onChanged: (v) => setState(() => _duration = v ?? 20),
         ),
         const SizedBox(height: 16),
-        FilledButton(onPressed: _save, child: Text(_bookingId == null ? 'יצירה' : 'עדכון')),
+        FilledButton(
+          onPressed: _save,
+          child: Text(_bookingId == null ? l10n.scheduleCreate : l10n.scheduleUpdate),
+        ),
         if (_bookingId != null)
           TextButton(
             onPressed: () => setState(() => _bookingId = null),
-            child: const Text('ביטול עריכה'),
+            child: Text(l10n.scheduleCancelEdit),
           ),
       ],
     );
@@ -315,7 +321,7 @@ class _ChargingScheduleTabState extends ConsumerState<_ChargingScheduleTab> {
     final r = await ref.read(vehicleRepositoryProvider).saveChargingSchedule({'enabled': v});
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(r.userMessageHe(actionLabel: 'טעינה'))),
+      SnackBar(content: Text(r.userMessage(context.l10n, actionLabel: context.l10n.actionScheduleCharging))),
     );
     if (r.success) await _reload();
   }
@@ -329,7 +335,7 @@ class _ChargingScheduleTabState extends ConsumerState<_ChargingScheduleTab> {
     });
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(r.userMessageHe(actionLabel: 'תזמון טעינה'))),
+      SnackBar(content: Text(r.userMessage(context.l10n, actionLabel: context.l10n.actionScheduleCharging))),
     );
     if (r.success) await _reload();
   }
@@ -338,21 +344,22 @@ class _ChargingScheduleTabState extends ConsumerState<_ChargingScheduleTab> {
     final r = await ref.read(vehicleRepositoryProvider).startCharging();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(r.userMessageHe(actionLabel: 'התחלת טעינה'))),
+      SnackBar(content: Text(r.userMessage(context.l10n, actionLabel: context.l10n.actionStartCharging))),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_error != null) return Center(child: Text(_error!));
     final s = _state;
     if (s == null || !s.success) {
-      return const Center(child: Text('תגובת שרת לא תקינה'));
+      return Center(child: Text(l10n.scheduleInvalidResponse));
     }
     if (!s.supported) {
       return Center(
-        child: Text('לא נתמך: ${s.reason ?? "טעינה חכמה לא זמינה"}', textAlign: TextAlign.center),
+        child: Text(l10n.scheduleChargingUnsupported(s.reason ?? '—'), textAlign: TextAlign.center),
       );
     }
 
@@ -361,12 +368,12 @@ class _ChargingScheduleTabState extends ConsumerState<_ChargingScheduleTab> {
       children: [
         if (s.enabled != null)
           LtrMetricRow(
-            label: 'סטטוס',
-            value: s.enabled! ? 'פעיל' : 'כבוי',
+            label: l10n.scheduleChargingStatus,
+            value: s.enabled! ? l10n.stateActive : l10n.stateInactive,
           ),
         const SizedBox(height: 8),
         SwitchListTile(
-          title: const Text('טעינה מתוזמנת פעילה'),
+          title: Text(l10n.scheduleChargingEnabled),
           value: _enabled,
           onChanged: (v) {
             setState(() => _enabled = v);
@@ -375,31 +382,31 @@ class _ChargingScheduleTabState extends ConsumerState<_ChargingScheduleTab> {
         ),
         TextField(
           controller: _startCtrl,
-          decoration: const InputDecoration(labelText: 'התחלה (HH:mm)'),
+          decoration: InputDecoration(labelText: l10n.scheduleChargingStart),
           textDirection: TextDirection.ltr,
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _endCtrl,
-          decoration: const InputDecoration(labelText: 'סיום (HH:mm או full)'),
+          decoration: InputDecoration(labelText: l10n.scheduleChargingEnd),
           textDirection: TextDirection.ltr,
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           initialValue: _chargeWay,
-          decoration: const InputDecoration(labelText: 'סוג חזרה'),
-          items: const [
-            DropdownMenuItem(value: 'e', child: Text('חוזר בכל יום')),
-            DropdownMenuItem(value: 's', child: Text('חד־פעמי')),
+          decoration: InputDecoration(labelText: l10n.scheduleChargingRepeat),
+          items: [
+            DropdownMenuItem(value: 'e', child: Text(l10n.scheduleRepeatDaily)),
+            DropdownMenuItem(value: 's', child: Text(l10n.scheduleRepeatOnce)),
           ],
           onChanged: (v) => setState(() => _chargeWay = v ?? 'e'),
         ),
         const SizedBox(height: 16),
-        FilledButton(onPressed: _saveWindow, child: const Text('שמירת חלון')),
+        FilledButton(onPressed: _saveWindow, child: Text(l10n.scheduleChargingSaveWindow)),
         const SizedBox(height: 8),
         FilledButton.tonal(
           onPressed: _startNow,
-          child: const Text('התחל טעינה עכשיו'),
+          child: Text(l10n.scheduleChargingStartNow),
         ),
       ],
     );

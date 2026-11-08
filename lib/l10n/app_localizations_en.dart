@@ -493,6 +493,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionCancel => 'Cancel';
 
   @override
+  String get actionScheduleClimate => 'Climate schedule';
+
+  @override
+  String get actionScheduleCharging => 'Charging schedule';
+
+  @override
+  String get actionStartCharging => 'Start charging';
+
+  @override
+  String get actionSeat => 'Seat';
+
+  @override
+  String get actionMedia => 'Media';
+
+  @override
+  String get actionAdas => 'ADAS';
+
+  @override
+  String get actionCpd => 'CPD';
+
+  @override
+  String get actionBatteryHeat => 'Battery heat';
+
+  @override
+  String get actionChargeCap => 'Charge cap';
+
+  @override
   String get settingsSectionConnection => 'Connection';
 
   @override
@@ -954,4 +981,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorConfigureTunnel => 'Set tunnel URL and device token';
+
+  @override
+  String get remoteServicesTitle => 'Remote services';
+
+  @override
+  String get drivingInMotion => 'Driving';
+
+  @override
+  String get drivingParked => 'Parked';
+
+  @override
+  String heatmapQuadrantSummary(String name, String active) {
+    return '$name: $active active blocks';
+  }
+
+  @override
+  String get filterLogEmpty => 'No filter log entries';
+
+  @override
+  String get genAiReplyTitle => 'Reply';
+
+  @override
+  String get wireGuardConfigured => 'Configured';
+
+  @override
+  String get wireGuardRunning => 'Running';
+
+  @override
+  String get wireGuardNotConfigured => 'Not configured';
+
+  @override
+  String get communicateCarState => 'Vehicle state';
+
+  @override
+  String get seatLevelOff => 'Off';
+
+  @override
+  String get seatLevelLow => 'Low';
+
+  @override
+  String get seatLevelHigh => 'High';
+
+  @override
+  String celsiusDegrees(String temp) {
+    return '$temp °C';
+  }
+
+  @override
+  String get scheduleUnknownTime => 'Unknown time';
+
+  @override
+  String get scheduleNewTitle => 'New schedule';
+
+  @override
+  String get scheduleEditTitle => 'Edit schedule';
+
+  @override
+  String scheduleMinutesShort(String minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get rateLimitError =>
+      'Too many login attempts. Wait a minute and try again.';
+
+  @override
+  String get authHtmlRejected =>
+      'Server returned HTML instead of JSON — check the tunnel URL.';
 }

@@ -980,6 +980,60 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get actionCancel;
 
+  /// No description provided for @actionScheduleClimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Climate schedule'**
+  String get actionScheduleClimate;
+
+  /// No description provided for @actionScheduleCharging.
+  ///
+  /// In en, this message translates to:
+  /// **'Charging schedule'**
+  String get actionScheduleCharging;
+
+  /// No description provided for @actionStartCharging.
+  ///
+  /// In en, this message translates to:
+  /// **'Start charging'**
+  String get actionStartCharging;
+
+  /// No description provided for @actionSeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat'**
+  String get actionSeat;
+
+  /// No description provided for @actionMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Media'**
+  String get actionMedia;
+
+  /// No description provided for @actionAdas.
+  ///
+  /// In en, this message translates to:
+  /// **'ADAS'**
+  String get actionAdas;
+
+  /// No description provided for @actionCpd.
+  ///
+  /// In en, this message translates to:
+  /// **'CPD'**
+  String get actionCpd;
+
+  /// No description provided for @actionBatteryHeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery heat'**
+  String get actionBatteryHeat;
+
+  /// No description provided for @actionChargeCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge cap'**
+  String get actionChargeCap;
+
   /// No description provided for @settingsSectionConnection.
   ///
   /// In en, this message translates to:
@@ -1831,6 +1885,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set tunnel URL and device token'**
   String get errorConfigureTunnel;
+
+  /// No description provided for @remoteServicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote services'**
+  String get remoteServicesTitle;
+
+  /// No description provided for @drivingInMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Driving'**
+  String get drivingInMotion;
+
+  /// No description provided for @drivingParked.
+  ///
+  /// In en, this message translates to:
+  /// **'Parked'**
+  String get drivingParked;
+
+  /// No description provided for @heatmapQuadrantSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {active} active blocks'**
+  String heatmapQuadrantSummary(String name, String active);
+
+  /// No description provided for @filterLogEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No filter log entries'**
+  String get filterLogEmpty;
+
+  /// No description provided for @genAiReplyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get genAiReplyTitle;
+
+  /// No description provided for @wireGuardConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Configured'**
+  String get wireGuardConfigured;
+
+  /// No description provided for @wireGuardRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get wireGuardRunning;
+
+  /// No description provided for @wireGuardNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured'**
+  String get wireGuardNotConfigured;
+
+  /// No description provided for @communicateCarState.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle state'**
+  String get communicateCarState;
+
+  /// No description provided for @seatLevelOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get seatLevelOff;
+
+  /// No description provided for @seatLevelLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get seatLevelLow;
+
+  /// No description provided for @seatLevelHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get seatLevelHigh;
+
+  /// No description provided for @celsiusDegrees.
+  ///
+  /// In en, this message translates to:
+  /// **'{temp} °C'**
+  String celsiusDegrees(String temp);
+
+  /// No description provided for @scheduleUnknownTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown time'**
+  String get scheduleUnknownTime;
+
+  /// No description provided for @scheduleNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New schedule'**
+  String get scheduleNewTitle;
+
+  /// No description provided for @scheduleEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit schedule'**
+  String get scheduleEditTitle;
+
+  /// No description provided for @scheduleMinutesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String scheduleMinutesShort(String minutes);
+
+  /// No description provided for @rateLimitError.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many login attempts. Wait a minute and try again.'**
+  String get rateLimitError;
+
+  /// No description provided for @authHtmlRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Server returned HTML instead of JSON — check the tunnel URL.'**
+  String get authHtmlRejected;
 }
 
 class _AppLocalizationsDelegate

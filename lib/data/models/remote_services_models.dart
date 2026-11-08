@@ -18,11 +18,11 @@ class CommunicateStatusState {
     }
 
     return CommunicateStatusState(
-      success: json['success'] == true,
+      success: json['success'] == true || json.containsKey('reachable'),
       online: json['online'] as bool?,
-      audioReady: ready('audio'),
-      messagesReady: ready('message'),
-      listenerReady: ready('listener'),
+      audioReady: ready('audio') ?? json['audioReady'] as bool?,
+      messagesReady: ready('message') ?? json['messagesReady'] as bool?,
+      listenerReady: ready('listener') ?? json['listenerReady'] as bool?,
       busy: json['busy'] as bool?,
       carState: json['carState']?.toString(),
       raw: json,
@@ -79,7 +79,7 @@ class GenAiStatusState {
 
   factory GenAiStatusState.fromJson(Map<String, dynamic> json) {
     return GenAiStatusState(
-      success: json['success'] == true,
+      success: json['success'] == true || json.containsKey('enabled'),
       enabled: json['enabled'] as bool?,
       model: json['model']?.toString(),
       voiceSessions: (json['voiceSessions'] as num?)?.toInt(),
@@ -143,15 +143,17 @@ class WireGuardStatusState {
     this.configured,
     this.running,
     this.summary,
+    this.exposeDashboard,
     this.raw = const {},
   });
 
   factory WireGuardStatusState.fromJson(Map<String, dynamic> json) {
     return WireGuardStatusState(
-      success: json['success'] == true,
+      success: json['success'] == true || json.containsKey('configured'),
       configured: json['configured'] as bool?,
       running: json['running'] as bool?,
       summary: json['summary']?.toString(),
+      exposeDashboard: json['expose_dashboard'] as bool?,
       raw: json,
     );
   }
@@ -160,25 +162,73 @@ class WireGuardStatusState {
   final bool? configured;
   final bool? running;
   final String? summary;
+  final bool? exposeDashboard;
   final Map<String, dynamic> raw;
+}
+
+class SurveillanceHeatmapQuadrant {
+  const SurveillanceHeatmapQuadrant({
+    required this.id,
+    this.name,
+    this.enabled,
+    this.activeBlocks,
+    this.threatLevel,
+    this.confidence = const [],
+  });
+
+  factory SurveillanceHeatmapQuadrant.fromJson(Map<String, dynamic> json) {
+    final conf = <double>[];
+    final raw = json['confidence'];
+    if (raw is List) {
+      for (final v in raw) {
+        if (v is num) conf.add(v.toDouble());
+      }
+    }
+    return SurveillanceHeatmapQuadrant(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      name: json['name']?.toString(),
+      enabled: json['enabled'] as bool?,
+      activeBlocks: (json['activeBlocks'] as num?)?.toInt(),
+      threatLevel: (json['threatLevel'] as num?)?.toInt(),
+      confidence: conf,
+    );
+  }
+
+  final int id;
+  final String? name;
+  final bool? enabled;
+  final int? activeBlocks;
+  final int? threatLevel;
+  final List<double> confidence;
 }
 
 class SurveillanceHeatmapState {
   const SurveillanceHeatmapState({
     required this.success,
-    this.width,
-    this.height,
-    this.cells,
+    this.viewMode,
+    this.quadrants = const [],
+    this.gridCols,
+    this.gridRows,
     this.pngBytes,
     this.error,
   });
 
   factory SurveillanceHeatmapState.fromJson(Map<String, dynamic> json) {
+    final rawQuadrants = json['quadrants'];
+    final quadrants = <SurveillanceHeatmapQuadrant>[];
+    if (rawQuadrants is List) {
+      for (final q in rawQuadrants) {
+        if (q is Map<String, dynamic>) {
+          quadrants.add(SurveillanceHeatmapQuadrant.fromJson(q));
+        }
+      }
+    }
     return SurveillanceHeatmapState(
-      success: json['success'] == true,
-      width: (json['width'] as num?)?.toInt(),
-      height: (json['height'] as num?)?.toInt(),
-      cells: json['cells'] as List<dynamic>?,
+      success: json['success'] == true || quadrants.isNotEmpty || json.containsKey('viewMode'),
+      viewMode: (json['viewMode'] as num?)?.toInt(),
+      quadrants: quadrants,
+      gridCols: (json['gridCols'] as num?)?.toInt(),
+      gridRows: (json['gridRows'] as num?)?.toInt(),
       error: json['error']?.toString(),
     );
   }
@@ -188,9 +238,10 @@ class SurveillanceHeatmapState {
   }
 
   final bool success;
-  final int? width;
-  final int? height;
-  final List<dynamic>? cells;
+  final int? viewMode;
+  final List<SurveillanceHeatmapQuadrant> quadrants;
+  final int? gridCols;
+  final int? gridRows;
   final List<int>? pngBytes;
   final String? error;
 }
@@ -211,7 +262,7 @@ class SurveillanceFilterLogState {
       }
     }
     return SurveillanceFilterLogState(
-      success: json['success'] == true,
+      success: json['success'] == true || json.containsKey('entries') || json.containsKey('lines'),
       lines: lines,
       error: json['error']?.toString(),
     );

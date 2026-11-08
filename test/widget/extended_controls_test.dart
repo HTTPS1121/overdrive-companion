@@ -66,14 +66,14 @@ void main() {
 
   testWidgets('extended controls visible with battery heat toggle', (tester) async {
     await pumpCommands(tester);
-    expect(find.text('הדלקת רכב (power-on)'), findsOneWidget);
+    expect(find.text('הדלקת רכב'), findsOneWidget);
     expect(find.text('חימום מקדים לסוללה'), findsOneWidget);
     expect(find.text('צילום מסך מולטימדיה'), findsOneWidget);
   });
 
   testWidgets('power-on shows confirm dialog', (tester) async {
     await pumpCommands(tester);
-    await tester.tap(find.text('הדלקת רכב (power-on)'));
+    await tester.tap(find.text('הדלקת רכב'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.text('להדליק את הרכב?'), findsOneWidget);

@@ -6,6 +6,8 @@ import '../../data/api/overdrive_api_client.dart';
 import '../../core/config/app_settings.dart';
 import '../../core/l10n/l10n_x.dart';
 import '../../providers/app_providers.dart';
+import '../inventory/capability_inventory_screen.dart';
+import '../remote/remote_services_screen.dart';
 import '../setup/connection_form.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -89,6 +91,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 12),
         FilledButton(onPressed: _save, child: Text(l10n.settingsSaveConnect)),
+        const SizedBox(height: 28),
+        Text(l10n.settingsSectionRemote, style: theme.textTheme.titleLarge),
+        const SizedBox(height: 8),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.remoteServicesTitle),
+          subtitle: Text(l10n.settingsOpenRemoteServices),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const RemoteServicesScreen()),
+          ),
+        ),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.inventoryTitle),
+          subtitle: Text(l10n.settingsOpenCapabilityInventory),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const CapabilityInventoryScreen()),
+          ),
+        ),
         const SizedBox(height: 28),
         Text(l10n.settingsSectionAppearance, style: theme.textTheme.titleLarge),
         const SizedBox(height: 8),

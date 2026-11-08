@@ -64,7 +64,7 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
       if (!status.ok || status.deviceId == null) {
         throw ConnectionFailure(
           ConnectionFailureKind.deviceIdMissing,
-          l10n.errorDeviceIdFromServer,
+          detail: l10n.errorDeviceIdFromServer,
         );
       }
         setState(() => _deviceId = status.deviceId!);
@@ -124,7 +124,7 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
       if (!status.ok) {
         throw ConnectionFailure(
           ConnectionFailureKind.unknown,
-          l10n.errorUnexpectedAuth,
+          detail: l10n.errorUnexpectedAuth,
         );
       }
       final jwt = ref.read(vehicleRepositoryProvider).sessionJwt;

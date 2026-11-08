@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/command_result_l10n.dart';
+import '../../core/l10n/l10n_x.dart';
 import '../../core/widgets/confirm_risky_action.dart';
 import '../../data/repositories/vehicle_repository.dart';
 import '../../providers/app_providers.dart';
@@ -35,14 +37,13 @@ class _VehicleExtendedControlsState extends ConsumerState<VehicleExtendedControl
   bool get _canCommand => !widget.busy && !widget.staleBlocked;
 
   Future<void> _power(bool on) async {
-    final label = on ? 'הדלקת רכב' : 'כיבוי רכב';
+    final l10n = context.l10n;
+    final action = on ? l10n.extendedPowerOn : l10n.extendedPowerOff;
     final ok = await confirmRiskyAction(
       context,
-      title: on ? 'להדליק את הרכב?' : 'לכבות את הרכב?',
-      body: on
-          ? 'פקודת power-on נשלחת לשרת. מותר רק כשהרכב חונה וללא תנועה (SDK guard בצד השרת).'
-          : 'פקודת power-off תכבה את הרכב. וודא שאין נוסעים ברכב.',
-      confirmLabel: 'שליחה',
+      title: on ? l10n.extendedConfirmPowerOnTitle : l10n.extendedConfirmPowerOffTitle,
+      body: on ? l10n.extendedConfirmPowerOnBody : l10n.extendedConfirmPowerOffBody,
+      confirmLabel: l10n.controlSend,
     );
     if (!ok || !mounted) return;
     widget.onBusyChanged(true);
@@ -50,7 +51,7 @@ class _VehicleExtendedControlsState extends ConsumerState<VehicleExtendedControl
     final result = on ? await repo.vehiclePowerOn() : await repo.vehiclePowerOff();
     if (!mounted) return;
     widget.onBusyChanged(false);
-    final msg = result.userMessageHe(actionLabel: label);
+    final msg = result.userMessage(l10n, actionLabel: action);
     widget.onFeedback(msg);
     _snack(msg);
     if (result.userConfirmed) {
@@ -60,12 +61,13 @@ class _VehicleExtendedControlsState extends ConsumerState<VehicleExtendedControl
 
   Future<void> _batteryHeat(bool enabled) async {
     if (widget.snap.state.batteryHeat == null) return;
+    final l10n = context.l10n;
     widget.onBusyChanged(true);
     final repo = ref.read(vehicleRepositoryProvider);
     final result = await repo.setBatteryHeat(enabled);
     if (!mounted) return;
     widget.onBusyChanged(false);
-    final msg = result.userMessageHe(actionLabel: 'חימום סוללה');
+    final msg = result.userMessage(l10n, actionLabel: l10n.actionBatteryHeat);
     widget.onFeedback(msg);
     _snack(msg);
     if (result.success) {
@@ -74,21 +76,22 @@ class _VehicleExtendedControlsState extends ConsumerState<VehicleExtendedControl
   }
 
   Future<void> _screenshot(int display) async {
-    final label = display == 0 ? 'צילום מסך מולטימדיה' : 'צילום מסך לוח שעונים';
+    final l10n = context.l10n;
+    final label = display == 0 ? l10n.extendedScreenshotHu : l10n.extendedScreenshotCluster;
     final ok = await confirmRiskyAction(
       context,
-      title: 'לאשר $label?',
-      body: 'השרת יצלם במכשיר הרכב וישמור קובץ PNG במכשיר. אין הורדה אוטומטית לטלפון.',
-      confirmLabel: 'צילום',
+      title: l10n.extendedConfirmScreenshotTitle(label),
+      body: l10n.extendedConfirmScreenshotBody,
+      confirmLabel: l10n.extendedConfirmCapture,
     );
     if (!ok || !mounted) return;
     widget.onBusyChanged(true);
     final result = await ref.read(vehicleRepositoryProvider).systemScreenshot(display: display);
     if (!mounted) return;
     widget.onBusyChanged(false);
-    var msg = result.userMessageHe(actionLabel: label);
+    var msg = result.userMessage(l10n, actionLabel: label);
     if (result.success && result.message != null) {
-      msg = '${result.message}';
+      msg = result.message!;
     }
     widget.onFeedback(msg);
     _snack(msg);
@@ -101,27 +104,28 @@ class _VehicleExtendedControlsState extends ConsumerState<VehicleExtendedControl
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final heatKnown = widget.snap.state.batteryHeat;
 
     return Column(
       children: [
         ControlSection(
-          title: 'הדלקה וכיבוי',
+          title: l10n.extendedPowerSection,
           icon: Icons.power_settings_new,
           children: [
             if (_driving)
               Text(
-                'הרכב מדווח בנסיעה — power-on/off חסום עד עצירה (guard בשרת).',
+                l10n.extendedPowerDrivingBlocked,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ControlActionTile(
-              label: 'הדלקת רכב (power-on)',
+              label: l10n.extendedPowerOn,
               icon: Icons.power,
               enabled: _canCommand && !_driving,
               onPressed: () => _power(true),
             ),
             ControlActionTile(
-              label: 'כיבוי רכב (power-off)',
+              label: l10n.extendedPowerOff,
               icon: Icons.power_off,
               enabled: _canCommand && !_driving,
               onPressed: () => _power(false),
@@ -130,16 +134,16 @@ class _VehicleExtendedControlsState extends ConsumerState<VehicleExtendedControl
         ),
         const SizedBox(height: 12),
         ControlSection(
-          title: 'חימום סוללה',
+          title: l10n.extendedBatteryHeatSection,
           icon: Icons.battery_charging_full,
           children: [
             if (heatKnown == null)
-              const Text('השרת לא דיווח מצב חימום סוללה — הפעלה לא זמינה.')
+              Text(l10n.extendedBatteryHeatUnknown)
             else
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('חימום מקדים לסוללה'),
-                subtitle: Text(heatKnown ? 'פעיל לפי השרת' : 'כבוי לפי השרת'),
+                title: Text(l10n.extendedBatteryPreheat),
+                subtitle: Text(heatKnown ? l10n.extendedBatteryHeatOn : l10n.extendedBatteryHeatOff),
                 value: heatKnown,
                 onChanged: _canCommand ? _batteryHeat : null,
               ),
@@ -147,22 +151,22 @@ class _VehicleExtendedControlsState extends ConsumerState<VehicleExtendedControl
         ),
         const SizedBox(height: 12),
         ControlSection(
-          title: 'צילום מסכי הרכב',
+          title: l10n.extendedScreenshotsSection,
           icon: Icons.screenshot_monitor,
           children: [
             Text(
-              'צילום PNG נשמר במכשיר הרכב (מולטימדיה או לוח שעונים).',
+              l10n.extendedScreenshotsHint,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
             ControlActionTile(
-              label: 'צילום מסך מולטימדיה',
+              label: l10n.extendedScreenshotHu,
               icon: Icons.tablet_android,
               enabled: _canCommand,
               onPressed: () => _screenshot(0),
             ),
             ControlActionTile(
-              label: 'צילום מסך לוח שעונים',
+              label: l10n.extendedScreenshotCluster,
               icon: Icons.speed,
               enabled: _canCommand,
               onPressed: () => _screenshot(1),

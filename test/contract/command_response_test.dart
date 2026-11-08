@@ -11,7 +11,8 @@ void main() {
     final raw = await rootBundle.loadString('fixtures/command_lock_confirmed.json');
     final r = CommandResult.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     expect(r.userConfirmed, isTrue);
-    expect(r.userMessageHe(actionLabel: 'נעילה'), contains('אושר'));
+    expect(r.message, isNotNull);
+    expect(r.success, isTrue);
   });
 
   test('unconfirmed lock response is not userConfirmed', () async {

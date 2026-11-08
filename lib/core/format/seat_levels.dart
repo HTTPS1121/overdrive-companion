@@ -1,8 +1,15 @@
-const seatLevelLabelsHe = ['כבוי', 'נמוך', 'גבוה'];
+import 'package:overdrive_companion/l10n/app_localizations.dart';
 
-String seatLevelLabelHe(int level) {
-  final i = level.clamp(0, seatLevelLabelsHe.length - 1);
-  return seatLevelLabelsHe[i];
+String seatLevelLabel(AppLocalizations l10n, int level) {
+  return switch (level.clamp(0, 2)) {
+    0 => l10n.seatLevelOff,
+    1 => l10n.seatLevelLow,
+    _ => l10n.seatLevelHigh,
+  };
 }
 
-String celsiusLabelHe(num temp) => '${temp.round()} מעלות צלזיוס';
+List<String> seatLevelLabels(AppLocalizations l10n) => [
+      l10n.seatLevelOff,
+      l10n.seatLevelLow,
+      l10n.seatLevelHigh,
+    ];

@@ -1,48 +1,27 @@
-# Overdrive source reference & capability inventory
+# Overdrive Companion — source inventory
 
-**Authoritative upstream:** [yash-srivastava/Overdrive-release](https://github.com/yash-srivastava/Overdrive-release)  
-**Inspected ref:** `4807e94389de38feca3a8f8582e811a6c63eb2a2` (2026-11-07)  
-**Companion only:** `HTTPS1121/overdrive-companion` (no car/upstream writes).
+Mapped against upstream `Overdrive-release` @ `4807e94389de38feca3a8f8582e811a6c63eb2a2` (read-only). Each row lists HTTP contract, in-app surface, repository entry point, and contract test when present.
 
-## Auth (login.html + AuthApiHandler)
+| Method | Path | UI | Repository | Test | Coverage |
+|--------|------|----|------------|------|----------|
+| GET | `/auth/status` | Connection setup, Settings | `OverdriveApiClient.fetchAuthStatus` | `tunnel_login_mock_test.dart` | In app |
+| POST | `/auth/token` | Settings connect | `loginWithAccessCode` / `loginWithDeviceToken` | `tunnel_login_mock_test.dart` | In app |
+| GET | `/api/vehicle/state` | Status tab | `fetchSnapshot` | `vehicle_state_contract_test.dart` | In app |
+| GET | `/api/gps` | Location tab | `fetchGps` | vehicle state tests | In app |
+| POST | `/api/vehicle/*` controls | Controls hub | `runControl` / dedicated POSTs | `command_response_test.dart` | In app |
+| GET/POST | `/api/stream/*` | Camera hub stream panel | `fetchStreamStatus`, enable/disable/view/quality | `camera_api_contract_test.dart` | In app |
+| GET | `/api/recordings` | Camera hub | `fetchRecordingsList` | `camera_api_contract_test.dart` | In app |
+| GET | `/api/surveillance/heatmap` | `SurveillanceDiagnosticsPanel` | `fetchSurveillanceHeatmap` | `remote_services_contract_test.dart` | In app |
+| GET | `/api/surveillance/filterlog` | `SurveillanceDiagnosticsPanel` | `fetchSurveillanceFilterLog` | `remote_services_contract_test.dart` | In app |
+| GET/POST | screen-deterrent | `SurveillanceDiagnosticsPanel` | `fetchScreenDeterrentImage`, `postScreenDeterrentTest` | `remote_services_contract_test.dart` | In app |
+| GET/POST | `/api/communicate/*` | `RemoteServicesScreen` | communicate methods | `remote_services_contract_test.dart` | In app |
+| GET/POST | `/api/genai/*` | `RemoteServicesScreen` | GenAI methods | `remote_services_contract_test.dart` | In app |
+| GET/POST | `/api/wireguard`, `/expose` | `RemoteServicesScreen` | WireGuard status + expose | `remote_services_contract_test.dart` | In app (expose only) |
+| WS | `/ws?token=` | Android `H264LiveController` | native `H264StreamPlugin` | Dart `H264AnnexB` in `camera_api_contract_test.dart` | Partial — Annex-B logic verified in Dart; MediaCodec decode on device only |
+| POST | `/api/wireguard/config` | — | — | — | HTTP on car Daemons UI only |
+| POST | `/api/vehicle/cluster-cast` | — | — | — | Car HU projection (`cluster-cast.js`) |
+| GET | `/api/vehicle/cluster-apps` | — | — | — | Car HU projection |
 
-| Step | Upstream | Companion 2.6 |
-|------|----------|---------------|
-| Device ID | `GET /auth/status` | Connection form refresh |
-| Token | `POST /auth/token` `{token: deviceId-code}` | Composed + legacy full token |
-| API JWT | `Authorization: Bearer` | All authenticated GET/POST |
-| Live WS | `wss://host/ws?token=JWT` binary Annex-B H.264 | **Android** OkHttp WS + MediaCodec texture |
+Full machine-readable matrix: `lib/data/capabilities/companion_parity.dart` (shown in **Settings → Server capability map**).
 
-## HTTP parity matrix
-
-| Handler | Key routes | Companion |
-|---------|------------|-----------|
-| VehicleControlApiHandler | `/api/vehicle/*` | Controls hub + extended |
-| StreamingApiHandler | `/api/stream/*`, view modes 0–6, quality | Cameras: HTTP + **native preview** |
-| RecordingsApiHandler | list, `/video/id/{hex}`, `/thumb/id/{hex}`, DELETE id | List, play (`video_player`+JWT), download bytes |
-| SurveillanceApiHandler | status, config GET/POST, enable/disable, `/snapshot/{q}` | UI + snapshot dialog |
-| GpsApiHandler | `/api/gps` | Location tab |
-| WireGuard / Remote access | car tunnel / HU pairing | **Not phone scope** (documented) |
-| GenAI `/ws/genai*` | voice/chat on HU | **Not implemented** (no phone tunnel contract) |
-| `/ws/communicate`, cabin-audio | HU realtime | **HU-only** |
-
-## Implemented in 2.6 (fixture-tested)
-
-- Native H.264 live view (Android): reconnect backoff, queue depth 60, keyframe-aware drop policy (mirrors `StreamFrameDropPolicy` intent).
-- Recording playback via `/video/id/` with bearer headers; download to app documents.
-- Surveillance config load/save (sensitivity POST), enable/disable, quadrant snapshots.
-- System l10n: nav, connection, cameras, stream phases, status hero, errors (en/he).
-- Login parity retained; auth-before-persist.
-
-## Genuinely unavailable without car hardware / HU binaries
-
-- OEM encoder binding when stream daemon offline (needs BYD HAL on vehicle).
-- `/api/surveillance/heatmap`, screen-deterrent upload, impact POST calibration — API present upstream; companion exposes core config/snapshot only (expand in-app as needed).
-- GenAI voice WebSocket sessions (separate protocol from `/ws` video).
-- WireGuard peer provisioning on phone (car-side daemon).
-
-## Compatibility notes
-
-- `bookingId` string decimal; unknown JSON tolerated.
-- Recording identity prefers 32-hex `id` when present (RecordingsIndex).
-- Older servers: hide controls when `success`/`supported` false.
+**Annex-B / video:** Companion does not claim decoded live video in CI. Dart helpers mirror Kotlin NAL framing; native decode requires a physical Android device with a live stream.

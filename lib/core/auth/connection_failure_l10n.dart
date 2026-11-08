@@ -10,8 +10,8 @@ extension ConnectionFailureL10n on ConnectionFailure {
         ConnectionFailureKind.deviceIdMissing => l10n.errorDeviceIdMissing,
         ConnectionFailureKind.authRejected => l10n.errorAuthRejected,
         ConnectionFailureKind.sessionExpired => l10n.errorSessionExpired,
-        ConnectionFailureKind.notJson => messageHe,
-        ConnectionFailureKind.rateLimited => messageHe,
-        ConnectionFailureKind.unknown => messageHe,
+        ConnectionFailureKind.notJson => detail ?? l10n.errorTunnelUnreachable,
+        ConnectionFailureKind.rateLimited => l10n.rateLimitError,
+        ConnectionFailureKind.unknown => detail ?? l10n.errorTunnelUnreachable,
       };
 }

@@ -10,6 +10,7 @@ import '../../data/models/camera_models.dart';
 import '../../providers/app_providers.dart';
 import 'camera_stream_panel.dart';
 import 'recording_player_screen.dart';
+import 'surveillance_diagnostics_panel.dart';
 
 class CameraHubScreen extends ConsumerStatefulWidget {
   const CameraHubScreen({super.key});
@@ -209,6 +210,8 @@ class _CameraHubScreenState extends ConsumerState<CameraHubScreen> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  const SurveillanceDiagnosticsPanel(),
                   const SizedBox(height: 20),
                   Text(l10n.cameraRecordingsTitle, style: theme.textTheme.titleLarge),
                   if (_error != null) Text(_error!, style: TextStyle(color: theme.colorScheme.error)),

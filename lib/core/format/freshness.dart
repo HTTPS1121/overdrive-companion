@@ -30,12 +30,11 @@ class DataFreshness {
     return a > staleAfter || a.isNegative;
   }
 
-  /// Hebrew age of server timestamp relative to local fetch time.
-  String ageLabelHe() {
+  String ageLabelLocalized(AppLocalizations l10n) {
     final a = age;
-    if (a == null) return 'מקור זמן לא ידוע';
-    if (a.isNegative) return 'שעון הרכב מקדים את המכשיר';
-    return _relativeHe(a);
+    if (a == null) return l10n.errorFreshnessUnknown;
+    if (a.isNegative) return l10n.errorFreshnessClockSkew;
+    return _relativeLocalized(l10n, a);
   }
 
   /// How long ago we finished the last successful poll (always meaningful in UI).

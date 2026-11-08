@@ -13,52 +13,59 @@ enum ConnectionFailureKind {
 }
 
 class ConnectionFailure implements Exception {
-  ConnectionFailure(this.kind, this.messageHe, {this.cause});
+  ConnectionFailure(this.kind, {this.detail, this.cause});
 
   final ConnectionFailureKind kind;
-  final String messageHe;
+  final String? detail;
   final Object? cause;
 
   @override
-  String toString() => messageHe;
+  String toString() => detail ?? kind.name;
 
   static ConnectionFailure fromApi(OverdriveApiException e) {
     final msg = e.message.toLowerCase();
-    if (e.authRequired) {
+    if (e.authRequired || msg.contains('auth required')) {
       return ConnectionFailure(
         ConnectionFailureKind.sessionExpired,
-        'פג תוקף ההתחברות — הזן שוב את קוד הגישה ולחץ התחבר.',
+        detail: e.message,
         cause: e,
       );
     }
-    if (msg.contains('rate') || msg.contains('יותר מדי')) {
+    if (msg.contains('rate') || msg.contains('too many')) {
       return ConnectionFailure(
         ConnectionFailureKind.rateLimited,
-        'יותר מדי ניסיונות התחברות. המתן דקה ונסה שוב.',
+        detail: e.message,
         cause: e,
       );
     }
     if (msg.contains('html') || msg.contains('<!doctype')) {
       return ConnectionFailure(
         ConnectionFailureKind.htmlResponse,
-        'השרת החזיר דף HTML במקום JSON — בדוק שכתובת המנהרה מצביעה לשרת Overdrive ולא לדף שגיאה של ספק המנהרה.',
+        detail: e.message,
         cause: e,
       );
     }
-    if (msg.contains('json') || msg.contains('תגובה לא תקינה')) {
+    if (msg.contains('invalid json') || msg.contains('not json')) {
       return ConnectionFailure(
         ConnectionFailureKind.notJson,
-        e.message,
+        detail: e.message,
         cause: e,
       );
     }
-    if (msg.contains('אימות') || msg.contains('invalid') || msg.contains('token')) {
+    if (msg.contains('auth') || msg.contains('invalid') || msg.contains('token')) {
       return ConnectionFailure(
         ConnectionFailureKind.authRejected,
-        'קוד הגישה לא התקבל — ודא מזהה מכשיר מעודכן וקוד מלא כפי שמוצג במסך ההתחברות ברכב.',
+        detail: e.message,
         cause: e,
       );
     }
-    return ConnectionFailure(ConnectionFailureKind.unknown, e.message, cause: e);
+    if (msg.contains('device id')) {
+      return ConnectionFailure(
+        ConnectionFailureKind.deviceIdMissing,
+        detail: e.message,
+        cause: e,
+      );
+    }
+    return ConnectionFailure(ConnectionFailureKind.unknown, detail: e.message, cause: e);
   }
 }

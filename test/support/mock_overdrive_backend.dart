@@ -29,6 +29,8 @@ class MockOverdriveBackend {
   };
   String? _jwt;
   bool authRequired = false;
+  bool _wireguardExpose = false;
+  bool _genaiEnabled = true;
 
   static Map<String, dynamic> _defaultState() => {
         'success': true,
@@ -209,6 +211,27 @@ class MockOverdriveBackend {
       case '/api/surveillance/enable':
       case '/api/surveillance/disable':
         return _ok('surveillance-toggle');
+      case '/api/surveillance/screen-deterrent/test':
+        return {'success': true, 'status': 'queued'};
+      case '/api/communicate/message':
+        return {
+          'success': true,
+          'status': 'queued',
+          'message': body['text']?.toString(),
+        };
+      case '/api/communicate/test-speaker':
+        return {'success': true, 'status': 'queued'};
+      case '/api/communicate/emergency-stop':
+        return {'success': true, 'emergencyDisabled': true};
+      case '/api/genai/chat':
+        return {
+          'success': _genaiEnabled,
+          'reply': _genaiEnabled ? 'Mock GenAI reply' : null,
+          if (!_genaiEnabled) 'error': 'genai_disabled',
+        };
+      case '/api/wireguard/expose':
+        _wireguardExpose = body['enabled'] == true;
+        return {'success': true, 'expose_dashboard': _wireguardExpose};
       case '/api/vehicle/system':
         if (body['target'] == 'screenshot') {
           final d = body['display'] ?? 0;
@@ -296,6 +319,67 @@ class MockOverdriveBackend {
           'sensitivity': 3,
           'distance': 3,
         };
+      case '/api/surveillance/heatmap':
+        return {
+          'viewMode': 0,
+          'gridCols': 8,
+          'gridRows': 4,
+          'blockSize': 32,
+          'quadrants': [
+            {
+              'id': 0,
+              'name': 'front',
+              'enabled': true,
+              'activeBlocks': 2,
+              'threatLevel': 1,
+              'confidence': [0.0, 0.1, 0.2, 0.4],
+            },
+            {
+              'id': 2,
+              'name': 'rear',
+              'enabled': true,
+              'activeBlocks': 0,
+              'threatLevel': 0,
+              'confidence': [0.0, 0.0],
+            },
+          ],
+        };
+      case '/api/surveillance/filterlog':
+        return {
+          'entries': ['q0 brightness suppress=false', 'q2 motion confirm=true'],
+          'count': 2,
+        };
+      case '/api/communicate/status':
+        return {
+          'success': true,
+          'reachable': true,
+          'online': true,
+          'carState': 'on',
+          'busy': false,
+          'audioReady': true,
+          'messagesReady': true,
+          'listenerReady': true,
+        };
+      case '/api/genai/status':
+        return {
+          'success': true,
+          'enabled': _genaiEnabled,
+          'model': 'mock-model',
+        };
+      case '/api/genai/insights/dashboard':
+        return {
+          'success': true,
+          'tiles': [
+            {'id': 'battery', 'title': 'Battery insight'},
+          ],
+        };
+      case '/api/wireguard':
+        return {
+          'configured': true,
+          'running': false,
+          'summary': 'mock-peer',
+          'expose_dashboard': _wireguardExpose,
+        };
       default:
         if (path.startsWith('/api/surveillance/snapshot/')) {
           return {'success': false, 'error': 'use binary fixture via getBytes'};
@@ -303,6 +387,13 @@ class MockOverdriveBackend {
         return {'success': false, 'error': 'unsupported GET $path'};
     }
   }
+
+  List<int> screenDeterrentJpeg() => [
+        0xFF,
+        0xD8,
+        0xFF,
+        0xD9,
+      ];
 
   Map<String, dynamic> _handleWindow(Map<String, dynamic> body) {
     if (body['action'] == 'vent') {
