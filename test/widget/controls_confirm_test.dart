@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:overdrive_companion/core/config/app_settings.dart';
 import 'package:overdrive_companion/data/repositories/vehicle_repository.dart';
 import 'package:overdrive_companion/features/controls/controls_commands_tab.dart';
+import 'package:overdrive_companion/l10n/app_localizations.dart';
 import 'package:overdrive_companion/providers/app_providers.dart';
 import 'package:overdrive_companion/providers/settings_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,7 +44,12 @@ void main() {
           vehicleRepositoryProvider.overrideWith(() => _RepoNotif(client)),
           vehicleSnapshotProvider.overrideWith(() => _FixedSnap(fixtureSnap)),
         ],
-        child: const MaterialApp(home: Scaffold(body: ControlsCommandsTab())),
+        child: const MaterialApp(
+          locale: Locale('he'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: ControlsCommandsTab()),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -75,12 +81,12 @@ void main() {
     await expectConfirmDialog(
       tester,
       tapLabel: 'פתיחת תא מטען',
-      dialogTitle: 'לאשר תא מטען?',
+      dialogTitle: 'לאשר פתיחת תא מטען?',
     );
     await expectConfirmDialog(
       tester,
-      tapLabel: 'פתיחה מלאה',
-      dialogTitle: 'לאשר חלונות?',
+      tapLabel: 'פתיחת חלונות',
+      dialogTitle: 'לאשר פתיחת חלונות?',
     );
   });
 

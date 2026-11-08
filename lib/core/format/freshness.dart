@@ -1,3 +1,5 @@
+import 'package:overdrive_companion/l10n/app_localizations.dart';
+
 /// How old vehicle telemetry may be before we warn the user.
 class DataFreshness {
   const DataFreshness({
@@ -40,6 +42,19 @@ class DataFreshness {
   String fetchedAgoLabelHe(DateTime? lastFetch) {
     if (lastFetch == null) return 'לא עודכן עדיין';
     return 'עודכן ${_relativeHe(DateTime.now().difference(lastFetch))}';
+  }
+
+  String fetchedAgoLabelLocalized(AppLocalizations l10n, DateTime? lastFetch) {
+    if (lastFetch == null) return l10n.freshnessNotYet;
+    return l10n.freshnessUpdated(_relativeLocalized(l10n, DateTime.now().difference(lastFetch)));
+  }
+
+  static String _relativeLocalized(AppLocalizations l10n, Duration d) {
+    if (d.inSeconds < 5) return l10n.freshnessNow;
+    if (d.inSeconds < 60) return l10n.freshnessSecondsAgo(d.inSeconds);
+    if (d.inMinutes < 60) return l10n.freshnessMinutesAgo(d.inMinutes);
+    if (d.inHours < 24) return l10n.freshnessHoursAgo(d.inHours);
+    return l10n.freshnessDaysAgo(d.inDays);
   }
 
   static String _relativeHe(Duration d) {

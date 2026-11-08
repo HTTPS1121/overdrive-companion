@@ -32,11 +32,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connectionIntro =>
-      'Same flow as the car login page: tunnel URL, Device ID from the server, then your access code.';
+      'Enter your tunnel address, load the Device ID from the car server, then enter the access code shown in the car browser login.';
 
   @override
   String get connectionIntroLong =>
-      'In the browser: open the tunnel URL → login.html shows Device ID → enter your access code.';
+      'Open the tunnel URL in a browser on the car side to see the Device ID, then use that code here.';
 
   @override
   String get connectionScreenTitle => 'Remote connection';
@@ -62,7 +62,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deviceIdHelper =>
-      'Loaded from GET /auth/status (same as car login.html)';
+      'Tap refresh after the tunnel URL is correct — loads the ID from your car server';
+
+  @override
+  String get errorTunnelFirst =>
+      'Enter the tunnel URL before loading Device ID.';
+
+  @override
+  String get errorTunnelUnreachable =>
+      'Cannot reach the tunnel. Check HTTPS, network, and that the car server is online.';
+
+  @override
+  String get errorDeviceIdFromServer =>
+      'No Device ID from the server. Check the tunnel and car connection.';
 
   @override
   String get deviceIdPlaceholder => 'Refresh after entering the tunnel URL';
@@ -117,7 +129,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cameraLiveHelp =>
-      'Annex-B H.264 on wss://host/ws?token=JWT — native MediaCodec on Android.';
+      'Live view from your dash cameras when the stream is enabled.';
+
+  @override
+  String get streamBadgeLive => 'Live';
+
+  @override
+  String get streamBadgeOffline => 'Offline';
+
+  @override
+  String get streamBadgeEnabled => 'Stream on';
+
+  @override
+  String get streamBadgeDisabled => 'Stream off';
+
+  @override
+  String streamQualityCurrent(String level) {
+    return 'Quality · $level';
+  }
+
+  @override
+  String get cameraViewPickerTitle => 'Camera view';
+
+  @override
+  String get cameraQualityTitle => 'Video quality';
+
+  @override
+  String get cameraQualityLow => 'Low';
+
+  @override
+  String get cameraQualityMedium => 'Medium';
+
+  @override
+  String get cameraQualityHigh => 'High';
 
   @override
   String get cameraEnableStream => 'Enable stream';
@@ -132,22 +176,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraRecordingsTitle => 'Recordings';
 
   @override
-  String get cameraViewMosaic => 'Mosaic (0)';
+  String get cameraViewMosaic => 'All cameras';
 
   @override
-  String get cameraViewFront => 'Front (1)';
+  String get cameraViewFront => 'Front';
 
   @override
-  String get cameraViewRight => 'Right (2)';
+  String get cameraViewRight => 'Right';
 
   @override
-  String get cameraViewRear => 'Rear (3)';
+  String get cameraViewRear => 'Rear';
 
   @override
-  String get cameraViewLeft => 'Left (4)';
-
-  @override
-  String get cameraViewQualityMedium => 'Quality: MEDIUM';
+  String get cameraViewLeft => 'Left';
 
   @override
   String streamConnectedLabel(String connected) {
@@ -210,8 +251,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String surveillanceSnapshot(int q) {
-    return 'Snapshot Q$q';
+    return 'Corner $q';
   }
+
+  @override
+  String get surveillanceCornerFrontLeft => 'Front left';
+
+  @override
+  String get surveillanceCornerFrontRight => 'Front right';
+
+  @override
+  String get surveillanceCornerRearLeft => 'Rear left';
+
+  @override
+  String get surveillanceCornerRearRight => 'Rear right';
 
   @override
   String get surveillanceEnable => 'Enable';
@@ -254,4 +307,173 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusErrorTitle => 'Error';
+
+  @override
+  String get statusDriving => 'Driving';
+
+  @override
+  String get statusParked => 'Parked';
+
+  @override
+  String get statusRangeUnit => 'km';
+
+  @override
+  String get sectionClimate => 'Climate';
+
+  @override
+  String get sectionWindows => 'Windows';
+
+  @override
+  String get sectionTyres => 'Tires';
+
+  @override
+  String get sectionCloud => 'BYD cloud';
+
+  @override
+  String get stateOn => 'On';
+
+  @override
+  String get stateOff => 'Off';
+
+  @override
+  String get cloudActive => 'Linked and verified';
+
+  @override
+  String get cloudPartial => 'Incomplete';
+
+  @override
+  String get freshnessNotYet => 'Not updated yet';
+
+  @override
+  String freshnessUpdated(String ago) {
+    return 'Updated $ago';
+  }
+
+  @override
+  String get freshnessNow => 'just now';
+
+  @override
+  String freshnessSecondsAgo(int n) {
+    return '$n sec ago';
+  }
+
+  @override
+  String freshnessMinutesAgo(int n) {
+    return '$n min ago';
+  }
+
+  @override
+  String freshnessHoursAgo(int n) {
+    return '$n h ago';
+  }
+
+  @override
+  String freshnessDaysAgo(int n) {
+    return '$n d ago';
+  }
+
+  @override
+  String get controlSectionAccess => 'Vehicle access';
+
+  @override
+  String get controlSectionWindows => 'Windows';
+
+  @override
+  String get controlSectionClimate => 'Climate';
+
+  @override
+  String get controlStaleTitle => 'Stale data';
+
+  @override
+  String controlStaleBody(String ago) {
+    return 'Refresh status before sending commands ($ago)';
+  }
+
+  @override
+  String controlConfirmTitle(String action) {
+    return 'Confirm $action?';
+  }
+
+  @override
+  String get controlConfirmBody =>
+      'This command is sent to the car over the tunnel. Make sure the vehicle is in a safe place.';
+
+  @override
+  String get controlSend => 'Send';
+
+  @override
+  String get controlClimateOffAction => 'Turn climate off';
+
+  @override
+  String get controlClimateOnAction => 'Turn climate on';
+
+  @override
+  String get controlSteeringHeatOff => 'Steering heat off';
+
+  @override
+  String get controlSteeringHeatOn => 'Steering heat on';
+
+  @override
+  String get controlTempDownShort => 'Cooler';
+
+  @override
+  String get controlTempUpShort => 'Warmer';
+
+  @override
+  String get controlLock => 'Lock';
+
+  @override
+  String get controlUnlock => 'Unlock';
+
+  @override
+  String get controlTrunkOpen => 'Open trunk';
+
+  @override
+  String get controlTrunkClose => 'Close trunk';
+
+  @override
+  String get controlWindowsOpen => 'Open windows';
+
+  @override
+  String get controlWindowsClose => 'Close windows';
+
+  @override
+  String get controlWindowsVent => 'Ventilate';
+
+  @override
+  String get controlFlash => 'Flash lights';
+
+  @override
+  String get controlFindCar => 'Find car';
+
+  @override
+  String get controlClimateOn => 'Climate on';
+
+  @override
+  String get controlClimateOff => 'Climate off';
+
+  @override
+  String get controlTempUp => 'Warmer';
+
+  @override
+  String get controlTempDown => 'Cooler';
+
+  @override
+  String get controlFanUp => 'Fan up';
+
+  @override
+  String get controlFanDown => 'Fan down';
+
+  @override
+  String get controlReadingLight => 'Reading light';
+
+  @override
+  String get controlSteeringHeat => 'Steering heat';
+
+  @override
+  String get controlsErrorTitle => 'Error';
+
+  @override
+  String get controlsNoConnection =>
+      'No server connection — controls unavailable';
 }

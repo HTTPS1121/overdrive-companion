@@ -6,7 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:overdrive_companion/app.dart';
 import 'package:overdrive_companion/core/config/app_settings.dart';
-import 'package:overdrive_companion/data/api/overdrive_api_client.dart';
+import 'package:overdrive_companion/core/theme/companion_color_schemes.dart';
 import 'package:overdrive_companion/data/models/vehicle_state.dart';
 import 'package:overdrive_companion/data/repositories/vehicle_repository.dart';
 import 'package:overdrive_companion/features/controls/controls_commands_tab.dart';
@@ -19,17 +19,18 @@ import '../support/fixture_api_client.dart';
 import 'test_fonts.dart';
 
 const _artifactRoots = [
-  '/opt/cursor/artifacts/v2.6-0/screenshots',
-  '/cursor/stores/self/artifacts/v2.6-0/screenshots',
+  '/opt/cursor/artifacts/v2.7-0/screenshots',
+  '/cursor/stores/self/artifacts/v2.7-0/screenshots',
 ];
-const _goldenRoot = 'goldens/v2.6';
+const _goldenRoot = 'goldens/v2.7';
 
 late SettingsRepository _settingsRepo;
 late VehicleSnapshot _fixtureSnap;
 late VehicleSnapshot _offlineSnap;
 late FixtureOverdriveApiClient _fixtureClient;
 
-const _navLabels = ['מצב', 'שליטה', 'מצלמות', 'מיקום', 'הגדרות'];
+const _navLabelsHe = ['מצב', 'שליטה', 'מצלמות', 'מיקום', 'הגדרות'];
+const _navLabelsEn = ['Status', 'Controls', 'Cameras', 'Location', 'Settings'];
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -57,49 +58,94 @@ void main() {
     );
   });
 
-  testWidgets('v2.4 setup unconfigured light', (tester) async {
+  testWidgets('v2.7 setup unconfigured light he', (tester) async {
     await _capture(
       tester,
-      '01_setup_unconfigured_light',
+      '01_setup_unconfigured_light_he',
       settings: AppSettings.defaults().copyWith(
         themeMode: CompanionThemeMode.light,
         useDynamicColor: false,
+        baseUrl: 'https://fixture.test',
+        deviceId: 'mock-atto3-demo',
       ),
       snapshot: null,
+      locale: const Locale('he'),
     );
   });
 
-  testWidgets('v2.4 status fixture dark', (tester) async {
+  testWidgets('v2.7 setup unconfigured light en', (tester) async {
     await _capture(
       tester,
-      '02_status_fixture_dark',
+      '01b_setup_unconfigured_light_en',
+      settings: AppSettings.defaults().copyWith(
+        themeMode: CompanionThemeMode.light,
+        useDynamicColor: false,
+        baseUrl: 'https://fixture.test',
+        deviceId: 'mock-atto3-demo',
+      ),
+      snapshot: null,
+      locale: const Locale('en'),
+    );
+  });
+
+  testWidgets('v2.7 status fixture dark he', (tester) async {
+    await _capture(
+      tester,
+      '02_status_fixture_dark_he',
       settings: _fixtureSettings(dark: true),
       snapshot: _fixtureSnap,
       expectNavIndex: 0,
+      locale: const Locale('he'),
     );
   });
 
-  testWidgets('v2.4 controls fixture light', (tester) async {
+  testWidgets('v2.7 status fixture light en', (tester) async {
     await _capture(
       tester,
-      '03_controls_fixture_light',
+      '02b_status_fixture_light_en',
+      settings: _fixtureSettings(),
+      snapshot: _fixtureSnap,
+      expectNavIndex: 0,
+      locale: const Locale('en'),
+    );
+  });
+
+  testWidgets('v2.7 status ev accent dynamic light en', (tester) async {
+    await _capture(
+      tester,
+      '02c_status_ev_accent_light_en',
+      settings: _fixtureSettings().copyWith(useDynamicColor: true),
+      snapshot: _fixtureSnap,
+      expectNavIndex: 0,
+      locale: const Locale('en'),
+      lightScheme: CompanionColorSchemes.evAccentLight,
+      darkScheme: CompanionColorSchemes.evAccentDark,
+    );
+  });
+
+  testWidgets('v2.7 controls fixture light he', (tester) async {
+    await _capture(
+      tester,
+      '03_controls_fixture_light_he',
       settings: _fixtureSettings(),
       snapshot: _fixtureSnap,
       expectNavIndex: 1,
+      locale: const Locale('he'),
       afterPump: (t) async {
-        await _tapControlsHubTab(t, 'פקודות');
+        await _tapControlsHubTab(t, 'פקודות', locale: const Locale('he'));
         expect(find.text('נעילה'), findsOneWidget);
       },
     );
   });
 
-  testWidgets('v2.5 cameras fixture light', (tester) async {
+  testWidgets('v2.7 cameras fixture light he', (tester) async {
     await _capture(
       tester,
-      '12_camera_hub_fixture_light',
+      '12_camera_hub_fixture_light_he',
       settings: _fixtureSettings(),
       snapshot: _fixtureSnap,
       expectNavIndex: 2,
+      locale: const Locale('he'),
       afterPump: (t) async {
         for (var i = 0; i < 40; i++) {
           await t.pump(const Duration(milliseconds: 100));
@@ -108,18 +154,42 @@ void main() {
             break;
           }
         }
-        expect(find.textContaining('שידור'), findsWidgets);
+        expect(find.textContaining('wss://'), findsNothing);
+        expect(find.textContaining('MediaCodec'), findsNothing);
+        expect(find.text('שידור חי'), findsOneWidget);
       },
     );
   });
 
-  testWidgets('v2.4 location fixture light', (tester) async {
+  testWidgets('v2.7 cameras fixture dark en', (tester) async {
     await _capture(
       tester,
-      '04_location_fixture_light',
+      '12b_camera_hub_fixture_dark_en',
+      settings: _fixtureSettings(dark: true),
+      snapshot: _fixtureSnap,
+      expectNavIndex: 2,
+      locale: const Locale('en'),
+      afterPump: (t) async {
+        for (var i = 0; i < 40; i++) {
+          await t.pump(const Duration(milliseconds: 100));
+          if (find.text('Live stream').evaluate().isNotEmpty &&
+              find.byType(CircularProgressIndicator).evaluate().isEmpty) {
+            break;
+          }
+        }
+        expect(find.textContaining('Annex'), findsNothing);
+      },
+    );
+  });
+
+  testWidgets('v2.7 location fixture light he', (tester) async {
+    await _capture(
+      tester,
+      '04_location_fixture_light_he',
       settings: _fixtureSettings(),
       snapshot: _fixtureSnap,
       expectNavIndex: 3,
+      locale: const Locale('he'),
       afterPump: (t) async {
         expect(find.text('פתיחה בניווט'), findsOneWidget);
         expect(find.textContaining('32.08530'), findsOneWidget);
@@ -127,45 +197,48 @@ void main() {
     );
   });
 
-  testWidgets('v2.4 schedules fixture dark', (tester) async {
+  testWidgets('v2.7 schedules fixture dark he', (tester) async {
     await _capture(
       tester,
-      '05_schedules_fixture_dark',
+      '05_schedules_fixture_dark_he',
       settings: _fixtureSettings(dark: true),
       snapshot: _fixtureSnap,
       expectNavIndex: 1,
+      locale: const Locale('he'),
       afterPump: (t) async {
-        await _tapControlsHubTab(t, 'תזמונים');
+        await _tapControlsHubTab(t, 'תזמונים', locale: const Locale('he'));
         await _awaitSchedulesLoaded(t);
         expect(find.text('תזמוני מיזוג מהשרת'), findsOneWidget);
       },
     );
   });
 
-  testWidgets('v2.4 comfort fixture light', (tester) async {
+  testWidgets('v2.7 comfort fixture light he', (tester) async {
     await _capture(
       tester,
-      '06_comfort_fixture_light',
+      '06_comfort_fixture_light_he',
       settings: _fixtureSettings(),
       snapshot: _fixtureSnap,
       expectNavIndex: 1,
+      locale: const Locale('he'),
       afterPump: (t) async {
-        await _tapControlsHubTab(t, 'נוחות');
+        await _tapControlsHubTab(t, 'נוחות', locale: const Locale('he'));
         await _awaitComfortLoaded(t);
         expect(find.text('מושב נהג'), findsOneWidget);
       },
     );
   });
 
-  testWidgets('v2.4 charge cap fixture light', (tester) async {
+  testWidgets('v2.7 charge cap fixture light he', (tester) async {
     await _capture(
       tester,
-      '09_charge_cap_fixture_light',
+      '09_charge_cap_fixture_light_he',
       settings: _fixtureSettings(),
       snapshot: _fixtureSnap,
       expectNavIndex: 1,
+      locale: const Locale('he'),
       afterPump: (t) async {
-        await _tapControlsHubTab(t, 'טעינה');
+        await _tapControlsHubTab(t, 'טעינה', locale: const Locale('he'));
         await _awaitChargeCapLoaded(t);
         expect(find.text('שמירה לשרת'), findsOneWidget);
         expect(find.text('זרם טעינה AC'), findsOneWidget);
@@ -173,15 +246,16 @@ void main() {
     );
   });
 
-  testWidgets('v2.4 extended controls fixture light', (tester) async {
+  testWidgets('v2.7 extended controls fixture light he', (tester) async {
     await _capture(
       tester,
-      '11_extended_controls_fixture_light',
+      '11_extended_controls_fixture_light_he',
       settings: _fixtureSettings(),
       snapshot: _fixtureSnap,
       expectNavIndex: 1,
+      locale: const Locale('he'),
       afterPump: (t) async {
-        await _tapControlsHubTab(t, 'פקודות');
+        await _tapControlsHubTab(t, 'פקודות', locale: const Locale('he'));
         final scrollable = find.descendant(
           of: find.byType(ControlsCommandsTab),
           matching: find.byType(Scrollable),
@@ -197,23 +271,24 @@ void main() {
     );
   });
 
-  testWidgets('v2.4 settings configured light', (tester) async {
+  testWidgets('v2.7 settings configured light he', (tester) async {
     await _capture(
       tester,
-      '07_settings_light',
-      settings: _fixtureSettings(),
+      '07_settings_light_he',
+      settings: _fixtureSettings().copyWith(deviceId: 'mock-atto3-demo'),
       snapshot: _fixtureSnap,
       expectNavIndex: 4,
+      locale: const Locale('he'),
       afterPump: (t) async {
         expect(find.text('חיבור'), findsOneWidget);
       },
     );
   });
 
-  testWidgets('v2.4 status offline dark', (tester) async {
+  testWidgets('v2.7 status offline dark he', (tester) async {
     await _capture(
       tester,
-      '08_status_offline_dark',
+      '08_status_offline_dark_he',
       settings: const AppSettings(
         baseUrl: 'https://offline.example.com',
         deviceToken: 'x',
@@ -222,17 +297,20 @@ void main() {
       ),
       snapshot: _offlineSnap,
       expectNavIndex: 0,
+      locale: const Locale('he'),
     );
   });
 
-  testWidgets('v2.4 lock confirmation dialog', (tester) async {
+  testWidgets('v2.7 lock confirmation dialog he', (tester) async {
+    const locale = Locale('he');
     await _pumpHarness(
       tester,
       settings: _fixtureSettings(),
       snapshot: _fixtureSnap,
       expectNavIndex: 1,
+      locale: locale,
     );
-    await _tapControlsHubTab(tester, 'פקודות');
+    await _tapControlsHubTab(tester, 'פקודות', locale: locale);
     await tester.tap(find.text('נעילה'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -253,9 +331,13 @@ AppSettings _fixtureSettings({bool dark = false}) => AppSettings(
       useDynamicColor: false,
     );
 
-Future<void> _tapNavIndex(WidgetTester tester, int index) async {
-  expect(index, inInclusiveRange(0, _navLabels.length - 1));
-  final label = _navLabels[index];
+List<String> _navLabelsFor(Locale? locale) =>
+    locale?.languageCode == 'en' ? _navLabelsEn : _navLabelsHe;
+
+Future<void> _tapNavIndex(WidgetTester tester, int index, {Locale? locale}) async {
+  final labels = _navLabelsFor(locale);
+  expect(index, inInclusiveRange(0, labels.length - 1));
+  final label = labels[index];
   await tester.tap(
     find.descendant(
       of: find.byType(NavigationBar),
@@ -267,8 +349,8 @@ Future<void> _tapNavIndex(WidgetTester tester, int index) async {
   expect(bar.selectedIndex, index, reason: 'NavigationBar selectedIndex after tap');
 }
 
-Future<void> _tapControlsHubTab(WidgetTester tester, String label) async {
-  await _tapNavIndex(tester, 1);
+Future<void> _tapControlsHubTab(WidgetTester tester, String label, {Locale? locale}) async {
+  await _tapNavIndex(tester, 1, locale: locale);
   final tab = find.descendant(
     of: find.descendant(
       of: find.byType(ControlsHubScreen),
@@ -323,6 +405,9 @@ Future<void> _capture(
   required AppSettings settings,
   required VehicleSnapshot? snapshot,
   int? expectNavIndex,
+  Locale? locale,
+  ColorScheme? lightScheme,
+  ColorScheme? darkScheme,
   Future<void> Function(WidgetTester)? afterPump,
 }) async {
   final boundaryKey = await _pumpHarness(
@@ -330,6 +415,9 @@ Future<void> _capture(
     settings: settings,
     snapshot: snapshot,
     expectNavIndex: expectNavIndex,
+    locale: locale ?? const Locale('he'),
+    lightScheme: lightScheme,
+    darkScheme: darkScheme,
   );
   if (afterPump != null) await afterPump(tester);
   await _writeGolden(tester, name, find.byKey(boundaryKey));
@@ -340,6 +428,9 @@ Future<GlobalKey> _pumpHarness(
   required AppSettings settings,
   required VehicleSnapshot? snapshot,
   int? expectNavIndex,
+  Locale? locale,
+  ColorScheme? lightScheme,
+  ColorScheme? darkScheme,
 }) async {
   tester.view.physicalSize = const Size(1170, 2532);
   tester.view.devicePixelRatio = 3.0;
@@ -364,6 +455,9 @@ Future<GlobalKey> _pumpHarness(
         screenshotBoundaryKey: boundaryKey,
         lockPhoneViewport: true,
         screenshotMode: true,
+        screenshotLocale: locale,
+        screenshotLightScheme: lightScheme,
+        screenshotDarkScheme: darkScheme,
       ),
     ),
   );
@@ -371,7 +465,7 @@ Future<GlobalKey> _pumpHarness(
 
   if (expectNavIndex != null) {
     if (expectNavIndex > 0) {
-      await _tapNavIndex(tester, expectNavIndex);
+      await _tapNavIndex(tester, expectNavIndex, locale: locale);
     }
     final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
     expect(bar.selectedIndex, expectNavIndex);

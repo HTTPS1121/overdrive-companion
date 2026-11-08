@@ -54,10 +54,10 @@ class _ConnectionSetupScreenState extends ConsumerState<ConnectionSetupScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
           children: [
-            Text('התחברות לרכב מרחוק', style: theme.textTheme.headlineSmall),
+            Text(context.l10n.connectionScreenTitle, style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
-              'ב־Overdrive בדפדפן: פתח את כתובת המנהרה → login.html מציג Device ID → הזן קוד גישה.',
+              context.l10n.connectionIntroLong,
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 20),

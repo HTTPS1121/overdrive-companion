@@ -73,4 +73,17 @@ abstract final class CompanionColorSchemes {
     surfaceContainerHigh: Color(0xFF282A2F),
     surfaceContainerHighest: Color(0xFF33353A),
   );
+
+  /// Screenshot / accent preview — EV teal seed (distinct from default blue).
+  static ColorScheme evAccentLight = ColorScheme.fromSeed(
+    seedColor: const Color(0xFF0D9488),
+    brightness: Brightness.light,
+    surface: const Color(0xFFF4FAF9),
+  );
+
+  static ColorScheme evAccentDark = ColorScheme.fromSeed(
+    seedColor: const Color(0xFF2DD4BF),
+    brightness: Brightness.dark,
+    surface: const Color(0xFF0C1211),
+  );
 }

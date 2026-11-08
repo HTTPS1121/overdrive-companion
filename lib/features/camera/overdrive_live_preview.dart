@@ -67,11 +67,6 @@ class _OverdriveLivePreviewState extends ConsumerState<OverdriveLivePreview> {
         ),
         const SizedBox(height: 8),
         Text(_phaseLabel(l10n, c), style: theme.textTheme.labelLarge),
-        if (c?.statusMessage != null)
-          Text(
-            c!.statusMessage!,
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
-          ),
       ],
     );
   }

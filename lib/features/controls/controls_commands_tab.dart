@@ -3,15 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format/freshness.dart';
 import '../../core/layout/scroll_insets.dart';
+import '../../core/l10n/control_l10n.dart';
+import '../../core/l10n/l10n_x.dart';
 import '../../core/widgets/confirm_risky_action.dart';
-import '../../data/models/vehicle_state.dart';
 import '../../data/repositories/overdrive_endpoints.dart';
 import '../../data/repositories/vehicle_repository.dart';
 import '../../providers/app_providers.dart';
 import 'control_widgets.dart';
 import 'vehicle_extended_controls.dart';
 
-/// פקודות שליטה ישירות (נעילה, חלונות, מיזוג).
 class ControlsCommandsTab extends ConsumerStatefulWidget {
   const ControlsCommandsTab({super.key});
 
@@ -25,18 +25,19 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final snapAsync = ref.watch(vehicleSnapshotProvider);
 
     return snapAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('שגיאה: $e')),
+      error: (e, _) => Center(child: Text('${l10n.controlsErrorTitle}: $e')),
       data: (snap) {
         if (snap == null || snap.offline || !snap.state.success) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Text(
-                snap?.errorMessage ?? 'אין חיבור לשרת — שליטה לא זמינה',
+                snap?.errorMessage ?? l10n.controlsNoConnection,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -48,145 +49,153 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
           fetchedAt: snap.lastUpdated ?? DateTime.now(),
         );
         final staleBlocked = freshness.isStale;
+        final ago = freshness.fetchedAgoLabelLocalized(l10n, snap.lastUpdated);
 
         return Stack(
           children: [
             ListView(
-          padding: scrollBottomPadding(context),
-          children: [
-            if (staleBlocked)
-              Card(
-                color: Theme.of(context).colorScheme.tertiaryContainer,
-                child: ListTile(
-                  leading: Icon(Icons.schedule, color: Theme.of(context).colorScheme.onTertiaryContainer),
-                  title: const Text('נתונים ישנים'),
-                  subtitle: Text(
-                    'רענן את המצב לפני שליחת פקודה (${freshness.fetchedAgoLabelHe(snap.lastUpdated)})',
-                  ),
-                ),
-              ),
-            ControlSection(
-              title: 'גישה לרכב',
-              icon: Icons.vpn_key,
+              padding: scrollBottomPadding(context),
               children: [
-                ControlActionTile(
-                  label: 'נעילה',
-                  icon: Icons.lock,
-                  enabled: !_busy && !staleBlocked,
-                  onPressed: () => _runWithConfirm(ControlKind.lock, 'נעילה'),
-                ),
-                ControlActionTile(
-                  label: 'פתיחה',
-                  icon: Icons.lock_open,
-                  enabled: !_busy && !staleBlocked,
-                  onPressed: () => _runWithConfirm(ControlKind.unlock, 'פתיחה'),
-                ),
-                ControlActionTile(
-                  label: 'פתיחת תא מטען',
-                  icon: Icons.luggage,
-                  enabled: !_busy && !staleBlocked,
-                  onPressed: () => _runWithConfirm(ControlKind.trunkOpen, 'תא מטען'),
-                ),
-                ControlActionTile(
-                  label: 'הבהוב אורות',
-                  icon: Icons.lightbulb_outline,
-                  enabled: !_busy && !staleBlocked,
-                  onPressed: () => _run(ControlKind.flash, 'הבהוב'),
-                ),
-                ControlActionTile(
-                  label: 'מציאת רכב',
-                  icon: Icons.my_location,
-                  enabled: !_busy && !staleBlocked,
-                  onPressed: () => _runWithConfirm(ControlKind.findCar, 'מציאת רכב'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ControlSection(
-              title: 'חלונות',
-              icon: Icons.filter_drama_outlined,
-              children: [
-                ControlActionTile(
-                  label: 'פתיחה מלאה',
-                  icon: Icons.vertical_align_top,
-                  enabled: !_busy && !staleBlocked,
-                  onPressed: () => _runWithConfirm(ControlKind.windowsOpen, 'חלונות'),
-                ),
-                ControlActionTile(
-                  label: 'סגירה',
-                  icon: Icons.vertical_align_bottom,
-                  enabled: !_busy && !staleBlocked,
-                  onPressed: () => _run(ControlKind.windowsClose, 'חלונות'),
-                ),
-                ControlActionTile(
-                  label: 'אוורור',
-                  icon: Icons.air,
-                  enabled: !_busy && !staleBlocked,
-                  onPressed: () => _run(ControlKind.windowsVent, 'אוורור'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ControlSection(
-              title: 'מיזוג',
-              icon: Icons.ac_unit,
-              children: [
-                ControlActionTile(
-                  label: snap.state.climate?.acOn == true ? 'כיבוי מיזוג' : 'הפעלת מיזוג',
-                  icon: Icons.thermostat,
-                  enabled: !_busy && !staleBlocked,
-                  onPressed: () => _run(
-                    snap.state.climate?.acOn == true
-                        ? ControlKind.climateOff
-                        : ControlKind.climateOn,
-                    'מיזוג',
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ControlActionTile(
-                        label: 'טמפ׳ −',
-                        icon: Icons.remove,
-                        enabled: !_busy && !staleBlocked,
-                        compact: true,
-                        onPressed: () => _climateTemp(-1, snap),
+                if (staleBlocked)
+                  Card(
+                    color: Theme.of(context).colorScheme.tertiaryContainer,
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.schedule,
+                        color: Theme.of(context).colorScheme.onTertiaryContainer,
                       ),
+                      title: Text(l10n.controlStaleTitle),
+                      subtitle: Text(l10n.controlStaleBody(ago)),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ControlActionTile(
-                        label: 'טמפ׳ +',
-                        icon: Icons.add,
-                        enabled: !_busy && !staleBlocked,
-                        compact: true,
-                        onPressed: () => _climateTemp(1, snap),
-                      ),
+                  ),
+                ControlSection(
+                  title: l10n.controlSectionAccess,
+                  icon: Icons.vpn_key,
+                  children: [
+                    ControlActionGrid(
+                      actions: [
+                        ControlGridAction(
+                          label: l10n.controlLock,
+                          icon: Icons.lock,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _runWithConfirm(ControlKind.lock),
+                        ),
+                        ControlGridAction(
+                          label: l10n.controlUnlock,
+                          icon: Icons.lock_open,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _runWithConfirm(ControlKind.unlock),
+                        ),
+                        ControlGridAction(
+                          label: l10n.controlTrunkOpen,
+                          icon: Icons.luggage,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _runWithConfirm(ControlKind.trunkOpen),
+                        ),
+                        ControlGridAction(
+                          label: l10n.controlFindCar,
+                          icon: Icons.my_location,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _runWithConfirm(ControlKind.findCar),
+                        ),
+                        ControlGridAction(
+                          label: l10n.controlFlash,
+                          icon: Icons.lightbulb_outline,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _run(ControlKind.flash),
+                          fullWidth: true,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                ControlActionTile(
-                  label: snap.state.seats?.steeringHeat == true
-                      ? 'כיבוי חימום הגה'
-                      : 'חימום הגה',
-                  icon: Icons.touch_app,
-                  enabled: !_busy && !staleBlocked,
-                  onPressed: () => _run(ControlKind.steeringHeat, 'הגה'),
+                const SizedBox(height: 12),
+                ControlSection(
+                  title: l10n.controlSectionWindows,
+                  icon: Icons.filter_drama_outlined,
+                  children: [
+                    ControlActionGrid(
+                      actions: [
+                        ControlGridAction(
+                          label: l10n.controlWindowsOpen,
+                          icon: Icons.vertical_align_top,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _runWithConfirm(ControlKind.windowsOpen),
+                        ),
+                        ControlGridAction(
+                          label: l10n.controlWindowsClose,
+                          icon: Icons.vertical_align_bottom,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _run(ControlKind.windowsClose),
+                        ),
+                        ControlGridAction(
+                          label: l10n.controlWindowsVent,
+                          icon: Icons.air,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _run(ControlKind.windowsVent),
+                          fullWidth: true,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 12),
+                ControlSection(
+                  title: l10n.controlSectionClimate,
+                  icon: Icons.ac_unit,
+                  children: [
+                    ControlActionGrid(
+                      actions: [
+                        ControlGridAction(
+                          label: snap.state.climate?.acOn == true
+                              ? l10n.controlClimateOffAction
+                              : l10n.controlClimateOnAction,
+                          icon: Icons.thermostat,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _run(
+                            snap.state.climate?.acOn == true
+                                ? ControlKind.climateOff
+                                : ControlKind.climateOn,
+                          ),
+                          fullWidth: true,
+                        ),
+                        ControlGridAction(
+                          label: l10n.controlTempDownShort,
+                          icon: Icons.remove,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _climateTemp(-1, snap),
+                        ),
+                        ControlGridAction(
+                          label: l10n.controlTempUpShort,
+                          icon: Icons.add,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _climateTemp(1, snap),
+                        ),
+                        ControlGridAction(
+                          label: snap.state.seats?.steeringHeat == true
+                              ? l10n.controlSteeringHeatOff
+                              : l10n.controlSteeringHeatOn,
+                          icon: Icons.touch_app,
+                          enabled: !_busy && !staleBlocked,
+                          onPressed: () => _run(ControlKind.steeringHeat),
+                          fullWidth: true,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                VehicleExtendedControls(
+                  snap: snap,
+                  staleBlocked: staleBlocked,
+                  busy: _busy,
+                  onBusyChanged: (v) => setState(() => _busy = v),
+                  onFeedback: (m) => setState(() => _lastFeedback = m),
+                ),
+                if (_lastFeedback != null) ...[
+                  const SizedBox(height: 16),
+                  Text(_lastFeedback!, textAlign: TextAlign.center),
+                ],
               ],
-            ),
-            VehicleExtendedControls(
-              snap: snap,
-              staleBlocked: staleBlocked,
-              busy: _busy,
-              onBusyChanged: (v) => setState(() => _busy = v),
-              onFeedback: (m) => setState(() => _lastFeedback = m),
-            ),
-            if (_lastFeedback != null) ...[
-              const SizedBox(height: 16),
-              Text(_lastFeedback!, textAlign: TextAlign.center),
-            ],
-          ],
             ),
             if (_busy)
               Positioned.fill(
@@ -204,21 +213,25 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
   ControlCapability _cap(ControlKind kind) =>
       kCompanionControls.firstWhere((c) => c.kind == kind);
 
-  Future<void> _runWithConfirm(ControlKind kind, String label) async {
+  Future<void> _runWithConfirm(ControlKind kind) async {
     final cap = _cap(kind);
+    final l10n = context.l10n;
+    final label = kind.label(l10n);
     if (cap.requiresConfirmation) {
       final ok = await confirmRiskyAction(
         context,
-        title: 'לאשר $label?',
-        body: 'הפעולה תישלח לרכב דרך השרת. וודא שהרכב במקום בטוח.',
-        confirmLabel: 'שליחה',
+        title: l10n.controlConfirmTitle(label),
+        body: l10n.controlConfirmBody,
+        confirmLabel: l10n.controlSend,
       );
       if (!ok || !mounted) return;
     }
-    await _run(kind, label);
+    await _run(kind);
   }
 
-  Future<void> _run(ControlKind kind, String label) async {
+  Future<void> _run(ControlKind kind) async {
+    final l10n = context.l10n;
+    final label = kind.label(l10n);
     final snap = ref.read(vehicleSnapshotProvider).valueOrNull;
     setState(() {
       _busy = true;
@@ -253,6 +266,7 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
   }
 
   Future<void> _climateTemp(int delta, VehicleSnapshot snap) async {
+    final l10n = context.l10n;
     final current = snap.state.climate?.setpointDriver ?? 22;
     final next = (current + delta).clamp(15, 33).toDouble();
     setState(() => _busy = true);
@@ -264,11 +278,10 @@ class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
     if (!mounted) return;
     setState(() {
       _busy = false;
-      _lastFeedback = result.userMessageHe(actionLabel: 'טמפרטורה');
+      _lastFeedback = result.userMessageHe(actionLabel: l10n.sectionClimate);
     });
     if (result.success) {
       await ref.read(vehicleSnapshotProvider.notifier).refresh();
     }
   }
 }
-

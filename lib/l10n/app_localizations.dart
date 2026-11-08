@@ -143,13 +143,13 @@ abstract class AppLocalizations {
   /// No description provided for @connectionIntro.
   ///
   /// In en, this message translates to:
-  /// **'Same flow as the car login page: tunnel URL, Device ID from the server, then your access code.'**
+  /// **'Enter your tunnel address, load the Device ID from the car server, then enter the access code shown in the car browser login.'**
   String get connectionIntro;
 
   /// No description provided for @connectionIntroLong.
   ///
   /// In en, this message translates to:
-  /// **'In the browser: open the tunnel URL → login.html shows Device ID → enter your access code.'**
+  /// **'Open the tunnel URL in a browser on the car side to see the Device ID, then use that code here.'**
   String get connectionIntroLong;
 
   /// No description provided for @connectionScreenTitle.
@@ -197,8 +197,26 @@ abstract class AppLocalizations {
   /// No description provided for @deviceIdHelper.
   ///
   /// In en, this message translates to:
-  /// **'Loaded from GET /auth/status (same as car login.html)'**
+  /// **'Tap refresh after the tunnel URL is correct — loads the ID from your car server'**
   String get deviceIdHelper;
+
+  /// No description provided for @errorTunnelFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the tunnel URL before loading Device ID.'**
+  String get errorTunnelFirst;
+
+  /// No description provided for @errorTunnelUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot reach the tunnel. Check HTTPS, network, and that the car server is online.'**
+  String get errorTunnelUnreachable;
+
+  /// No description provided for @errorDeviceIdFromServer.
+  ///
+  /// In en, this message translates to:
+  /// **'No Device ID from the server. Check the tunnel and car connection.'**
+  String get errorDeviceIdFromServer;
 
   /// No description provided for @deviceIdPlaceholder.
   ///
@@ -293,8 +311,68 @@ abstract class AppLocalizations {
   /// No description provided for @cameraLiveHelp.
   ///
   /// In en, this message translates to:
-  /// **'Annex-B H.264 on wss://host/ws?token=JWT — native MediaCodec on Android.'**
+  /// **'Live view from your dash cameras when the stream is enabled.'**
   String get cameraLiveHelp;
+
+  /// No description provided for @streamBadgeLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get streamBadgeLive;
+
+  /// No description provided for @streamBadgeOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get streamBadgeOffline;
+
+  /// No description provided for @streamBadgeEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Stream on'**
+  String get streamBadgeEnabled;
+
+  /// No description provided for @streamBadgeDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Stream off'**
+  String get streamBadgeDisabled;
+
+  /// No description provided for @streamQualityCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality · {level}'**
+  String streamQualityCurrent(String level);
+
+  /// No description provided for @cameraViewPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera view'**
+  String get cameraViewPickerTitle;
+
+  /// No description provided for @cameraQualityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video quality'**
+  String get cameraQualityTitle;
+
+  /// No description provided for @cameraQualityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get cameraQualityLow;
+
+  /// No description provided for @cameraQualityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get cameraQualityMedium;
+
+  /// No description provided for @cameraQualityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get cameraQualityHigh;
 
   /// No description provided for @cameraEnableStream.
   ///
@@ -323,38 +401,32 @@ abstract class AppLocalizations {
   /// No description provided for @cameraViewMosaic.
   ///
   /// In en, this message translates to:
-  /// **'Mosaic (0)'**
+  /// **'All cameras'**
   String get cameraViewMosaic;
 
   /// No description provided for @cameraViewFront.
   ///
   /// In en, this message translates to:
-  /// **'Front (1)'**
+  /// **'Front'**
   String get cameraViewFront;
 
   /// No description provided for @cameraViewRight.
   ///
   /// In en, this message translates to:
-  /// **'Right (2)'**
+  /// **'Right'**
   String get cameraViewRight;
 
   /// No description provided for @cameraViewRear.
   ///
   /// In en, this message translates to:
-  /// **'Rear (3)'**
+  /// **'Rear'**
   String get cameraViewRear;
 
   /// No description provided for @cameraViewLeft.
   ///
   /// In en, this message translates to:
-  /// **'Left (4)'**
+  /// **'Left'**
   String get cameraViewLeft;
-
-  /// No description provided for @cameraViewQualityMedium.
-  ///
-  /// In en, this message translates to:
-  /// **'Quality: MEDIUM'**
-  String get cameraViewQualityMedium;
 
   /// No description provided for @streamConnectedLabel.
   ///
@@ -461,8 +533,32 @@ abstract class AppLocalizations {
   /// No description provided for @surveillanceSnapshot.
   ///
   /// In en, this message translates to:
-  /// **'Snapshot Q{q}'**
+  /// **'Corner {q}'**
   String surveillanceSnapshot(int q);
+
+  /// No description provided for @surveillanceCornerFrontLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Front left'**
+  String get surveillanceCornerFrontLeft;
+
+  /// No description provided for @surveillanceCornerFrontRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Front right'**
+  String get surveillanceCornerFrontRight;
+
+  /// No description provided for @surveillanceCornerRearLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Rear left'**
+  String get surveillanceCornerRearLeft;
+
+  /// No description provided for @surveillanceCornerRearRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Rear right'**
+  String get surveillanceCornerRearRight;
 
   /// No description provided for @surveillanceEnable.
   ///
@@ -547,6 +643,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error'**
   String get statusErrorTitle;
+
+  /// No description provided for @statusDriving.
+  ///
+  /// In en, this message translates to:
+  /// **'Driving'**
+  String get statusDriving;
+
+  /// No description provided for @statusParked.
+  ///
+  /// In en, this message translates to:
+  /// **'Parked'**
+  String get statusParked;
+
+  /// No description provided for @statusRangeUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'km'**
+  String get statusRangeUnit;
+
+  /// No description provided for @sectionClimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Climate'**
+  String get sectionClimate;
+
+  /// No description provided for @sectionWindows.
+  ///
+  /// In en, this message translates to:
+  /// **'Windows'**
+  String get sectionWindows;
+
+  /// No description provided for @sectionTyres.
+  ///
+  /// In en, this message translates to:
+  /// **'Tires'**
+  String get sectionTyres;
+
+  /// No description provided for @sectionCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'BYD cloud'**
+  String get sectionCloud;
+
+  /// No description provided for @stateOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get stateOn;
+
+  /// No description provided for @stateOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get stateOff;
+
+  /// No description provided for @cloudActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked and verified'**
+  String get cloudActive;
+
+  /// No description provided for @cloudPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete'**
+  String get cloudPartial;
+
+  /// No description provided for @freshnessNotYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not updated yet'**
+  String get freshnessNotYet;
+
+  /// No description provided for @freshnessUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {ago}'**
+  String freshnessUpdated(String ago);
+
+  /// No description provided for @freshnessNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get freshnessNow;
+
+  /// No description provided for @freshnessSecondsAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} sec ago'**
+  String freshnessSecondsAgo(int n);
+
+  /// No description provided for @freshnessMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min ago'**
+  String freshnessMinutesAgo(int n);
+
+  /// No description provided for @freshnessHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} h ago'**
+  String freshnessHoursAgo(int n);
+
+  /// No description provided for @freshnessDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} d ago'**
+  String freshnessDaysAgo(int n);
+
+  /// No description provided for @controlSectionAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle access'**
+  String get controlSectionAccess;
+
+  /// No description provided for @controlSectionWindows.
+  ///
+  /// In en, this message translates to:
+  /// **'Windows'**
+  String get controlSectionWindows;
+
+  /// No description provided for @controlSectionClimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Climate'**
+  String get controlSectionClimate;
+
+  /// No description provided for @controlStaleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stale data'**
+  String get controlStaleTitle;
+
+  /// No description provided for @controlStaleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh status before sending commands ({ago})'**
+  String controlStaleBody(String ago);
+
+  /// No description provided for @controlConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm {action}?'**
+  String controlConfirmTitle(String action);
+
+  /// No description provided for @controlConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This command is sent to the car over the tunnel. Make sure the vehicle is in a safe place.'**
+  String get controlConfirmBody;
+
+  /// No description provided for @controlSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get controlSend;
+
+  /// No description provided for @controlClimateOffAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn climate off'**
+  String get controlClimateOffAction;
+
+  /// No description provided for @controlClimateOnAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn climate on'**
+  String get controlClimateOnAction;
+
+  /// No description provided for @controlSteeringHeatOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Steering heat off'**
+  String get controlSteeringHeatOff;
+
+  /// No description provided for @controlSteeringHeatOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Steering heat on'**
+  String get controlSteeringHeatOn;
+
+  /// No description provided for @controlTempDownShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooler'**
+  String get controlTempDownShort;
+
+  /// No description provided for @controlTempUpShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Warmer'**
+  String get controlTempUpShort;
+
+  /// No description provided for @controlLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock'**
+  String get controlLock;
+
+  /// No description provided for @controlUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get controlUnlock;
+
+  /// No description provided for @controlTrunkOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open trunk'**
+  String get controlTrunkOpen;
+
+  /// No description provided for @controlTrunkClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close trunk'**
+  String get controlTrunkClose;
+
+  /// No description provided for @controlWindowsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open windows'**
+  String get controlWindowsOpen;
+
+  /// No description provided for @controlWindowsClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close windows'**
+  String get controlWindowsClose;
+
+  /// No description provided for @controlWindowsVent.
+  ///
+  /// In en, this message translates to:
+  /// **'Ventilate'**
+  String get controlWindowsVent;
+
+  /// No description provided for @controlFlash.
+  ///
+  /// In en, this message translates to:
+  /// **'Flash lights'**
+  String get controlFlash;
+
+  /// No description provided for @controlFindCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Find car'**
+  String get controlFindCar;
+
+  /// No description provided for @controlClimateOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Climate on'**
+  String get controlClimateOn;
+
+  /// No description provided for @controlClimateOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Climate off'**
+  String get controlClimateOff;
+
+  /// No description provided for @controlTempUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Warmer'**
+  String get controlTempUp;
+
+  /// No description provided for @controlTempDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooler'**
+  String get controlTempDown;
+
+  /// No description provided for @controlFanUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Fan up'**
+  String get controlFanUp;
+
+  /// No description provided for @controlFanDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Fan down'**
+  String get controlFanDown;
+
+  /// No description provided for @controlReadingLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading light'**
+  String get controlReadingLight;
+
+  /// No description provided for @controlSteeringHeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Steering heat'**
+  String get controlSteeringHeat;
+
+  /// No description provided for @controlsErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get controlsErrorTitle;
+
+  /// No description provided for @controlsNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No server connection — controls unavailable'**
+  String get controlsNoConnection;
 }
 
 class _AppLocalizationsDelegate

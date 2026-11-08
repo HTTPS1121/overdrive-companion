@@ -36,6 +36,58 @@ class ControlSection extends StatelessWidget {
   }
 }
 
+/// Two-column action grid for premium control layout.
+class ControlActionGrid extends StatelessWidget {
+  const ControlActionGrid({
+    super.key,
+    required this.actions,
+  });
+
+  final List<ControlGridAction> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 8.0;
+        final cellW = (constraints.maxWidth - spacing) / 2;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final a in actions)
+              SizedBox(
+                width: a.fullWidth ? constraints.maxWidth : cellW,
+                height: 52,
+                child: FilledButton.tonalIcon(
+                  onPressed: a.enabled ? a.onPressed : null,
+                  icon: Icon(a.icon, size: 20),
+                  label: Text(a.label, maxLines: 2, overflow: TextOverflow.ellipsis),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class ControlGridAction {
+  const ControlGridAction({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+    required this.enabled,
+    this.fullWidth = false,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+  final bool enabled;
+  final bool fullWidth;
+}
+
 class ControlActionTile extends StatelessWidget {
   const ControlActionTile({
     super.key,

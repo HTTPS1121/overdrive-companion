@@ -32,11 +32,11 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get connectionIntro =>
-      'אותו תהליך כמו login.html: כתובת מנהרה, מזהה מכשיר מהשרת, וקוד גישה.';
+      'הזן כתובת מנהרה, טען מזהה מכשיר מהשרת ברכב, והזן את קוד הגישה כפי שמוצג במסך ההתחברות בדפדפן.';
 
   @override
   String get connectionIntroLong =>
-      'בדפדפן: פתח את כתובת המנהרה → login.html מציג Device ID → הזן קוד גישה.';
+      'פתח את כתובת המנהרה בדפדפן בצד הרכב כדי לראות את מזהה המכשיר, והזן את אותו הקוד כאן.';
 
   @override
   String get connectionScreenTitle => 'התחברות לרכב מרחוק';
@@ -60,7 +60,19 @@ class AppLocalizationsHe extends AppLocalizations {
   String get deviceIdHint => 'לחץ רענן לאחר הזנת כתובת המנהרה';
 
   @override
-  String get deviceIdHelper => 'נטען מ־GET /auth/status (כמו login.html ברכב)';
+  String get deviceIdHelper =>
+      'לחץ רענון לאחר שהמנהרה נכונה — טוען את המזהה מהשרת ברכב';
+
+  @override
+  String get errorTunnelFirst => 'הזן קודם כתובת מנהרה (HTTPS).';
+
+  @override
+  String get errorTunnelUnreachable =>
+      'לא ניתן להגיע למנהרה. בדוק HTTPS, רשת ושהשרת ברכב פעיל.';
+
+  @override
+  String get errorDeviceIdFromServer =>
+      'לא התקבל מזהה מכשיר מהשרת. בדוק מנהרה וחיבור רכב.';
 
   @override
   String get deviceIdPlaceholder => 'לחץ רענן לאחר הזנת כתובת המנהרה';
@@ -110,8 +122,39 @@ class AppLocalizationsHe extends AppLocalizations {
   String get cameraLiveTitle => 'שידור חי';
 
   @override
-  String get cameraLiveHelp =>
-      'H.264 Annex-B על wss://host/ws?token=JWT — MediaCodec מקומי ב־Android.';
+  String get cameraLiveHelp => 'תצוגה חיה ממצלמות הלוח כשהשידור פעיל.';
+
+  @override
+  String get streamBadgeLive => 'חי';
+
+  @override
+  String get streamBadgeOffline => 'לא מחובר';
+
+  @override
+  String get streamBadgeEnabled => 'שידור פעיל';
+
+  @override
+  String get streamBadgeDisabled => 'שידור כבוי';
+
+  @override
+  String streamQualityCurrent(String level) {
+    return 'איכות · $level';
+  }
+
+  @override
+  String get cameraViewPickerTitle => 'בחירת מצלמה';
+
+  @override
+  String get cameraQualityTitle => 'איכות וידאו';
+
+  @override
+  String get cameraQualityLow => 'נמוכה';
+
+  @override
+  String get cameraQualityMedium => 'בינונית';
+
+  @override
+  String get cameraQualityHigh => 'גבוהה';
 
   @override
   String get cameraEnableStream => 'הפעל שידור';
@@ -126,22 +169,19 @@ class AppLocalizationsHe extends AppLocalizations {
   String get cameraRecordingsTitle => 'הקלטות';
 
   @override
-  String get cameraViewMosaic => 'מוזאיקה (0)';
+  String get cameraViewMosaic => 'כל המצלמות';
 
   @override
-  String get cameraViewFront => 'קדמי (1)';
+  String get cameraViewFront => 'קדמי';
 
   @override
-  String get cameraViewRight => 'ימין (2)';
+  String get cameraViewRight => 'ימין';
 
   @override
-  String get cameraViewRear => 'אחורי (3)';
+  String get cameraViewRear => 'אחורי';
 
   @override
-  String get cameraViewLeft => 'שמאל (4)';
-
-  @override
-  String get cameraViewQualityMedium => 'איכות: MEDIUM';
+  String get cameraViewLeft => 'שמאל';
 
   @override
   String streamConnectedLabel(String connected) {
@@ -204,8 +244,20 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String surveillanceSnapshot(int q) {
-    return 'תצוגה Q$q';
+    return 'פינה $q';
   }
+
+  @override
+  String get surveillanceCornerFrontLeft => 'קדמי שמאל';
+
+  @override
+  String get surveillanceCornerFrontRight => 'קדמי ימין';
+
+  @override
+  String get surveillanceCornerRearLeft => 'אחורי שמאל';
+
+  @override
+  String get surveillanceCornerRearRight => 'אחורי ימין';
 
   @override
   String get surveillanceEnable => 'הפעל';
@@ -248,4 +300,172 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get statusErrorTitle => 'שגיאה';
+
+  @override
+  String get statusDriving => 'בנסיעה';
+
+  @override
+  String get statusParked => 'חונה';
+
+  @override
+  String get statusRangeUnit => 'ק״מ';
+
+  @override
+  String get sectionClimate => 'מיזוג';
+
+  @override
+  String get sectionWindows => 'חלונות';
+
+  @override
+  String get sectionTyres => 'צמיגים';
+
+  @override
+  String get sectionCloud => 'ענן BYD';
+
+  @override
+  String get stateOn => 'פועל';
+
+  @override
+  String get stateOff => 'כבוי';
+
+  @override
+  String get cloudActive => 'מקושר ומאומת';
+
+  @override
+  String get cloudPartial => 'לא הושלם';
+
+  @override
+  String get freshnessNotYet => 'לא עודכן עדיין';
+
+  @override
+  String freshnessUpdated(String ago) {
+    return 'עודכן $ago';
+  }
+
+  @override
+  String get freshnessNow => 'עכשיו';
+
+  @override
+  String freshnessSecondsAgo(int n) {
+    return 'לפני $n שניות';
+  }
+
+  @override
+  String freshnessMinutesAgo(int n) {
+    return 'לפני $n דקות';
+  }
+
+  @override
+  String freshnessHoursAgo(int n) {
+    return 'לפני $n שעות';
+  }
+
+  @override
+  String freshnessDaysAgo(int n) {
+    return 'לפני $n ימים';
+  }
+
+  @override
+  String get controlSectionAccess => 'גישה לרכב';
+
+  @override
+  String get controlSectionWindows => 'חלונות';
+
+  @override
+  String get controlSectionClimate => 'מיזוג';
+
+  @override
+  String get controlStaleTitle => 'נתונים ישנים';
+
+  @override
+  String controlStaleBody(String ago) {
+    return 'רענן את המצב לפני שליחת פקודה ($ago)';
+  }
+
+  @override
+  String controlConfirmTitle(String action) {
+    return 'לאשר $action?';
+  }
+
+  @override
+  String get controlConfirmBody =>
+      'הפעולה תישלח לרכב דרך המנהרה. ודא שהרכב במקום בטוח.';
+
+  @override
+  String get controlSend => 'שליחה';
+
+  @override
+  String get controlClimateOffAction => 'כיבוי מיזוג';
+
+  @override
+  String get controlClimateOnAction => 'הפעלת מיזוג';
+
+  @override
+  String get controlSteeringHeatOff => 'כיבוי חימום הגה';
+
+  @override
+  String get controlSteeringHeatOn => 'חימום הגה';
+
+  @override
+  String get controlTempDownShort => 'קריר יותר';
+
+  @override
+  String get controlTempUpShort => 'חם יותר';
+
+  @override
+  String get controlLock => 'נעילה';
+
+  @override
+  String get controlUnlock => 'פתיחה';
+
+  @override
+  String get controlTrunkOpen => 'פתיחת תא מטען';
+
+  @override
+  String get controlTrunkClose => 'סגירת תא מטען';
+
+  @override
+  String get controlWindowsOpen => 'פתיחת חלונות';
+
+  @override
+  String get controlWindowsClose => 'סגירת חלונות';
+
+  @override
+  String get controlWindowsVent => 'אוורור';
+
+  @override
+  String get controlFlash => 'הבהוב אורות';
+
+  @override
+  String get controlFindCar => 'מציאת רכב';
+
+  @override
+  String get controlClimateOn => 'הפעלת מיזוג';
+
+  @override
+  String get controlClimateOff => 'כיבוי מיזוג';
+
+  @override
+  String get controlTempUp => 'חם יותר';
+
+  @override
+  String get controlTempDown => 'קריר יותר';
+
+  @override
+  String get controlFanUp => 'מאוורר +';
+
+  @override
+  String get controlFanDown => 'מאוורר −';
+
+  @override
+  String get controlReadingLight => 'תאורת קריאה';
+
+  @override
+  String get controlSteeringHeat => 'חימום הגה';
+
+  @override
+  String get controlsErrorTitle => 'שגיאה';
+
+  @override
+  String get controlsNoConnection => 'אין חיבור לשרת — שליטה לא זמינה';
 }

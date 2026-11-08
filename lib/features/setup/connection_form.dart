@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/auth/connection_errors.dart';
+import '../../core/auth/connection_failure_l10n.dart';
 import '../../core/l10n/l10n_x.dart';
 import '../../core/auth/tunnel_credentials.dart';
 import '../../core/config/app_settings.dart';
@@ -45,8 +46,9 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
 
   Future<void> _fetchDeviceId() async {
     final url = normalizeBaseUrl(widget.urlController.text);
+    final l10n = context.l10n;
     if (url.isEmpty) {
-      setState(() => _deviceIdError = 'הזן קודם כתובת מנהרה (HTTPS).');
+      setState(() => _deviceIdError = l10n.errorTunnelFirst);
       return;
     }
     setState(() {
@@ -62,7 +64,7 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
       if (!status.ok || status.deviceId == null) {
         throw ConnectionFailure(
           ConnectionFailureKind.deviceIdMissing,
-          'לא התקבל מזהה מכשיר מ־/auth/status. ודא שהמנהרה פעילה והרכב מחובר.',
+          l10n.errorDeviceIdFromServer,
         );
       }
         setState(() => _deviceId = status.deviceId!);
@@ -71,14 +73,12 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
         client.baseUrl = priorBase;
       }
     } on OverdriveApiException catch (e) {
-      setState(() => _deviceIdError = ConnectionFailure.fromApi(e).messageHe);
+      final fail = ConnectionFailure.fromApi(e);
+      setState(() => _deviceIdError = fail.localizedMessage(l10n));
     } on ConnectionFailure catch (e) {
-      setState(() => _deviceIdError = e.messageHe);
+      setState(() => _deviceIdError = e.localizedMessage(l10n));
     } catch (e) {
-      setState(
-        () => _deviceIdError =
-            'לא ניתן להגיע למנהרה. בדוק רשת, HTTPS, ושהמנהרה פעילה ברכב.',
-      );
+      setState(() => _deviceIdError = l10n.errorTunnelUnreachable);
     } finally {
       setState(() => _loadingId = false);
     }
@@ -99,16 +99,17 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
   Future<void> _connect() async {
     final code = widget.accessCodeController.text.trim();
     final url = normalizeBaseUrl(widget.urlController.text);
+    final l10n = context.l10n;
     if (url.isEmpty) {
-      widget.onError?.call('נא למלא כתובת מנהרה');
+      widget.onError?.call(l10n.errorTunnelUrlRequired);
       return;
     }
     if (_deviceId.isEmpty) {
-      widget.onError?.call('טען מזהה מכשיר מהמנהרה לפני התחברות.');
+      widget.onError?.call(l10n.errorDeviceIdMissing);
       return;
     }
     if (!isPlausibleAccessCode(code)) {
-      widget.onError?.call('קוד הגישה קצר מדי (לפחות 8 תווים, כמו במסך ההתחברות ברכב).');
+      widget.onError?.call(l10n.errorAccessCodeShort);
       return;
     }
     setState(() => _busy = true);
@@ -123,7 +124,7 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
       if (!status.ok) {
         throw ConnectionFailure(
           ConnectionFailureKind.unknown,
-          'השרת לא ענה כמצופה לאחר אימות.',
+          l10n.errorUnexpectedAuth,
         );
       }
       final jwt = ref.read(vehicleRepositoryProvider).sessionJwt;
@@ -131,9 +132,9 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
       await ref.read(vehicleSnapshotProvider.notifier).refresh();
       widget.onSuccess?.call();
     } on ConnectionFailure catch (e) {
-      widget.onError?.call(e.messageHe);
+      widget.onError?.call(e.localizedMessage(l10n));
     } on OverdriveApiException catch (e) {
-      widget.onError?.call(ConnectionFailure.fromApi(e).messageHe);
+      widget.onError?.call(ConnectionFailure.fromApi(e).localizedMessage(l10n));
     } catch (e) {
       widget.onError?.call(e.toString());
     } finally {
@@ -195,7 +196,10 @@ class _ConnectionFormState extends ConsumerState<ConnectionForm> {
           ),
           child: SelectableText(
             _deviceId.isEmpty ? l10n.deviceIdPlaceholder : _deviceId,
-            style: theme.textTheme.bodyLarge?.copyWith(fontFamily: 'monospace'),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontFamily: 'NotoSans',
+              letterSpacing: 0.4,
+            ),
             textDirection: TextDirection.ltr,
           ),
         ),

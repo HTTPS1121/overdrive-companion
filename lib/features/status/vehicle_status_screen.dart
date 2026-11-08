@@ -1,46 +1,48 @@
 import 'package:flutter/material.dart';
-import '../../core/l10n/l10n_x.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format/freshness.dart';
+import '../../core/l10n/l10n_x.dart';
 import '../../core/layout/scroll_insets.dart';
-import '../../core/widgets/ltr_metric.dart';
-import '../gps/gps_location_card.dart';
-import '../../data/models/gps_snapshot.dart';
+import '../../core/layout/screenshot_scope.dart';
+import '../../data/models/cloud_status.dart';
 import '../../data/models/vehicle_state.dart';
 import '../../providers/app_providers.dart';
+import '../gps/gps_location_card.dart';
+import 'vehicle_hero_panel.dart';
 
 class VehicleStatusScreen extends ConsumerWidget {
   const VehicleStatusScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final asyncSnap = ref.watch(vehicleSnapshotProvider);
 
     return asyncSnap.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => _CenteredMessage(
         icon: Icons.error_outline,
-        title: 'שגיאה',
+        title: l10n.statusErrorTitle,
         body: e.toString(),
       ),
       data: (snap) {
         if (snap == null) {
-          return const _CenteredMessage(
+          return _CenteredMessage(
             icon: Icons.link_off,
-            title: 'לא מחובר',
-            body: 'הגדר חיבור בהגדרות',
+            title: l10n.statusNotConnected,
+            body: l10n.statusSetupInSettings,
           );
         }
         if (snap.offline || !snap.state.success) {
           return _CenteredMessage(
             icon: Icons.cloud_off,
-            title: 'אין קשר עם השרת',
-            body: snap.errorMessage ?? 'בדוק מנהרה ורשת',
+            title: l10n.statusServerUnreachable,
+            body: snap.errorMessage ?? l10n.statusCheckTunnel,
             action: FilledButton.tonalIcon(
               onPressed: () => ref.read(vehicleSnapshotProvider.notifier).refresh(),
               icon: const Icon(Icons.refresh),
-              label: const Text('נסה שוב'),
+              label: Text(l10n.statusRetry),
             ),
           );
         }
@@ -49,74 +51,171 @@ class VehicleStatusScreen extends ConsumerWidget {
           serverEpochSec: snap.state.timestamp,
           fetchedAt: snap.lastUpdated ?? DateTime.now(),
         );
+        final driving = snap.gps?.isDriving == true ? l10n.statusDriving : l10n.statusParked;
+        final freshnessLabel = ScreenshotScope.of(context)
+            ? l10n.freshnessUpdated(l10n.freshnessNow)
+            : freshness.fetchedAgoLabelLocalized(l10n, snap.lastUpdated);
 
         return RefreshIndicator(
           onRefresh: () => ref.read(vehicleSnapshotProvider.notifier).refresh(),
           child: ListView(
             padding: scrollBottomPadding(context, extra: 88),
             children: [
-              _HeroStatusCard(
+              VehicleHeroPanel(
                 soc: snap.state.battery?.soc,
                 rangeKm: snap.state.battery?.displayRangeKm,
                 locked: snap.state.isLocked,
-                driving: snap.drivingLabelHe,
+                driving: driving,
+                freshnessLabel: freshnessLabel,
               ),
-              const SizedBox(height: 12),
-              _SectionCard(
-                title: 'חיבור',
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('מחובר לשרת', style: Theme.of(context).textTheme.titleMedium),
-                    Text(
-                      freshness.fetchedAgoLabelHe(snap.lastUpdated),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    if (freshness.age != null && freshness.age!.inSeconds >= 5)
-                      Text(
-                        'זמן בשרת: ${freshness.ageLabelHe()}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    if (freshness.isStale)
-                      Text(
-                        'נתונים ישנים — רענן לפני פקודות',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.tertiary,
-                            ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              _BatterySection(battery: snap.state.battery, locked: snap.state.isLocked),
-              const SizedBox(height: 12),
-              _ClimateSection(climate: snap.state.climate),
-              const SizedBox(height: 12),
-              _WindowsSection(windows: snap.state.windows),
-              if (snap.state.tyres?.available == true) ...[
+              if (freshness.isStale) ...[
                 const SizedBox(height: 12),
-                _TyresSection(tyres: snap.state.tyres!),
+                Card(
+                  color: Theme.of(context).colorScheme.tertiaryContainer,
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.schedule,
+                      color: Theme.of(context).colorScheme.onTertiaryContainer,
+                    ),
+                    title: Text(l10n.statusDataStale),
+                  ),
+                ),
               ],
+              const SizedBox(height: 16),
+              _MetricGrid(
+                climate: snap.state.climate,
+                windows: snap.state.windows,
+                tyres: snap.state.tyres,
+              ),
               if (snap.gps != null) ...[
                 const SizedBox(height: 12),
-                _GpsSection(gps: snap.gps!, drivingLabel: snap.drivingLabelHe),
+                GpsLocationCard(gps: snap.gps!, compact: true),
               ],
               if (snap.cloud != null) ...[
                 const SizedBox(height: 12),
-                _SectionCard(
-                  title: 'ענן BYD',
-                  child: Text(
-                    snap.cloud!.configured && snap.cloud!.verified
-                        ? 'מוגדר ופעיל'
-                        : 'חלקי או לא מוגדר',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
+                _CloudStrip(cloud: snap.cloud!),
               ],
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _MetricGrid extends StatelessWidget {
+  const _MetricGrid({this.climate, this.windows, this.tyres});
+
+  final ClimateInfo? climate;
+  final WindowPercents? windows;
+  final TyreBlock? tyres;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    String win(int? v) => v == null || v < 0 ? '—' : '$v%';
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: _MetricTile(
+                icon: Icons.ac_unit,
+                title: l10n.sectionClimate,
+                value: climate?.acOn == true ? l10n.stateOn : l10n.stateOff,
+                subtitle: climate?.insideTempC != null
+                    ? '${climate!.insideTempC!.toStringAsFixed(1)}°'
+                    : null,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              flex: 2,
+              child: _MetricTile(
+                icon: Icons.filter_drama_outlined,
+                title: l10n.sectionWindows,
+                value: win(windows?.lf),
+                subtitle: win(windows?.lr),
+              ),
+            ),
+          ],
+        ),
+        if (tyres?.available == true) ...[
+          const SizedBox(height: 10),
+          _MetricTile(
+            icon: Icons.tire_repair,
+            title: l10n.sectionTyres,
+            value: tyres?.fl?.kPa != null ? '${tyres!.fl!.kPa} kPa' : '—',
+            subtitle: tyres?.fr?.kPa != null ? '${tyres!.fr!.kPa} kPa' : null,
+            wide: true,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _MetricTile extends StatelessWidget {
+  const _MetricTile({
+    required this.icon,
+    required this.title,
+    required this.value,
+    this.subtitle,
+    this.wide = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String value;
+  final String? subtitle;
+  final bool wide;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surfaceContainer,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: theme.colorScheme.primary),
+            const SizedBox(height: 8),
+            Text(title, style: theme.textTheme.labelLarge),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+              textDirection: TextDirection.ltr,
+            ),
+            if (subtitle != null)
+              Text(subtitle!, style: theme.textTheme.bodySmall, textDirection: TextDirection.ltr),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CloudStrip extends StatelessWidget {
+  const _CloudStrip({required this.cloud});
+
+  final CloudStatus cloud;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final ok = cloud.configured && cloud.verified;
+    return ListTile(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      tileColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      leading: const Icon(Icons.cloud_outlined),
+      title: Text(l10n.sectionCloud),
+      subtitle: Text(ok ? l10n.cloudActive : l10n.cloudPartial),
     );
   }
 }
@@ -152,209 +251,5 @@ class _CenteredMessage extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _HeroStatusCard extends StatelessWidget {
-  const _HeroStatusCard({
-    required this.soc,
-    required this.rangeKm,
-    required this.locked,
-    this.driving,
-  });
-
-  final double? soc;
-  final int? rangeKm;
-  final bool? locked;
-  final String? driving;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Material(
-      color: scheme.surfaceContainerLow,
-      elevation: 0,
-      borderRadius: BorderRadius.circular(24),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.statusHeroTitle,
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            if (driving != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(driving!, style: theme.textTheme.bodyMedium),
-              ),
-            const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (soc != null)
-                  Text(
-                    '${soc!.round()}%',
-                    style: theme.textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: scheme.primary,
-                    ),
-                  )
-                else
-                  Text('—', style: theme.textTheme.displaySmall),
-                const SizedBox(width: 16),
-                if (rangeKm != null)
-                  Expanded(
-                    child: Text(
-                      '$rangeKm km',
-                      style: theme.textTheme.titleLarge,
-                      textDirection: TextDirection.ltr,
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (locked != null)
-              Text(
-                locked! ? context.l10n.statusLocked : context.l10n.statusUnlocked,
-                style: theme.textTheme.labelLarge,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BatterySection extends StatelessWidget {
-  const _BatterySection({required this.battery, required this.locked});
-
-  final BatteryInfo? battery;
-  final bool? locked;
-
-  @override
-  Widget build(BuildContext context) {
-    final soc = battery?.soc;
-    final range = battery?.displayRangeKm;
-    return _SectionCard(
-      title: 'סוללה',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (soc != null)
-            LtrMetricText(
-              '${soc.round()}%',
-              style: Theme.of(context).textTheme.headlineMedium,
-            )
-          else
-            const Text('לא ידוע'),
-          if (range != null) ...[
-            const SizedBox(height: 4),
-            LtrMetricRow(label: 'טווח', value: '$range km'),
-          ],
-          if (locked != null)
-            Text(locked! ? 'נעול' : 'פתוח', style: Theme.of(context).textTheme.bodyMedium),
-        ],
-      ),
-    );
-  }
-}
-
-class _ClimateSection extends StatelessWidget {
-  const _ClimateSection({required this.climate});
-
-  final ClimateInfo? climate;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = climate;
-    return _SectionCard(
-      title: 'מיזוג',
-      child: Text(
-        c?.acOn == true ? 'פעיל' : 'כבוי',
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
-    );
-  }
-}
-
-class _WindowsSection extends StatelessWidget {
-  const _WindowsSection({required this.windows});
-
-  final WindowPercents? windows;
-
-  @override
-  Widget build(BuildContext context) {
-    String p(int? v) => v == null || v < 0 ? '--' : '$v%';
-    return _SectionCard(
-      title: 'חלונות',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LtrMetricRow(label: 'חלון קדמי', value: p(windows?.lf)),
-          LtrMetricRow(label: 'חלון אחורי', value: p(windows?.lr)),
-        ],
-      ),
-    );
-  }
-}
-
-class _TyresSection extends StatelessWidget {
-  const _TyresSection({required this.tyres});
-
-  final TyreBlock tyres;
-
-  @override
-  Widget build(BuildContext context) {
-    String line(TyreCorner? t) => t?.kPa != null ? '${t!.kPa} kPa' : '—';
-    return _SectionCard(
-      title: 'צמיגים',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LtrMetricRow(label: 'קדמי שמאל', value: line(tyres.fl)),
-          LtrMetricRow(label: 'קדמי ימין', value: line(tyres.fr)),
-        ],
-      ),
-    );
-  }
-}
-
-class _GpsSection extends StatelessWidget {
-  const _GpsSection({required this.gps, this.drivingLabel});
-
-  final GpsSnapshot gps;
-  final String? drivingLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return GpsLocationCard(gps: gps, drivingLabel: drivingLabel, compact: true);
   }
 }

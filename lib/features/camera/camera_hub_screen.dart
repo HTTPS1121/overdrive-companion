@@ -8,7 +8,7 @@ import '../../core/layout/scroll_insets.dart';
 import '../../core/widgets/requires_connection.dart';
 import '../../data/models/camera_models.dart';
 import '../../providers/app_providers.dart';
-import 'overdrive_live_preview.dart';
+import 'camera_stream_panel.dart';
 import 'recording_player_screen.dart';
 
 class CameraHubScreen extends ConsumerStatefulWidget {
@@ -27,6 +27,8 @@ class _CameraHubScreenState extends ConsumerState<CameraHubScreen> {
   String? _error;
   bool _busy = false;
   double _sensitivity = 3;
+  int _selectedView = 0;
+  String _selectedQuality = 'MEDIUM';
 
   @override
   void initState() {
@@ -47,10 +49,15 @@ class _CameraHubScreenState extends ConsumerState<CameraHubScreen> {
         repo.fetchSurveillanceStatus(),
       ]);
       if (!mounted) return;
+      final stream = results[0] as StreamStatusState;
       setState(() {
-        _stream = results[0] as StreamStatusState;
+        _stream = stream;
         _recordings = results[1] as RecordingsListState;
         _surveillance = results[2] as SurveillanceStatusState;
+        if (stream.viewMode != null) _selectedView = stream.viewMode!;
+        if (stream.quality != null) {
+          _selectedQuality = stream.quality!.toUpperCase();
+        }
         _loading = false;
       });
     } catch (e) {
@@ -118,66 +125,21 @@ class _CameraHubScreenState extends ConsumerState<CameraHubScreen> {
               child: ListView(
                 padding: scrollBottomPadding(context, extra: 96),
                 children: [
-                  Text(l10n.cameraLiveTitle, style: theme.textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(l10n.cameraLiveHelp, style: theme.textTheme.bodySmall),
-                  const SizedBox(height: 12),
-                  const OverdriveLivePreview(),
-                  const SizedBox(height: 12),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            l10n.streamConnectedLabel(
-                              _stream?.success == true ? '${_stream?.connected}' : '—',
-                            ),
-                          ),
-                          if (_stream?.viewMode != null)
-                            Text(l10n.streamViewModeLabel(_stream!.viewMode!)),
-                          if (_stream?.quality != null)
-                            Text(_stream!.quality!, textDirection: TextDirection.ltr),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              FilledButton.tonal(
-                                onPressed: _busy
-                                    ? null
-                                    : () => _post(() => ref.read(vehicleRepositoryProvider).enableStream()),
-                                child: Text(l10n.cameraEnableStream),
-                              ),
-                              FilledButton.tonal(
-                                onPressed: _busy
-                                    ? null
-                                    : () => _post(() => ref.read(vehicleRepositoryProvider).disableStream()),
-                                child: Text(l10n.cameraDisableStream),
-                              ),
-                              for (final mode in [0, 1, 2, 3, 4])
-                                FilledButton.tonal(
-                                  onPressed: _busy
-                                      ? null
-                                      : () => _post(
-                                            () => ref.read(vehicleRepositoryProvider).setStreamViewMode(mode),
-                                          ),
-                                  child: Text(_viewLabel(l10n, mode)),
-                                ),
-                              FilledButton.tonal(
-                                onPressed: _busy
-                                    ? null
-                                    : () => _post(
-                                          () => ref.read(vehicleRepositoryProvider).setStreamQuality('MEDIUM'),
-                                        ),
-                                child: Text(l10n.cameraViewQualityMedium),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                  CameraStreamPanel(
+                    stream: _stream,
+                    busy: _busy,
+                    selectedView: _selectedView,
+                    selectedQuality: _selectedQuality,
+                    onEnable: () => _post(() => ref.read(vehicleRepositoryProvider).enableStream()),
+                    onDisable: () => _post(() => ref.read(vehicleRepositoryProvider).disableStream()),
+                    onView: (mode) {
+                      setState(() => _selectedView = mode);
+                      _post(() => ref.read(vehicleRepositoryProvider).setStreamViewMode(mode));
+                    },
+                    onQuality: (q) {
+                      setState(() => _selectedQuality = q);
+                      _post(() => ref.read(vehicleRepositoryProvider).setStreamQuality(q));
+                    },
                   ),
                   const SizedBox(height: 20),
                   Text(l10n.cameraSurveillanceTitle, style: theme.textTheme.titleLarge),
@@ -240,7 +202,7 @@ class _CameraHubScreenState extends ConsumerState<CameraHubScreen> {
                             4,
                             (q) => OutlinedButton(
                               onPressed: () => _snapshot(q),
-                              child: Text(l10n.surveillanceSnapshot(q)),
+                              child: Text(_cornerLabel(l10n, q)),
                             ),
                           ),
                         ),
@@ -275,12 +237,11 @@ class _CameraHubScreenState extends ConsumerState<CameraHubScreen> {
     );
   }
 
-  String _viewLabel(dynamic l10n, int mode) => switch (mode) {
-        0 => l10n.cameraViewMosaic,
-        1 => l10n.cameraViewFront,
-        2 => l10n.cameraViewRight,
-        3 => l10n.cameraViewRear,
-        4 => l10n.cameraViewLeft,
-        _ => '$mode',
+  String _cornerLabel(dynamic l10n, int q) => switch (q) {
+        0 => l10n.surveillanceCornerFrontLeft,
+        1 => l10n.surveillanceCornerFrontRight,
+        2 => l10n.surveillanceCornerRearLeft,
+        3 => l10n.surveillanceCornerRearRight,
+        _ => l10n.surveillanceSnapshot(q),
       };
 }

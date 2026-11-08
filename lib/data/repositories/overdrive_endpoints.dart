@@ -46,6 +46,25 @@ abstract final class OverdriveEndpoints {
   static String thumbById(String recordingId) => '/thumb/id/$recordingId';
   static String recordingDeleteById(String recordingId) => '/api/recordings/id/$recordingId';
   static String surveillanceSnapshot(int quadrant) => '/api/surveillance/snapshot/$quadrant';
+  static const surveillanceHeatmap = '/api/surveillance/heatmap';
+  static const surveillanceFilterLog = '/api/surveillance/filterlog';
+  static const surveillanceScreenDeterrentImage = '/api/surveillance/screen-deterrent/image';
+  static const surveillanceScreenDeterrentTest = '/api/surveillance/screen-deterrent/test';
+
+  static const wireguardStatus = '/api/wireguard';
+  static const wireguardConfig = '/api/wireguard/config';
+  static const wireguardExpose = '/api/wireguard/expose';
+
+  static const communicateStatus = '/api/communicate/status';
+  static const communicateSettings = '/api/communicate/settings';
+  static const communicateMessage = '/api/communicate/message';
+  static const communicateTestSpeaker = '/api/communicate/test-speaker';
+  static const communicateEmergencyStop = '/api/communicate/emergency-stop';
+
+  static const genaiStatus = '/api/genai/status';
+  static const genaiConfig = '/api/genai/config';
+  static const genaiChat = '/api/genai/chat';
+  static const genaiInsightsDashboard = '/api/genai/insights/dashboard';
 }
 
 enum ControlKind {
@@ -72,7 +91,6 @@ class ControlCapability {
   const ControlCapability({
     required this.kind,
     required this.path,
-    required this.labelHe,
     this.defaultBody,
     this.requiresTyres = false,
     this.requiresConfirmation = false,
@@ -80,115 +98,81 @@ class ControlCapability {
 
   final ControlKind kind;
   final String path;
-  final String labelHe;
   final Map<String, dynamic>? defaultBody;
   final bool requiresTyres;
   final bool requiresConfirmation;
 }
 
-/// Controls implemented in this companion (subset of VehicleControlApiHandler).
 const kCompanionControls = <ControlCapability>[
-  ControlCapability(
-    kind: ControlKind.lock,
-    path: OverdriveEndpoints.lock,
-    labelHe: 'נעילה',
-    requiresConfirmation: true,
-  ),
-  ControlCapability(
-    kind: ControlKind.unlock,
-    path: OverdriveEndpoints.unlock,
-    labelHe: 'פתיחה',
-    requiresConfirmation: true,
-  ),
+  ControlCapability(kind: ControlKind.lock, path: OverdriveEndpoints.lock, requiresConfirmation: true),
+  ControlCapability(kind: ControlKind.unlock, path: OverdriveEndpoints.unlock, requiresConfirmation: true),
   ControlCapability(
     kind: ControlKind.trunkOpen,
     path: OverdriveEndpoints.trunk,
-    labelHe: 'פתיחת תא מטען',
     defaultBody: {'action': 'open'},
     requiresConfirmation: true,
   ),
   ControlCapability(
     kind: ControlKind.trunkClose,
     path: OverdriveEndpoints.trunk,
-    labelHe: 'סגירת תא מטען',
     defaultBody: {'action': 'close'},
   ),
   ControlCapability(
     kind: ControlKind.windowsOpen,
     path: OverdriveEndpoints.window,
-    labelHe: 'פתיחת חלונות',
     defaultBody: {'area': 0, 'command': 1},
     requiresConfirmation: true,
   ),
   ControlCapability(
     kind: ControlKind.windowsClose,
     path: OverdriveEndpoints.window,
-    labelHe: 'סגירת חלונות',
     defaultBody: {'area': 0, 'command': 2},
   ),
   ControlCapability(
     kind: ControlKind.windowsVent,
     path: OverdriveEndpoints.window,
-    labelHe: 'אוורור חלונות',
     defaultBody: {'action': 'vent'},
   ),
-  ControlCapability(
-    kind: ControlKind.flash,
-    path: OverdriveEndpoints.flash,
-    labelHe: 'הבהוב אורות',
-  ),
-  ControlCapability(
-    kind: ControlKind.findCar,
-    path: OverdriveEndpoints.findCar,
-    labelHe: 'מציאת רכב',
-    requiresConfirmation: true,
-  ),
+  ControlCapability(kind: ControlKind.flash, path: OverdriveEndpoints.flash),
+  ControlCapability(kind: ControlKind.findCar, path: OverdriveEndpoints.findCar, requiresConfirmation: true),
   ControlCapability(
     kind: ControlKind.climateOn,
     path: OverdriveEndpoints.climate,
-    labelHe: 'הפעלת מיזוג',
     defaultBody: {'action': 'power_on', 'temp': 22, 'remoteDurationMinutes': 20},
   ),
   ControlCapability(
     kind: ControlKind.climateOff,
     path: OverdriveEndpoints.climate,
-    labelHe: 'כיבוי מיזוג',
     defaultBody: {'action': 'power_off'},
   ),
   ControlCapability(
     kind: ControlKind.tempUp,
     path: OverdriveEndpoints.climate,
-    labelHe: 'טמפ׳ +',
     defaultBody: {'action': 'set_temp', 'zone': 0, 'temp': 23},
   ),
   ControlCapability(
     kind: ControlKind.tempDown,
     path: OverdriveEndpoints.climate,
-    labelHe: 'טמפ׳ -',
     defaultBody: {'action': 'set_temp', 'zone': 0, 'temp': 21},
   ),
   ControlCapability(
     kind: ControlKind.fanUp,
     path: OverdriveEndpoints.climate,
-    labelHe: 'מאוורר +',
     defaultBody: {'action': 'set_fan', 'fan': 3},
   ),
   ControlCapability(
     kind: ControlKind.fanDown,
     path: OverdriveEndpoints.climate,
-    labelHe: 'מאוורר -',
     defaultBody: {'action': 'set_fan', 'fan': 1},
   ),
   ControlCapability(
     kind: ControlKind.readingLight,
     path: OverdriveEndpoints.lights,
-    labelHe: 'אור קריאה',
     defaultBody: {'target': 'readingLight', 'enable': true},
   ),
   ControlCapability(
     kind: ControlKind.steeringHeat,
     path: OverdriveEndpoints.climate,
-    labelHe: 'חימום הגה',
     defaultBody: {'action': 'steering_heat_on'},
   ),
 ];

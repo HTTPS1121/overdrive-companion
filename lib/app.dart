@@ -19,6 +19,9 @@ class OverdriveApp extends ConsumerStatefulWidget {
     this.screenshotBoundaryKey,
     this.lockPhoneViewport = false,
     this.screenshotMode = false,
+    this.screenshotLocale,
+    this.screenshotLightScheme,
+    this.screenshotDarkScheme,
   });
 
   final AppSettings initialSettings;
@@ -26,6 +29,9 @@ class OverdriveApp extends ConsumerStatefulWidget {
   final bool lockPhoneViewport;
   /// Test-only: skip bootstrap that would overwrite Riverpod overrides.
   final bool screenshotMode;
+  final Locale? screenshotLocale;
+  final ColorScheme? screenshotLightScheme;
+  final ColorScheme? screenshotDarkScheme;
 
   @override
   ConsumerState<OverdriveApp> createState() => _OverdriveAppState();
@@ -73,19 +79,28 @@ class _OverdriveAppState extends ConsumerState<OverdriveApp> {
       return const Locale('en');
     }
 
-    final screenshotLocale =
-        widget.screenshotMode ? const Locale('he') : null;
+    final localeOverride = widget.screenshotMode
+        ? (widget.screenshotLocale ?? const Locale('he'))
+        : widget.screenshotLocale;
 
-    if (!settings.useDynamicColor) {
+    final lightScheme = widget.screenshotLightScheme;
+    final darkScheme = widget.screenshotDarkScheme;
+    final useInjectedScheme = lightScheme != null || darkScheme != null;
+
+    if (!settings.useDynamicColor || useInjectedScheme) {
       return MaterialApp(
         title: 'Overdrive Companion',
         debugShowCheckedModeBanner: false,
         supportedLocales: AppLocalizations.supportedLocales,
-        locale: screenshotLocale,
+        locale: localeOverride,
         localeResolutionCallback: localeResolution,
         localizationsDelegates: localizations,
-        theme: companionLightTheme(),
-        darkTheme: companionDarkTheme(),
+        theme: companionLightTheme(
+          colorScheme: lightScheme ?? CompanionColorSchemes.light,
+        ),
+        darkTheme: companionDarkTheme(
+          colorScheme: darkScheme ?? CompanionColorSchemes.dark,
+        ),
         themeMode: settings.materialThemeMode,
         home: home,
       );
@@ -97,7 +112,7 @@ class _OverdriveAppState extends ConsumerState<OverdriveApp> {
           title: 'Overdrive Companion',
           debugShowCheckedModeBanner: false,
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: screenshotLocale,
+          locale: localeOverride,
           localeResolutionCallback: localeResolution,
           localizationsDelegates: localizations,
           theme: companionLightTheme(
