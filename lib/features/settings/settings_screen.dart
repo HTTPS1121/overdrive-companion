@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/app_settings.dart';
+import '../../core/theme/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/demo_banner.dart';
 import '../../data/api/overdrive_api_client.dart';
@@ -77,7 +78,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       await ref.read(vehicleRepositoryProvider.notifier).authenticateAndStoreJwt();
       setState(() {
         _testOk = true;
-        _testMessage = 'מחובר. מזהה: ${status.deviceId ?? '—'}';
+        _testMessage = 'מחובר. מזהה: ${status.deviceId ?? "--"}';
       });
     } catch (e) {
       setState(() {
@@ -105,7 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         DemoDataBanner(mode: _mode),
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             children: [
               Text('חיבור לשרת Overdrive ברכב', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 6),
@@ -115,21 +116,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               const SizedBox(height: 20),
               SegmentedButton<ConnectionMode>(
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: ConnectionMode.embeddedMock,
-                    label: Text('דמו'),
-                    icon: Icon(Icons.science_outlined),
+                    label: Text('דמו', style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge)),
+                    icon: const Icon(Icons.science_outlined),
                   ),
                   ButtonSegment(
                     value: ConnectionMode.live,
-                    label: Text('רכב'),
-                    icon: Icon(Icons.directions_car),
+                    label: Text('רכב', style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge)),
+                    icon: const Icon(Icons.directions_car),
                   ),
                   ButtonSegment(
                     value: ConnectionMode.localMockServer,
-                    label: Text('Mock HTTP'),
-                    icon: Icon(Icons.dns_outlined),
+                    label: Text(
+                      'סימולטור',
+                      style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge),
+                    ),
+                    icon: const Icon(Icons.dns_outlined),
                   ),
                 ],
                 selected: {_mode},
@@ -150,9 +154,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
               TextField(
                 controller: _tokenCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Device token',
-                  helperText: 'POST /auth/token — נשמר מוצפן במכשיר',
+                decoration: InputDecoration(
+                  labelText: 'אסימון מכשיר',
+                  helperText: 'נשמר מוצפן במכשיר (אימות /auth/token)',
+                  helperStyle: hebrewTextStyle(Theme.of(context).textTheme.bodySmall),
+                  labelStyle: hebrewTextStyle(Theme.of(context).textTheme.bodyLarge),
                 ),
                 obscureText: true,
                 textDirection: TextDirection.ltr,

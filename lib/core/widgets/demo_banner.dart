@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../config/app_settings.dart';
+import '../format/display_strings.dart';
+import '../theme/app_text.dart';
 import '../theme/app_theme.dart';
 
 class DemoDataBanner extends StatelessWidget {
@@ -13,20 +15,23 @@ class DemoDataBanner extends StatelessWidget {
     if (mode == ConnectionMode.live) return const SizedBox.shrink();
 
     final colors = OverdriveColors.of(context);
-    final label = switch (mode) {
-      ConnectionMode.embeddedMock => 'מצב הדגמה מובנה — לא נתוני רכב אמיתיים',
-      ConnectionMode.localMockServer => 'שרת Mock מקומי — סימולציה בלבד',
-      ConnectionMode.live => '',
-    };
+    final label = demoModeBannerHe(
+      switch (mode) {
+        ConnectionMode.embeddedMock => ConnectionModeLabel.embedded,
+        ConnectionMode.localMockServer => ConnectionModeLabel.localSim,
+        ConnectionMode.live => ConnectionModeLabel.live,
+      },
+    );
 
     return Material(
       color: colors.demoBanner,
       child: InkWell(
         onTap: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'הנתונים והפקודות כאן מדומים. לחיבור לרכב אמיתי בחר «רכב / מנהרה» בהגדרות.',
+                'הנתונים והפקודות כאן מדומים. לחיבור לרכב אמיתי בחר «רכב» בהגדרות.',
+                style: hebrewTextStyle(Theme.of(context).textTheme.bodyMedium),
               ),
             ),
           );
@@ -46,7 +51,7 @@ class DemoDataBanner extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge).copyWith(
                         color: colors.warn,
                         fontSize: 13,
                       ),

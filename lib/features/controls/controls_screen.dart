@@ -35,7 +35,7 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
             data: (snap) {
               if (snap == null || snap.offline || !snap.state.success) {
                 return Center(
-                  child: Text(snap?.errorMessage ?? 'אין חיבור — לא ניתן לשלוט'),
+                  child: Text(snap?.errorMessage ?? 'אין חיבור - לא ניתן לשלוט'),
                 );
               }
 
@@ -46,7 +46,7 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
               final staleBlocked = freshness.isStale;
 
               return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
                 children: [
                   if (staleBlocked)
                     Card(

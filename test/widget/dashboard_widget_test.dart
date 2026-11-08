@@ -15,7 +15,7 @@ void main() {
     await ensureScreenshotFonts();
   });
 
-  testWidgets('dashboard shows demo banner and BYD hero', (tester) async {
+  testWidgets('dashboard shows demo banner and quick actions', (tester) async {
     final mock = MockOverdriveBackend();
     final repo = VehicleRepository(
       settings: AppSettings.defaults(),
@@ -40,9 +40,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('הדגמה'), findsOneWidget);
-    expect(find.text('BYD Atto 3'), findsOneWidget);
-    expect(find.textContaining('72'), findsWidgets);
+    expect(find.textContaining('מצב הדגמה מובנה'), findsOneWidget);
+    expect(find.text('נעילה'), findsOneWidget);
+    expect(find.textContaining('72%'), findsWidgets);
   });
 }
 

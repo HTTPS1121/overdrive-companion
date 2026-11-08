@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/app_settings.dart';
+import '../../core/theme/app_text.dart';
+import '../../core/widgets/bilingual_text.dart';
 import '../../providers/app_providers.dart';
 import '../controls/controls_screen.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -45,13 +47,21 @@ class _MainShellState extends ConsumerState<MainShell> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('מלווה Overdrive'),
+          centerTitle: true,
+          title: HebrewLatinTitle(
+            hebrew: 'מלווה',
+            latin: 'Overdrive',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           actions: [
             if (settings.connectionMode != ConnectionMode.live)
-              const Padding(
-                padding: EdgeInsetsDirectional.only(end: 4),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 4),
                 child: Chip(
-                  label: Text('דמו'),
+                  label: Text(
+                    'דמו',
+                    style: hebrewTextStyle(Theme.of(context).textTheme.labelSmall),
+                  ),
                   visualDensity: VisualDensity.compact,
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/cloud_status.dart';
 import '../../data/repositories/vehicle_repository.dart';
+import '../format/display_strings.dart';
 import '../format/freshness.dart';
 import '../theme/app_text.dart';
 import '../theme/app_theme.dart';
@@ -104,7 +105,7 @@ class ConnectionStatusBar extends StatelessWidget {
         TextSpan(
           style: he,
           children: [
-            const TextSpan(text: 'נתונים ישנים · '),
+            TextSpan(text: 'נתונים ישנים${kTextSep}'),
             TextSpan(text: freshness.ageLabelHe(), style: num),
           ],
         ),
