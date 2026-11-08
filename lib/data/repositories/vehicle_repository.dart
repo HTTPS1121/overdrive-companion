@@ -100,7 +100,7 @@ class VehicleRepository {
 
   Future<void> ensureAuthenticated() async {
     if (!_settings.isConfigured) {
-      throw OverdriveApiException('חיבור לשרת לא הוגדר');
+      throw OverdriveApiException('connection not configured');
     }
     if (_client.jwt != null && _client.jwt!.isNotEmpty) return;
     try {
@@ -242,7 +242,7 @@ class VehicleRepository {
         commandSuccess: true,
         confirmation: 'local',
         outcome: 'success',
-        message: expected ? 'הרכב ננעל' : 'הרכב נפתח',
+        message: expected ? 'locked' : 'unlocked',
         path: server.path,
       );
     }
@@ -253,14 +253,14 @@ class VehicleRepository {
         confirmation: 'none',
         outcome: 'unconfirmed',
         message: server.message,
-        error: server.message ?? 'לא אושר בעקבות קריאת מצב',
+        error: server.message ?? 'state poll unconfirmed',
         path: server.path,
       );
     }
     if (before != null && after == before) {
       return CommandResult(
         success: false,
-        error: 'מצב נעילה לא השתנה',
+        error: 'lock state unchanged',
         path: server.path,
       );
     }
