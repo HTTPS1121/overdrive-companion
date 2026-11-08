@@ -71,6 +71,9 @@ abstract final class ExtendedEndpoints {
   static const debugLightResolve = '/api/debug/light/resolve';
   static const debugRemoteKey = '/api/debug/remote-key';
   static const debugAutoServiceStatus = '/api/debug/autoservice/status';
+  static const debugSeatWrite = '/api/debug/seat/write';
+  static const debugLightWrite = '/api/debug/light/write';
+  static const debugCarPropertySet = '/api/debug/car-property/set';
 
   // RoadSense
   static const roadsenseDeleteLocal = '/api/roadsense/delete-local';

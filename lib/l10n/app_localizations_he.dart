@@ -1552,4 +1552,246 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get releaseSigningDebugNote =>
       'בניית שחרור חתומה במפתח debug ל־CI/תצוגה בלבד — להפצה השתמשו בחתימת שחרור משלכם.';
+
+  @override
+  String get automationSettingsTitle => 'הגדרות אוטומציה';
+
+  @override
+  String get automationSchemaTitle => 'סכימה';
+
+  @override
+  String get automationGlobalEnabled => 'אוטומציות פעילות';
+
+  @override
+  String get automationStateTitle => 'מצב מנוע';
+
+  @override
+  String get automationEditTitle => 'עריכת אוטומציה';
+
+  @override
+  String get automationEnabledLabel => 'פעיל';
+
+  @override
+  String get automationModeLabel => 'מצב';
+
+  @override
+  String get automationRulesSection => 'כללים';
+
+  @override
+  String get automationActionsSection => 'פעולות';
+
+  @override
+  String get automationAddRule => 'הוספת כלל';
+
+  @override
+  String get automationAddAction => 'הוספת פעולה';
+
+  @override
+  String get automationSignalLabel => 'אות';
+
+  @override
+  String get automationOpLabel => 'אופרטור';
+
+  @override
+  String get automationValueLabel => 'ערך';
+
+  @override
+  String get parkingSignageTitle => 'שלט חניה';
+
+  @override
+  String get parkingSignageMessageLabel => 'טקסט שלט';
+
+  @override
+  String get parkingSignageEnabled => 'שלט פעיל';
+
+  @override
+  String get tripConfigTitle => 'מקליט נסיעות';
+
+  @override
+  String get tripConfigEnabled => 'הקלטת נסיעות';
+
+  @override
+  String get tripHistoryDaysLabel => 'חלון היסטוריה (ימים)';
+
+  @override
+  String get tripBootstrapTitle => 'אתחול מאגר נסיעות';
+
+  @override
+  String get tripBootstrapBody => 'בונה מחדש מטא־נתוני נסיעות ברכב.';
+
+  @override
+  String get tripDetailTitle => 'פרטי נסיעה';
+
+  @override
+  String get tripStartedLabel => 'התחלה';
+
+  @override
+  String get genAiRoutineAccept => 'אישור';
+
+  @override
+  String get genAiRoutineReject => 'דחייה';
+
+  @override
+  String get genAiActionTypeLabel => 'סוג פעולה';
+
+  @override
+  String get genAiActionTargetLabel => 'יעד (אופציונלי)';
+
+  @override
+  String get genAiActionValueLabel => 'ערך (אופציונלי)';
+
+  @override
+  String get genAiCreateIncidentTitle => 'יצירת חבילת אירוע';
+
+  @override
+  String get genAiCreateIncidentBody => 'אורזת ראיות ממצלמה לבדיקת GenAI ברכב.';
+
+  @override
+  String get genAiRecordingIdLabel => 'מזהה הקלטה';
+
+  @override
+  String get genAiRecordingIdRequired => 'הזן מזהה הקלטה';
+
+  @override
+  String get telegramPinTitle => 'צימוד עם PIN';
+
+  @override
+  String get telegramPinLabel => 'PIN לצימוד';
+
+  @override
+  String get telegramPinSubmit => 'שליחת PIN';
+
+  @override
+  String get launcherAppearanceTitle => 'מראה Launcher';
+
+  @override
+  String get bydCloudLoggedIn => 'מחובר';
+
+  @override
+  String get bydCloudConfigured => 'מוגדר — לא מחובר';
+
+  @override
+  String get mqttTelemetryTitle => 'טלמטריית MQTT';
+
+  @override
+  String get audioAvasTitle => 'השמעת AVAS';
+
+  @override
+  String get audioAvasPlaying => 'מנגן';
+
+  @override
+  String get audioAvasIdle => 'מושבת';
+
+  @override
+  String get huRemoteTitle => 'שליטה מרחוק במסך ראשי';
+
+  @override
+  String get huRemoteIntro =>
+      'מקשי מעטפת, דמוון קול ושיקוף לוח — ההשפעה על מסכי הרכב.';
+
+  @override
+  String get huRemoteOpen => 'בקרות מסך ראשי';
+
+  @override
+  String get huShellSection => 'מעטפת מסך ראשי';
+
+  @override
+  String get huShellHint => 'שולח מקשי ניווט למסך הרכב (השפעה מרחוק).';
+
+  @override
+  String get huShellConfirmBody => 'מנווט את מסך הרכב — אשר רק אם מורשה.';
+
+  @override
+  String get huHome => 'בית';
+
+  @override
+  String get huBack => 'אחורה';
+
+  @override
+  String get huRecents => 'אחרונים';
+
+  @override
+  String get huDisplayId => 'מסך';
+
+  @override
+  String get huMoveX => 'היסט X';
+
+  @override
+  String get huMoveY => 'היסט Y';
+
+  @override
+  String get huMoveDisplayTitle => 'הזזת מסך';
+
+  @override
+  String get huVoiceSection => 'קול במסך ראשי';
+
+  @override
+  String get huVoiceConfirmBody => 'שמע או דיבור יופעלו ברמקולי הרכב.';
+
+  @override
+  String get huAudioFileLabel => 'שם קובץ שמע';
+
+  @override
+  String get huAudioFileHint => 'נתיב או שם מהספרייה ברכב';
+
+  @override
+  String get huPlayAudio => 'השמעה ברכב';
+
+  @override
+  String get huStopAudio => 'עצירת שמע ברכב';
+
+  @override
+  String get huSpeakText => 'טקסט לדיבור';
+
+  @override
+  String get huSpeak => 'דיבור';
+
+  @override
+  String get huMessageText => 'הודעה על המסך';
+
+  @override
+  String get huMessage => 'הצגת הודעה';
+
+  @override
+  String get huClusterSection => 'שיקוף לוח מחוונים';
+
+  @override
+  String get huClusterHint => 'מתחיל/עוצר שיקוף בלוח — התצוגה עדיין על חומרה.';
+
+  @override
+  String get huClusterAppPackage => 'חבילת אפליקציה (אופציונלי)';
+
+  @override
+  String get huClusterCastStart => 'התחלת שיקוף';
+
+  @override
+  String get huClusterCastStop => 'עצירת שיקוף';
+
+  @override
+  String get debugWriteSection => 'כתיבה (דורש אסימון אישור)';
+
+  @override
+  String get debugWriteTitle => 'לבצע כתיבת דיבוג?';
+
+  @override
+  String get debugWriteBody =>
+      'כותב לרגיסטרים ברמה נמוכה — ערכים שגויים עלולים לפגוע בבטיחות.';
+
+  @override
+  String get debugWriteSubmit => 'החלת כתיבה';
+
+  @override
+  String get debugConfirmTokenLabel => 'אסימון אישור';
+
+  @override
+  String get debugConfirmTokenHint => 'נדרש טקסט מדויק בשרת (למשל YES)';
+
+  @override
+  String get debugRegisterLabel => 'רגיסטר';
+
+  @override
+  String get debugLightZoneLabel => 'אזור תאורה';
+
+  @override
+  String get debugLightLevelLabel => 'רמה (0–100)';
 }

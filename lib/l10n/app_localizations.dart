@@ -2983,6 +2983,486 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Release builds are signed with the debug key for CI/preview only — use your own release keystore for production distribution.'**
   String get releaseSigningDebugNote;
+
+  /// No description provided for @automationSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automation settings'**
+  String get automationSettingsTitle;
+
+  /// No description provided for @automationSchemaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schema'**
+  String get automationSchemaTitle;
+
+  /// No description provided for @automationGlobalEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Automations enabled globally'**
+  String get automationGlobalEnabled;
+
+  /// No description provided for @automationStateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Engine state'**
+  String get automationStateTitle;
+
+  /// No description provided for @automationEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit automation'**
+  String get automationEditTitle;
+
+  /// No description provided for @automationEnabledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get automationEnabledLabel;
+
+  /// No description provided for @automationModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode'**
+  String get automationModeLabel;
+
+  /// No description provided for @automationRulesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Rules'**
+  String get automationRulesSection;
+
+  /// No description provided for @automationActionsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get automationActionsSection;
+
+  /// No description provided for @automationAddRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Add rule'**
+  String get automationAddRule;
+
+  /// No description provided for @automationAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add action'**
+  String get automationAddAction;
+
+  /// No description provided for @automationSignalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Signal'**
+  String get automationSignalLabel;
+
+  /// No description provided for @automationOpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Operator'**
+  String get automationOpLabel;
+
+  /// No description provided for @automationValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get automationValueLabel;
+
+  /// No description provided for @parkingSignageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session signage'**
+  String get parkingSignageTitle;
+
+  /// No description provided for @parkingSignageMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign message'**
+  String get parkingSignageMessageLabel;
+
+  /// No description provided for @parkingSignageEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Signage enabled'**
+  String get parkingSignageEnabled;
+
+  /// No description provided for @tripConfigTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip recorder'**
+  String get tripConfigTitle;
+
+  /// No description provided for @tripConfigEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Record trips'**
+  String get tripConfigEnabled;
+
+  /// No description provided for @tripHistoryDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'History window (days)'**
+  String get tripHistoryDaysLabel;
+
+  /// No description provided for @tripBootstrapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bootstrap trip store'**
+  String get tripBootstrapTitle;
+
+  /// No description provided for @tripBootstrapBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuilds trip metadata on the vehicle (server operation).'**
+  String get tripBootstrapBody;
+
+  /// No description provided for @tripDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip detail'**
+  String get tripDetailTitle;
+
+  /// No description provided for @tripStartedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Started'**
+  String get tripStartedLabel;
+
+  /// No description provided for @genAiRoutineAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get genAiRoutineAccept;
+
+  /// No description provided for @genAiRoutineReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get genAiRoutineReject;
+
+  /// No description provided for @genAiActionTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Action type'**
+  String get genAiActionTypeLabel;
+
+  /// No description provided for @genAiActionTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target (optional)'**
+  String get genAiActionTargetLabel;
+
+  /// No description provided for @genAiActionValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Value (optional)'**
+  String get genAiActionValueLabel;
+
+  /// No description provided for @genAiCreateIncidentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create incident pack'**
+  String get genAiCreateIncidentTitle;
+
+  /// No description provided for @genAiCreateIncidentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Packages dashcam evidence for GenAI review on the vehicle.'**
+  String get genAiCreateIncidentBody;
+
+  /// No description provided for @genAiRecordingIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording ID'**
+  String get genAiRecordingIdLabel;
+
+  /// No description provided for @genAiRecordingIdRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a recording ID'**
+  String get genAiRecordingIdRequired;
+
+  /// No description provided for @telegramPinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pair with PIN'**
+  String get telegramPinTitle;
+
+  /// No description provided for @telegramPinLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pairing PIN'**
+  String get telegramPinLabel;
+
+  /// No description provided for @telegramPinSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit PIN'**
+  String get telegramPinSubmit;
+
+  /// No description provided for @launcherAppearanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Launcher appearance'**
+  String get launcherAppearanceTitle;
+
+  /// No description provided for @bydCloudLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged in'**
+  String get bydCloudLoggedIn;
+
+  /// No description provided for @bydCloudConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Configured — not logged in'**
+  String get bydCloudConfigured;
+
+  /// No description provided for @mqttTelemetryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'MQTT telemetry'**
+  String get mqttTelemetryTitle;
+
+  /// No description provided for @audioAvasTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AVAS playback'**
+  String get audioAvasTitle;
+
+  /// No description provided for @audioAvasPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing'**
+  String get audioAvasPlaying;
+
+  /// No description provided for @audioAvasIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Idle'**
+  String get audioAvasIdle;
+
+  /// No description provided for @huRemoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Head-unit remote'**
+  String get huRemoteTitle;
+
+  /// No description provided for @huRemoteIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Shell keys, voice daemon, and cluster cast API — effects occur on the vehicle displays.'**
+  String get huRemoteIntro;
+
+  /// No description provided for @huRemoteOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open head-unit controls'**
+  String get huRemoteOpen;
+
+  /// No description provided for @huShellSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Head-unit shell'**
+  String get huShellSection;
+
+  /// No description provided for @huShellHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends Android navigation keys to the vehicle display (remote effect on HU).'**
+  String get huShellHint;
+
+  /// No description provided for @huShellConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This navigates the vehicle head unit. Confirm only if you are authorized.'**
+  String get huShellConfirmBody;
+
+  /// No description provided for @huHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get huHome;
+
+  /// No description provided for @huBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get huBack;
+
+  /// No description provided for @huRecents.
+  ///
+  /// In en, this message translates to:
+  /// **'Recents'**
+  String get huRecents;
+
+  /// No description provided for @huDisplayId.
+  ///
+  /// In en, this message translates to:
+  /// **'Display'**
+  String get huDisplayId;
+
+  /// No description provided for @huMoveX.
+  ///
+  /// In en, this message translates to:
+  /// **'X offset'**
+  String get huMoveX;
+
+  /// No description provided for @huMoveY.
+  ///
+  /// In en, this message translates to:
+  /// **'Y offset'**
+  String get huMoveY;
+
+  /// No description provided for @huMoveDisplayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move display'**
+  String get huMoveDisplayTitle;
+
+  /// No description provided for @huVoiceSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Head-unit voice'**
+  String get huVoiceSection;
+
+  /// No description provided for @huVoiceConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio or speech plays on the vehicle speakers.'**
+  String get huVoiceConfirmBody;
+
+  /// No description provided for @huAudioFileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio file name'**
+  String get huAudioFileLabel;
+
+  /// No description provided for @huAudioFileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle-side clip path or library name'**
+  String get huAudioFileHint;
+
+  /// No description provided for @huPlayAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Play on HU'**
+  String get huPlayAudio;
+
+  /// No description provided for @huStopAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop HU audio'**
+  String get huStopAudio;
+
+  /// No description provided for @huSpeakText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text to speak'**
+  String get huSpeakText;
+
+  /// No description provided for @huSpeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Speak'**
+  String get huSpeak;
+
+  /// No description provided for @huMessageText.
+  ///
+  /// In en, this message translates to:
+  /// **'On-screen message'**
+  String get huMessageText;
+
+  /// No description provided for @huMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Show message'**
+  String get huMessage;
+
+  /// No description provided for @huClusterSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Cluster cast API'**
+  String get huClusterSection;
+
+  /// No description provided for @huClusterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts/stops cluster mirroring on the vehicle. Mirrored UI still renders on hardware.'**
+  String get huClusterHint;
+
+  /// No description provided for @huClusterAppPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'App package (optional)'**
+  String get huClusterAppPackage;
+
+  /// No description provided for @huClusterCastStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start cluster cast'**
+  String get huClusterCastStart;
+
+  /// No description provided for @huClusterCastStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop cluster cast'**
+  String get huClusterCastStop;
+
+  /// No description provided for @debugWriteSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Write (requires confirm token)'**
+  String get debugWriteSection;
+
+  /// No description provided for @debugWriteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply debug write?'**
+  String get debugWriteTitle;
+
+  /// No description provided for @debugWriteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Writes low-level vehicle registers. Incorrect values can affect safety systems.'**
+  String get debugWriteBody;
+
+  /// No description provided for @debugWriteSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply write'**
+  String get debugWriteSubmit;
+
+  /// No description provided for @debugConfirmTokenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm token'**
+  String get debugConfirmTokenLabel;
+
+  /// No description provided for @debugConfirmTokenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Upstream requires exact confirm text (e.g. YES)'**
+  String get debugConfirmTokenHint;
+
+  /// No description provided for @debugRegisterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get debugRegisterLabel;
+
+  /// No description provided for @debugLightZoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Light zone'**
+  String get debugLightZoneLabel;
+
+  /// No description provided for @debugLightLevelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level (0–100)'**
+  String get debugLightLevelLabel;
 }
 
 class _AppLocalizationsDelegate

@@ -128,35 +128,50 @@ class TelegramStatusState {
   final bool? videoUploads;
 }
 
+class GenAiRoutineSuggestion {
+  GenAiRoutineSuggestion({required this.id, this.title});
+
+  factory GenAiRoutineSuggestion.fromJson(Map<String, dynamic> json) => GenAiRoutineSuggestion(
+        id: json['id']?.toString() ?? '',
+        title: json['title']?.toString(),
+      );
+
+  final String id;
+  final String? title;
+}
+
 class GenAiRoutinesState {
   GenAiRoutinesState({
     required this.success,
     this.enabled,
-    this.pendingSuggestions = const [],
+    this.suggestions = const [],
   });
 
   factory GenAiRoutinesState.fromJson(Map<String, dynamic> json) {
-    final suggestions = <String>[];
+    final suggestions = <GenAiRoutineSuggestion>[];
     final raw = json['suggestions'] ?? json['pending'];
     if (raw is List) {
       for (final e in raw) {
-        if (e is Map) {
-          suggestions.add(e['title']?.toString() ?? e['id']?.toString() ?? '');
-        } else {
-          suggestions.add(e.toString());
+        if (e is Map<String, dynamic>) {
+          suggestions.add(GenAiRoutineSuggestion.fromJson(e));
+        } else if (e is Map) {
+          suggestions.add(GenAiRoutineSuggestion.fromJson(Map<String, dynamic>.from(e)));
         }
       }
     }
     return GenAiRoutinesState(
       success: json['success'] == true || json.containsKey('enabled'),
       enabled: json['enabled'] as bool? ?? json['routineLearningEnabled'] as bool?,
-      pendingSuggestions: suggestions,
+      suggestions: suggestions,
     );
   }
 
   final bool success;
   final bool? enabled;
-  final List<String> pendingSuggestions;
+  final List<GenAiRoutineSuggestion> suggestions;
+
+  List<String> get pendingSuggestionLabels =>
+      suggestions.map((s) => s.title ?? s.id).where((t) => t.isNotEmpty).toList();
 }
 
 class GenAiIncidentPack {

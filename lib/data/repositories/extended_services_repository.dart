@@ -30,6 +30,34 @@ class ExtendedServicesRepository {
   Future<Map<String, dynamic>> fetchAutomationSchema() =>
       _client.getJson(ExtendedEndpoints.automationsSchema);
 
+  Future<Map<String, dynamic>> fetchAutomationState() =>
+      _client.getJson(ExtendedEndpoints.automationsState);
+
+  Future<Map<String, dynamic>> fetchAutomationSettings() =>
+      _client.getJson(ExtendedEndpoints.automationsSettings);
+
+  Future<Map<String, dynamic>> saveAutomationSettings(Map<String, dynamic> body) =>
+      _client.postJson(ExtendedEndpoints.automationsSettings, body: body);
+
+  Future<Map<String, dynamic>> updateAutomation(
+    String id, {
+    required String name,
+    bool? enabled,
+    String? mode,
+    List<Map<String, dynamic>>? rules,
+    List<Map<String, dynamic>>? actions,
+  }) =>
+      _client.putJson(
+        ExtendedEndpoints.automationsUpdate(id),
+        body: {
+          'name': name,
+          if (enabled != null) 'enabled': enabled,
+          if (mode != null) 'mode': mode,
+          if (rules != null) 'rules': rules,
+          if (actions != null) 'actions': actions,
+        },
+      );
+
   Future<Map<String, dynamic>> createAutomation({required String name, bool enabled = true}) =>
       _client.postJson(
         ExtendedEndpoints.automationsCreate,
@@ -76,6 +104,22 @@ class ExtendedServicesRepository {
   Future<Map<String, dynamic>> deleteParkingSession(String id) =>
       _client.deleteJson(ExtendedEndpoints.parkingSession(id));
 
+  Future<Map<String, dynamic>> fetchParkingSignage(String sessionId) =>
+      _client.getJson(ExtendedEndpoints.parkingSignage(sessionId));
+
+  Future<Map<String, dynamic>> saveParkingSignage(
+    String sessionId, {
+    required String message,
+    bool? enabled,
+  }) =>
+      _client.postJson(
+        ExtendedEndpoints.parkingSignage(sessionId),
+        body: {
+          'message': message,
+          if (enabled != null) 'enabled': enabled,
+        },
+      );
+
   Future<List<TripEntry>> listTrips({int days = 14}) async {
     final json = await _client.getJson('${ExtendedEndpoints.tripsList}?days=$days');
     final list = <TripEntry>[];
@@ -93,6 +137,30 @@ class ExtendedServicesRepository {
 
   Future<Map<String, dynamic>> deleteTrip(String id) =>
       _client.deleteJson(ExtendedEndpoints.tripDelete(id));
+
+  Future<Map<String, dynamic>> fetchTripDetail(String id) =>
+      _client.getJson(ExtendedEndpoints.tripDetail(id));
+
+  Future<Map<String, dynamic>> fetchTripConfig() =>
+      _client.getJson(ExtendedEndpoints.tripsConfig);
+
+  Future<Map<String, dynamic>> saveTripConfig({required bool enabled, int? historyDays}) =>
+      _client.postJson(
+        ExtendedEndpoints.tripsConfig,
+        body: {
+          'enabled': enabled,
+          if (historyDays != null) 'historyDays': historyDays,
+        },
+      );
+
+  Future<Map<String, dynamic>> bootstrapTrips() =>
+      _client.postJson(ExtendedEndpoints.tripsBootstrap);
+
+  Future<Map<String, dynamic>> fetchAudioAvasState() =>
+      _client.getJson(ExtendedEndpoints.audioAvasState);
+
+  Future<Map<String, dynamic>> submitTelegramPin(String pin) =>
+      _client.postJson(ExtendedEndpoints.telegramPin, body: {'pin': pin});
 
   Future<List<AudioLibraryEntry>> listAudioLibrary() async {
     final json = await _client.getJson(ExtendedEndpoints.audioLibrary);
@@ -212,6 +280,22 @@ class ExtendedServicesRepository {
   Future<Map<String, dynamic>> readSeatDebug({String group = 'all'}) =>
       _client.getJson('${ExtendedEndpoints.debugSeatRead}?group=$group');
 
+  Future<Map<String, dynamic>> writeSeatDebug({
+    required String register,
+    required int value,
+    required String confirmToken,
+    String group = 'all',
+  }) =>
+      _client.postJson(
+        ExtendedEndpoints.debugSeatWrite,
+        body: {
+          'group': group,
+          'register': register,
+          'value': value,
+          'confirm': confirmToken,
+        },
+      );
+
   Future<Map<String, dynamic>> fetchLogsAvailable() =>
       _client.getJson(ExtendedEndpoints.logsAvailable);
 
@@ -224,6 +308,16 @@ class ExtendedServicesRepository {
   Future<Map<String, dynamic>> readCarProperty(String key) =>
       _client.getJson('${ExtendedEndpoints.debugCarPropertyGet}?key=$key');
 
+  Future<Map<String, dynamic>> writeCarProperty({
+    required String key,
+    required String value,
+    required String confirmToken,
+  }) =>
+      _client.postJson(
+        ExtendedEndpoints.debugCarPropertySet,
+        body: {'key': key, 'value': value, 'confirm': confirmToken},
+      );
+
   Future<Map<String, dynamic>> resolveAdas() =>
       _client.getJson(ExtendedEndpoints.debugAdasResolve);
 
@@ -232,6 +326,16 @@ class ExtendedServicesRepository {
 
   Future<Map<String, dynamic>> resolveLightDebug() =>
       _client.getJson(ExtendedEndpoints.debugLightResolve);
+
+  Future<Map<String, dynamic>> writeLightDebug({
+    required String zone,
+    required int level,
+    required String confirmToken,
+  }) =>
+      _client.postJson(
+        ExtendedEndpoints.debugLightWrite,
+        body: {'zone': zone, 'level': level, 'confirm': confirmToken},
+      );
 
   Future<Map<String, dynamic>> fetchRemoteKeyDebug() =>
       _client.getJson(ExtendedEndpoints.debugRemoteKey);

@@ -1584,4 +1584,253 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get releaseSigningDebugNote =>
       'Release builds are signed with the debug key for CI/preview only — use your own release keystore for production distribution.';
+
+  @override
+  String get automationSettingsTitle => 'Automation settings';
+
+  @override
+  String get automationSchemaTitle => 'Schema';
+
+  @override
+  String get automationGlobalEnabled => 'Automations enabled globally';
+
+  @override
+  String get automationStateTitle => 'Engine state';
+
+  @override
+  String get automationEditTitle => 'Edit automation';
+
+  @override
+  String get automationEnabledLabel => 'Enabled';
+
+  @override
+  String get automationModeLabel => 'Mode';
+
+  @override
+  String get automationRulesSection => 'Rules';
+
+  @override
+  String get automationActionsSection => 'Actions';
+
+  @override
+  String get automationAddRule => 'Add rule';
+
+  @override
+  String get automationAddAction => 'Add action';
+
+  @override
+  String get automationSignalLabel => 'Signal';
+
+  @override
+  String get automationOpLabel => 'Operator';
+
+  @override
+  String get automationValueLabel => 'Value';
+
+  @override
+  String get parkingSignageTitle => 'Session signage';
+
+  @override
+  String get parkingSignageMessageLabel => 'Sign message';
+
+  @override
+  String get parkingSignageEnabled => 'Signage enabled';
+
+  @override
+  String get tripConfigTitle => 'Trip recorder';
+
+  @override
+  String get tripConfigEnabled => 'Record trips';
+
+  @override
+  String get tripHistoryDaysLabel => 'History window (days)';
+
+  @override
+  String get tripBootstrapTitle => 'Bootstrap trip store';
+
+  @override
+  String get tripBootstrapBody =>
+      'Rebuilds trip metadata on the vehicle (server operation).';
+
+  @override
+  String get tripDetailTitle => 'Trip detail';
+
+  @override
+  String get tripStartedLabel => 'Started';
+
+  @override
+  String get genAiRoutineAccept => 'Accept';
+
+  @override
+  String get genAiRoutineReject => 'Reject';
+
+  @override
+  String get genAiActionTypeLabel => 'Action type';
+
+  @override
+  String get genAiActionTargetLabel => 'Target (optional)';
+
+  @override
+  String get genAiActionValueLabel => 'Value (optional)';
+
+  @override
+  String get genAiCreateIncidentTitle => 'Create incident pack';
+
+  @override
+  String get genAiCreateIncidentBody =>
+      'Packages dashcam evidence for GenAI review on the vehicle.';
+
+  @override
+  String get genAiRecordingIdLabel => 'Recording ID';
+
+  @override
+  String get genAiRecordingIdRequired => 'Enter a recording ID';
+
+  @override
+  String get telegramPinTitle => 'Pair with PIN';
+
+  @override
+  String get telegramPinLabel => 'Pairing PIN';
+
+  @override
+  String get telegramPinSubmit => 'Submit PIN';
+
+  @override
+  String get launcherAppearanceTitle => 'Launcher appearance';
+
+  @override
+  String get bydCloudLoggedIn => 'Logged in';
+
+  @override
+  String get bydCloudConfigured => 'Configured — not logged in';
+
+  @override
+  String get mqttTelemetryTitle => 'MQTT telemetry';
+
+  @override
+  String get audioAvasTitle => 'AVAS playback';
+
+  @override
+  String get audioAvasPlaying => 'Playing';
+
+  @override
+  String get audioAvasIdle => 'Idle';
+
+  @override
+  String get huRemoteTitle => 'Head-unit remote';
+
+  @override
+  String get huRemoteIntro =>
+      'Shell keys, voice daemon, and cluster cast API — effects occur on the vehicle displays.';
+
+  @override
+  String get huRemoteOpen => 'Open head-unit controls';
+
+  @override
+  String get huShellSection => 'Head-unit shell';
+
+  @override
+  String get huShellHint =>
+      'Sends Android navigation keys to the vehicle display (remote effect on HU).';
+
+  @override
+  String get huShellConfirmBody =>
+      'This navigates the vehicle head unit. Confirm only if you are authorized.';
+
+  @override
+  String get huHome => 'Home';
+
+  @override
+  String get huBack => 'Back';
+
+  @override
+  String get huRecents => 'Recents';
+
+  @override
+  String get huDisplayId => 'Display';
+
+  @override
+  String get huMoveX => 'X offset';
+
+  @override
+  String get huMoveY => 'Y offset';
+
+  @override
+  String get huMoveDisplayTitle => 'Move display';
+
+  @override
+  String get huVoiceSection => 'Head-unit voice';
+
+  @override
+  String get huVoiceConfirmBody =>
+      'Audio or speech plays on the vehicle speakers.';
+
+  @override
+  String get huAudioFileLabel => 'Audio file name';
+
+  @override
+  String get huAudioFileHint => 'Vehicle-side clip path or library name';
+
+  @override
+  String get huPlayAudio => 'Play on HU';
+
+  @override
+  String get huStopAudio => 'Stop HU audio';
+
+  @override
+  String get huSpeakText => 'Text to speak';
+
+  @override
+  String get huSpeak => 'Speak';
+
+  @override
+  String get huMessageText => 'On-screen message';
+
+  @override
+  String get huMessage => 'Show message';
+
+  @override
+  String get huClusterSection => 'Cluster cast API';
+
+  @override
+  String get huClusterHint =>
+      'Starts/stops cluster mirroring on the vehicle. Mirrored UI still renders on hardware.';
+
+  @override
+  String get huClusterAppPackage => 'App package (optional)';
+
+  @override
+  String get huClusterCastStart => 'Start cluster cast';
+
+  @override
+  String get huClusterCastStop => 'Stop cluster cast';
+
+  @override
+  String get debugWriteSection => 'Write (requires confirm token)';
+
+  @override
+  String get debugWriteTitle => 'Apply debug write?';
+
+  @override
+  String get debugWriteBody =>
+      'Writes low-level vehicle registers. Incorrect values can affect safety systems.';
+
+  @override
+  String get debugWriteSubmit => 'Apply write';
+
+  @override
+  String get debugConfirmTokenLabel => 'Confirm token';
+
+  @override
+  String get debugConfirmTokenHint =>
+      'Upstream requires exact confirm text (e.g. YES)';
+
+  @override
+  String get debugRegisterLabel => 'Register';
+
+  @override
+  String get debugLightZoneLabel => 'Light zone';
+
+  @override
+  String get debugLightLevelLabel => 'Level (0–100)';
 }

@@ -25,14 +25,14 @@ import 'screenshot_harness.dart';
 import 'test_fonts.dart';
 
 const _artifactRoots = [
-  '/opt/cursor/artifacts/v2.8.3/screenshots',
-  '/cursor/stores/self/artifacts/v2.8.3/screenshots',
+  '/opt/cursor/artifacts/v2.8.4/screenshots',
+  '/cursor/stores/self/artifacts/v2.8.4/screenshots',
 ];
 const _artifactPackageRoots = [
-  '/opt/cursor/artifacts/v2.8.3',
-  '/cursor/stores/self/artifacts/v2.8.3',
+  '/opt/cursor/artifacts/v2.8.4',
+  '/cursor/stores/self/artifacts/v2.8.4',
 ];
-const _goldenRoot = 'goldens/v2.8.3';
+const _goldenRoot = 'goldens/v2.8.4';
 
 late SettingsRepository _settingsRepo;
 late VehicleSnapshot _fixtureSnap;
@@ -538,13 +538,13 @@ Future<GlobalKey> _pumpHarness(
 }
 
 void _stageReleaseManifest() {
-  const manifestPath = 'docs/RELEASE_MANIFEST_v2.8.3.json';
+  const manifestPath = 'docs/RELEASE_MANIFEST_v2.8.4.json';
   final src = File(manifestPath);
   if (!src.existsSync()) return;
   final bytes = src.readAsBytesSync();
   for (final root in _artifactPackageRoots) {
     Directory(root).createSync(recursive: true);
-    File('$root/RELEASE_MANIFEST_v2.8.3.json').writeAsBytesSync(bytes);
+    File('$root/RELEASE_MANIFEST_v2.8.4.json').writeAsBytesSync(bytes);
   }
 }
 

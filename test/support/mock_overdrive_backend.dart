@@ -288,7 +288,23 @@ class MockOverdriveBackend {
             'outcome': 'success',
           };
         }
+        final target = body['target']?.toString() ?? '';
+        if (['home', 'back', 'recents', 'move_display'].contains(target)) {
+          return {'success': true, 'target': target, 'outcome': 'queued'};
+        }
         return {'success': false, 'error': 'unsupported system target'};
+      case '/api/vehicle/play-audio':
+        return {'success': true, 'playing': body['file']};
+      case '/api/vehicle/stop-audio':
+        return {'success': true, 'playing': false};
+      case '/api/vehicle/speak':
+        return {'success': true, 'spoken': body['text']};
+      case '/api/vehicle/message':
+        return {'success': true, 'displayed': body['text']};
+      case '/api/vehicle/cluster-cast':
+        return {'success': true, 'action': body['action'] ?? 'start'};
+      case '/api/vehicle/cluster-stop':
+        return {'success': true, 'stopped': true};
       default:
         final ext = _extended.tryPost(path, body);
         if (ext != null) return ext;
@@ -353,6 +369,14 @@ class MockOverdriveBackend {
         };
       case '/api/vehicle/ac-charge-current-limit':
         return _acChargeCurrentGet();
+      case '/api/vehicle/cluster-apps':
+        return {
+          'success': true,
+          'apps': [
+            {'package': 'com.android.car.cluster', 'label': 'Cluster'},
+            {'package': 'com.byd.media', 'label': 'Media'},
+          ],
+        };
       case '/api/stream/status':
         return {
           'success': true,

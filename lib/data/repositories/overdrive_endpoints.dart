@@ -28,6 +28,13 @@ abstract final class OverdriveEndpoints {
   static const batteryHeat = '/api/vehicle/battery-heat';
   static const system = '/api/vehicle/system';
   static const acChargeCurrentLimit = '/api/vehicle/ac-charge-current-limit';
+  static const playAudio = '/api/vehicle/play-audio';
+  static const stopAudio = '/api/vehicle/stop-audio';
+  static const speak = '/api/vehicle/speak';
+  static const vehicleMessage = '/api/vehicle/message';
+  static const clusterCast = '/api/vehicle/cluster-cast';
+  static const clusterStop = '/api/vehicle/cluster-stop';
+  static const clusterApps = '/api/vehicle/cluster-apps';
 
   static const streamStatus = '/api/stream/status';
   static const streamEnable = '/api/stream/enable';

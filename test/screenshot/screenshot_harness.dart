@@ -24,10 +24,10 @@ import 'package:overdrive_companion/features/screenshot/screenshot_settings_stub
 import '../support/fixture_api_client.dart';
 import 'test_fonts.dart';
 
-const screenshotGoldenRoot = 'goldens/v2.8.3';
+const screenshotGoldenRoot = 'goldens/v2.8.4';
 const screenshotArtifactRoots = [
-  '/opt/cursor/artifacts/v2.8.3/screenshots',
-  '/cursor/stores/self/artifacts/v2.8.3/screenshots',
+  '/opt/cursor/artifacts/v2.8.4/screenshots',
+  '/cursor/stores/self/artifacts/v2.8.4/screenshots',
 ];
 
 void configurePhoneView(WidgetTester tester) {

@@ -409,6 +409,54 @@ class VehicleRepository {
         body: {'target': 'screenshot', 'display': display},
       );
 
+  Future<CommandResult> systemShellAction({
+    required String target,
+    int? display,
+    int? x,
+    int? y,
+  }) =>
+      postJsonCommand(
+        OverdriveEndpoints.system,
+        body: {
+          'target': target,
+          if (display != null) 'display': display,
+          if (x != null) 'x': x,
+          if (y != null) 'y': y,
+        },
+      );
+
+  Future<CommandResult> playHeadUnitAudio(String file) => postJsonCommand(
+        OverdriveEndpoints.playAudio,
+        body: {'file': file},
+      );
+
+  Future<CommandResult> stopHeadUnitAudio() => postJsonCommand(OverdriveEndpoints.stopAudio);
+
+  Future<CommandResult> speakOnHeadUnit(String text) => postJsonCommand(
+        OverdriveEndpoints.speak,
+        body: {'text': text},
+      );
+
+  Future<CommandResult> messageOnHeadUnit(String text) => postJsonCommand(
+        OverdriveEndpoints.vehicleMessage,
+        body: {'text': text},
+      );
+
+  Future<Map<String, dynamic>> fetchClusterApps() async {
+    await ensureAuthenticated();
+    return _client.getJson(OverdriveEndpoints.clusterApps);
+  }
+
+  Future<CommandResult> clusterCast({required String action, String? app}) => postJsonCommand(
+        OverdriveEndpoints.clusterCast,
+        body: {
+          'action': action,
+          if (app != null && app.isNotEmpty) 'app': app,
+        },
+      );
+
+  Future<CommandResult> clusterStop() => postJsonCommand(OverdriveEndpoints.clusterStop);
+
   Future<AcChargeCurrentLimitState> fetchAcChargeCurrentLimit() async {
     await ensureAuthenticated();
     final json = await _client.getJson(OverdriveEndpoints.acChargeCurrentLimit);

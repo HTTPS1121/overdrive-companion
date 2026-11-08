@@ -59,5 +59,57 @@ void main() {
 
     final verdict = await repo.postRoadSenseHazardVerdict('h1', true);
     expect(verdict['success'], isTrue);
+
+    final schema = await repo.fetchAutomationSchema();
+    expect(schema['signals'], isList);
+
+    final settings = await repo.fetchAutomationSettings();
+    expect(settings['success'], isTrue);
+
+    await repo.updateAutomation(
+      automations.automations.first.id,
+      name: automations.automations.first.name,
+      enabled: true,
+      mode: 'manual',
+      rules: const [
+        {'signal': 'battery.soc', 'op': 'lt', 'value': 20},
+      ],
+      actions: const [
+        {'type': 'vehicle.flash'},
+      ],
+    );
+
+    final signage = await repo.fetchParkingSignage('park-1');
+    expect(signage['success'], isTrue);
+
+    final tripDetail = await repo.fetchTripDetail('trip-1');
+    expect(tripDetail['distanceKm'], isNotNull);
+
+    final tripConfig = await repo.fetchTripConfig();
+    await repo.saveTripConfig(enabled: true, historyDays: 14);
+
+    final bootstrap = await repo.bootstrapTrips();
+    expect(bootstrap['success'], isTrue);
+
+    await repo.submitTelegramPin('123456');
+
+    await repo.decideGenAiRoutine('r1', true);
+
+    await repo.createGenAiIncident(recordingId: 'rec-42');
+
+    await repo.executeGenAiAction({'type': 'vehicle.lock'});
+
+    final avas = await repo.fetchAudioAvasState();
+    expect(avas['success'], isTrue);
+
+    final launcher = await repo.fetchLauncherSummary();
+    expect(launcher['success'], isTrue);
+
+    final byd = await repo.fetchBydCloudStatus();
+    expect(byd['success'], isTrue);
+
+    await repo.writeSeatDebug(register: 'driver_vent', value: 1, confirmToken: 'YES');
+    await repo.writeLightDebug(zone: 'ambient', level: 40, confirmToken: 'YES');
+    await repo.writeCarProperty(key: '0x1', value: '1', confirmToken: 'YES');
   });
 }

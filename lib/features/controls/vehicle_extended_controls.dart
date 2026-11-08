@@ -7,6 +7,7 @@ import '../../core/widgets/confirm_risky_action.dart';
 import '../../data/repositories/vehicle_repository.dart';
 import '../../providers/app_providers.dart';
 import 'control_widgets.dart';
+import 'vehicle_hu_remote_screen.dart';
 
 /// Power on/off, battery heat, head-unit/cluster screenshot — handler-verified bodies only.
 class VehicleExtendedControls extends ConsumerStatefulWidget {
@@ -147,6 +148,25 @@ class _VehicleExtendedControlsState extends ConsumerState<VehicleExtendedControl
                 value: heatKnown,
                 onChanged: _canCommand ? _batteryHeat : null,
               ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ControlSection(
+          title: l10n.huRemoteTitle,
+          icon: Icons.settings_remote,
+          children: [
+            Text(l10n.huRemoteIntro, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 8),
+            ControlActionTile(
+              label: l10n.huRemoteOpen,
+              icon: Icons.open_in_new,
+              enabled: _canCommand,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const VehicleHuRemoteScreen()),
+                );
+              },
+            ),
           ],
         ),
         const SizedBox(height: 12),

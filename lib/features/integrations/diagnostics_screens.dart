@@ -6,6 +6,7 @@ import '../../core/layout/scroll_insets.dart';
 import '../../core/widgets/confirm_risky_action.dart';
 import '../../core/widgets/fixture_disclaimer_banner.dart';
 import '../../core/widgets/key_value_readout_card.dart';
+import '../../core/widgets/geojson_point_map.dart';
 import '../../core/widgets/requires_connection.dart';
 import '../../providers/app_providers.dart';
 import 'advanced_diagnostics_warning.dart';
@@ -82,11 +83,22 @@ class SeatDebugScreen extends ConsumerStatefulWidget {
 class _SeatDebugScreenState extends ConsumerState<SeatDebugScreen> with FamilyLoaderMixin {
   Map<String, dynamic>? _data;
   String _error = '';
+  final _registerCtrl = TextEditingController();
+  final _valueCtrl = TextEditingController(text: '0');
+  final _confirmCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  @override
+  void dispose() {
+    _registerCtrl.dispose();
+    _valueCtrl.dispose();
+    _confirmCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -127,6 +139,55 @@ class _SeatDebugScreenState extends ConsumerState<SeatDebugScreen> with FamilyLo
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: FilledButton(onPressed: busy ? null : _load, child: Text(l10n.integrationsRefresh)),
+            ),
+            const AdvancedDiagnosticsWarning(),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.debugWriteSection, style: Theme.of(context).textTheme.titleSmall),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(controller: _registerCtrl, decoration: InputDecoration(labelText: l10n.debugRegisterLabel)),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: _valueCtrl,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: l10n.automationValueLabel),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: _confirmCtrl,
+                decoration: InputDecoration(labelText: l10n.debugConfirmTokenLabel, helperText: l10n.debugConfirmTokenHint),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: FilledButton(
+                onPressed: busy
+                    ? null
+                    : () async {
+                        final ok = await confirmRiskyAction(
+                          context,
+                          title: l10n.debugWriteTitle,
+                          body: l10n.debugWriteBody,
+                          confirmLabel: l10n.actionConfirm,
+                        );
+                        if (ok != true) return;
+                        await guard(() async {
+                          await ref.read(extendedServicesRepositoryProvider).writeSeatDebug(
+                                register: _registerCtrl.text.trim(),
+                                value: int.tryParse(_valueCtrl.text.trim()) ?? 0,
+                                confirmToken: _confirmCtrl.text.trim(),
+                              );
+                          await _load();
+                        });
+                      },
+                child: Text(l10n.debugWriteSubmit),
+              ),
             ),
           ],
         ),
@@ -210,11 +271,15 @@ class CarPropertyDebugScreen extends ConsumerStatefulWidget {
 
 class _CarPropertyDebugScreenState extends ConsumerState<CarPropertyDebugScreen> with FamilyLoaderMixin {
   final _keyCtrl = TextEditingController(text: '0x11400008');
+  final _writeValueCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
   String _result = '';
 
   @override
   void dispose() {
     _keyCtrl.dispose();
+    _writeValueCtrl.dispose();
+    _confirmCtrl.dispose();
     super.dispose();
   }
 
@@ -259,6 +324,46 @@ class _CarPropertyDebugScreenState extends ConsumerState<CarPropertyDebugScreen>
                   }).toList(),
                 ),
               ),
+            const AdvancedDiagnosticsWarning(),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.debugWriteSection, style: Theme.of(context).textTheme.titleSmall),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(controller: _writeValueCtrl, decoration: InputDecoration(labelText: l10n.genAiActionValueLabel)),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: _confirmCtrl,
+                decoration: InputDecoration(labelText: l10n.debugConfirmTokenLabel, helperText: l10n.debugConfirmTokenHint),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: FilledButton(
+                onPressed: busy
+                    ? null
+                    : () async {
+                        final ok = await confirmRiskyAction(
+                          context,
+                          title: l10n.debugWriteTitle,
+                          body: l10n.debugWriteBody,
+                          confirmLabel: l10n.actionConfirm,
+                        );
+                        if (ok != true) return;
+                        await guard(() async {
+                          await ref.read(extendedServicesRepositoryProvider).writeCarProperty(
+                                key: _keyCtrl.text.trim(),
+                                value: _writeValueCtrl.text.trim(),
+                                confirmToken: _confirmCtrl.text.trim(),
+                              );
+                        });
+                      },
+                child: Text(l10n.debugWriteSubmit),
+              ),
+            ),
           ],
         ),
       ),
@@ -314,11 +419,42 @@ class _AdasDebugScreenState extends ConsumerState<AdasDebugScreen> with FamilyLo
   }
 }
 
-class LightDebugScreen extends ConsumerWidget {
+class LightDebugScreen extends ConsumerStatefulWidget {
   const LightDebugScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LightDebugScreen> createState() => _LightDebugScreenState();
+}
+
+class _LightDebugScreenState extends ConsumerState<LightDebugScreen> with FamilyLoaderMixin {
+  Map<String, dynamic>? _resolve;
+  final _zoneCtrl = TextEditingController(text: 'ambient');
+  final _levelCtrl = TextEditingController(text: '50');
+  final _confirmCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  @override
+  void dispose() {
+    _zoneCtrl.dispose();
+    _levelCtrl.dispose();
+    _confirmCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    await guard(() async {
+      _resolve = await ref.read(extendedServicesRepositoryProvider).resolveLightDebug();
+      setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     return RequiresConnection(
       child: Scaffold(
@@ -327,27 +463,59 @@ class LightDebugScreen extends ConsumerWidget {
           padding: scrollBottomPadding(context),
           children: [
             const FixtureDisclaimerBanner(),
-            Text(l10n.diagnosticsLightReadOnly, style: Theme.of(context).textTheme.bodySmall),
-            FutureBuilder(
-              future: ref.read(extendedServicesRepositoryProvider).resolveLightDebug(),
-              builder: (ctx, snap) {
-                if (snap.connectionState != ConnectionState.done) {
-                  return const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                if (snap.hasError) {
-                  return KeyValueReadoutCard(title: l10n.diagnosticsLightTitle, rows: const [], error: snap.error.toString());
-                }
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: KeyValueReadoutCard(
-                    title: l10n.diagnosticsLightTitle,
-                    rows: _rowsFromJson(snap.data),
-                  ),
-                );
-              },
+            if (_resolve != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: KeyValueReadoutCard(title: l10n.diagnosticsLightTitle, rows: _rowsFromJson(_resolve)),
+              ),
+            const AdvancedDiagnosticsWarning(),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.debugWriteSection, style: Theme.of(context).textTheme.titleSmall),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(controller: _zoneCtrl, decoration: InputDecoration(labelText: l10n.debugLightZoneLabel)),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: _levelCtrl,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: l10n.debugLightLevelLabel),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: _confirmCtrl,
+                decoration: InputDecoration(labelText: l10n.debugConfirmTokenLabel, helperText: l10n.debugConfirmTokenHint),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: FilledButton(
+                onPressed: busy
+                    ? null
+                    : () async {
+                        final ok = await confirmRiskyAction(
+                          context,
+                          title: l10n.debugWriteTitle,
+                          body: l10n.debugWriteBody,
+                          confirmLabel: l10n.actionConfirm,
+                        );
+                        if (ok != true) return;
+                        await guard(() async {
+                          await ref.read(extendedServicesRepositoryProvider).writeLightDebug(
+                                zone: _zoneCtrl.text.trim(),
+                                level: int.tryParse(_levelCtrl.text.trim()) ?? 0,
+                                confirmToken: _confirmCtrl.text.trim(),
+                              );
+                          await _load();
+                        });
+                      },
+                child: Text(l10n.debugWriteSubmit),
+              ),
             ),
           ],
         ),
@@ -471,6 +639,8 @@ class _RoadSenseToolsScreenState extends ConsumerState<RoadSenseToolsScreen> wit
               margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: ListTile(title: Text(l10n.roadSenseHazardCount), subtitle: Text('$count')),
             ),
+            if (features is List)
+              GeoJsonPointMap(features: features, onFeatureTap: (_) {}),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Card(

@@ -45,6 +45,10 @@ class MockExtendedBackend {
           'schemaVersion': 1,
           'signals': ['battery.soc', 'doors.overall'],
         };
+      case '/api/automations/state':
+        return {'success': true, 'engine': 'idle', 'activeCount': _automations.length};
+      case '/api/automations/settings':
+        return {'success': true, 'globalEnabled': true, 'enabled': true};
       case '/api/parking/status':
         return {
           'success': true,
@@ -61,7 +65,9 @@ class MockExtendedBackend {
       case '/api/trips':
         return {'success': true, 'trips': _trips};
       case '/api/trips/config':
-        return {'success': true, 'enabled': true};
+        return {'success': true, 'enabled': true, 'historyDays': 14};
+      case '/api/trips/bootstrap':
+        return {'success': true, 'bootstrapped': true};
       case '/api/audio/library':
         return {'success': true, 'library': _audioLibrary};
       case '/api/audio/avas-state':
@@ -157,8 +163,16 @@ class MockExtendedBackend {
       case '/api/debug/autoservice/status':
         return {'success': true, 'status': 'idle', 'queueDepth': 0};
       default:
-        if (base.startsWith('/api/trips/') && base != '/api/trips/config') {
-          return {'success': true, 'id': base.split('/').last, 'distanceKm': 24.5};
+        if (base.startsWith('/api/parking/sessions/') && base.endsWith('/signage')) {
+          return {'success': true, 'message': 'P1', 'enabled': true};
+        }
+        if (base.startsWith('/api/trips/') && base != '/api/trips/config' && base != '/api/trips/bootstrap') {
+          return {
+            'success': true,
+            'id': base.split('/').last,
+            'distanceKm': 24.5,
+            'durationMin': 32,
+          };
         }
         return null;
     }
@@ -204,6 +218,19 @@ class MockExtendedBackend {
         };
       case '/api/genai/action/execute':
         return {'success': true, 'outcome': 'mock_executed', 'action': body['action']};
+      case '/api/telegram/pin':
+        telegramPaired = true;
+        return {'success': true, 'paired': true};
+      case '/api/trips/bootstrap':
+        return {'success': true, 'bootstrapped': true};
+      case '/api/trips/config':
+        return {'success': true, 'enabled': body['enabled'] == true, if (body['historyDays'] != null) 'historyDays': body['historyDays']};
+      case '/api/automations/settings':
+        return {'success': true, ...body};
+      case '/api/debug/seat/write':
+      case '/api/debug/light/write':
+      case '/api/debug/car-property/set':
+        return {'success': true, 'written': true, ...body};
       case '/api/abrp/config':
         return {'success': true, ...body};
       case '/api/mqtt/connections':
@@ -225,6 +252,9 @@ class MockExtendedBackend {
       default:
         if (base.startsWith('/api/automations/test/')) {
           return {'success': true, 'tested': base.split('/').last};
+        }
+        if (base.startsWith('/api/parking/sessions/') && base.endsWith('/signage')) {
+          return {'success': true, 'message': body['message'], 'enabled': body['enabled'] != false};
         }
         if (base.startsWith('/api/automations/mode/')) {
           final id = base.split('/').last;
@@ -274,6 +304,17 @@ class MockExtendedBackend {
   Map<String, dynamic>? tryPut(String path, Map<String, dynamic> body) {
     if (path.startsWith('/api/mqtt/connections/')) {
       return {'success': true, ...body};
+    }
+    if (path.startsWith('/api/automations/automation/')) {
+      final id = path.substring('/api/automations/automation/'.length);
+      for (final a in _automations) {
+        if (a['id'] == id) {
+          a['name'] = body['name'] ?? a['name'];
+          if (body.containsKey('enabled')) a['enabled'] = body['enabled'];
+          if (body.containsKey('mode')) a['mode'] = body['mode'];
+        }
+      }
+      return {'success': true, 'id': id};
     }
     return null;
   }
