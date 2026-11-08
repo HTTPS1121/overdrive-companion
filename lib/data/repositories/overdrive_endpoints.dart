@@ -27,6 +27,7 @@ abstract final class OverdriveEndpoints {
   static const powerOff = '/api/vehicle/power-off';
   static const batteryHeat = '/api/vehicle/battery-heat';
   static const system = '/api/vehicle/system';
+  static const acChargeCurrentLimit = '/api/vehicle/ac-charge-current-limit';
 }
 
 enum ControlKind {

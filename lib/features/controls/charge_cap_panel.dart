@@ -5,6 +5,7 @@ import '../../core/widgets/ltr_metric.dart';
 import '../../core/widgets/requires_connection.dart';
 import '../../data/models/remote_feature_models.dart';
 import '../../providers/app_providers.dart';
+import 'ac_charge_current_panel.dart';
 
 /// מגבלת טעינה — GET/POST `/api/vehicle/charge-cap`.
 class ChargeCapPanel extends ConsumerStatefulWidget {
@@ -133,6 +134,7 @@ class _ChargeCapPanelState extends ConsumerState<ChargeCapPanel> {
                                   : const Icon(Icons.save),
                               label: const Text('שמירה לשרת'),
                             ),
+                            const AcChargeCurrentPanel(),
                           ],
                         ),
     );

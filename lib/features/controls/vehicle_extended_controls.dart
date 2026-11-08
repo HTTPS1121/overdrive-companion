@@ -150,9 +150,9 @@ class _VehicleExtendedControlsState extends ConsumerState<VehicleExtendedControl
           title: 'צילום מסכי הרכב',
           icon: Icons.screenshot_monitor,
           children: [
-            const Text(
-              'POST /api/vehicle/system — target=screenshot, display=0|1 בלבד.',
-              style: TextStyle(fontSize: 12),
+            Text(
+              'צילום PNG נשמר במכשיר הרכב (מולטימדיה או לוח שעונים).',
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
             ControlActionTile(

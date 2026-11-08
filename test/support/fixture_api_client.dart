@@ -29,6 +29,7 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
       case OverdriveEndpoints.chargingSchedule:
       case OverdriveEndpoints.adas:
       case OverdriveEndpoints.chargeCap:
+      case OverdriveEndpoints.acChargeCurrentLimit:
         return _backend.handleGet(path);
       default:
         throw OverdriveApiException('fixture: unknown GET $path');

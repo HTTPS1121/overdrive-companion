@@ -87,5 +87,6 @@
       "available": true
     }
   },
-  "timestamp": 1730851200
+  "timestamp": 1730851200,
+  "batteryHeat": false
 }

@@ -1,8 +1,8 @@
-# Overdrive Companion — feature parity (2.3.0)
+# Overdrive Companion — feature parity (2.4.0)
 
-**Authoritative server source (vendored for audit):** `tools/parity-ref/.../VehicleControlApiHandler.java` from [HTTPS1121/Overdrive-release](https://github.com/HTTPS1121/Overdrive-release) `main`. **PWA:** `vehicle-control.js`.
+**Authoritative server source (vendored):** `tools/parity-ref/.../VehicleControlApiHandler.java` from [HTTPS1121/Overdrive-release](https://github.com/HTTPS1121/Overdrive-release) `main`. **PWA:** `vehicle-control.js`.
 
-**Matrix:** `lib/data/capabilities/companion_parity.dart`. **Contract tests:** `test/contract/handler_json_shapes_test.dart` (shapes from handler, not invented fixtures).
+**Matrix:** `lib/data/capabilities/companion_parity.dart`. **Contract tests:** `test/contract/handler_json_shapes_test.dart`, `test/contract/ac_charge_current_limit_test.dart`.
 
 ## Implemented (tunnel)
 
@@ -10,44 +10,40 @@
 |------|-----|
 | Auth + `/api/vehicle/state`, `/cloud-status`, `/api/gps` | מצב, מיקום |
 | Lock/unlock/trunk/window/flash/find-car/climate/lights | שליטה → פקודות |
-| Climate/charging schedules, charge-cap, seat, adas, setting, media | שליטה → sub-tabs |
+| `POST /api/vehicle/power-on` \| `power-off` | שליטה → פקודות → הדלקה וכיבוי (אישור, חסימת נסיעה ב-UI) |
+| `POST /api/vehicle/battery-heat` `{enabled}` | שליטה → פקודות → חימום סוללה (`batteryHeat` מ-state) |
+| `POST /api/vehicle/system` `{target:screenshot, display:0\|1}` | שליטה → פקודות → צילום מסכים (אישור) |
+| Climate/charging schedules, seat, adas, setting, media | שליטה → sub-tabs |
+| `GET/POST /api/vehicle/charge-cap` | שליטה → טעינה |
+| `GET/POST /api/vehicle/ac-charge-current-limit` `{state:1..5}` | שליטה → טעינה (segmented; `supported`/`available` מהשרת) |
 
-Navigation: **4** bottom items (מצב \| שליטה \| מיקום \| הגדרות), RTL `NavigationBar`, `alwaysShow` labels.
-
-## Planned phone-remote (handler exposes; companion wiring in progress)
-
-| Path | Handler routing | Companion status |
-|------|-----------------|------------------|
-| `POST /api/vehicle/power-on` \| `power-off` | SDK_ONLY; parked+stationary guard | **Not in UI yet** — requires confirmation + driving gate |
-| `POST /api/vehicle/battery-heat` | CLOUD_ONLY `{enabled:bool}` | **Not in UI yet** — state from `/api/vehicle/state` `batteryHeat` |
-| `POST /api/vehicle/system` `{target:screenshot\|...}` | UID-2000 shell; surveillance capture | **Not in UI yet** — explicit confirm per capture |
-| `GET/POST /api/vehicle/ac-charge-current-limit` | SDK trim-dependent | **Not wired** |
+Navigation: **4** bottom items (מצב \| שליטה \| מיקום \| הגדרות), RTL `NavigationBar`.
 
 ## Not on phone client (specific reasons)
 
 | Path | Why omitted |
 |------|-------------|
-| `POST /api/vehicle/cluster-cast`, `cluster-stop`, `cluster-touch`, … | Requires in-car cluster projection / mirror controllers (`ClusterCast`, `ClusterMirrorController`) — not a tunnel JSON command from phone |
-| `GET /api/vehicle/cluster-apps` | Lists head-unit launcher apps for cluster cast — no phone UX |
-| `POST /api/vehicle/play-audio`, `stop-audio`, `speak`, `message` | Voice/audio daemon on HU; not remote companion flows |
-| `remote-access.html` / WireGuard UI | Separate PWA page; changes tunnel credentials — **no tunnel mutation** from companion without dedicated remote-access API review |
-| `POST /api/system/ivi-reboot` | Factory/service reboot — not offered in companion |
-| `POST /api/vehicle/genai`, `dev-view`, `communicate` | Head-unit dev / GenAI panels |
-| PWA 3D model (`/api/models/*`) | GLB asset pipeline on HU; not phone control surface |
+| `POST /api/vehicle/system` targets other than `screenshot` (home/back/recents/move_display) | Shell navigation on HU — not companion flows beyond captured screenshot |
+| `POST /api/vehicle/cluster-cast`, `cluster-stop`, `cluster-touch`, … | Cluster projection / mirror controllers on HU |
+| `GET /api/vehicle/cluster-apps` | Launcher list for cluster cast |
+| `POST /api/vehicle/play-audio`, `stop-audio`, `speak`, `message` | Voice daemon on HU |
+| `remote-access.html` / WireGuard UI | **No tunnel mutation** from companion |
+| `POST /api/system/ivi-reboot` | Factory/service |
+| `POST /api/vehicle/genai`, `dev-view`, `communicate` | HU dev panels |
+| PWA 3D model (`/api/models/*`) | GLB on HU |
 
-## JSON contract fixes (2.3)
+## JSON contracts
 
-- Climate schedule GET: `bookings.listInfo[]`, `mainSettingTemp` (raw)+`timeSpan` → °C/minutes (`ClimateBooking.fromCloudListEntry`).
-- `bookingsUnavailable` / `emptyBookingsMayBeStale` honoured in schedules UI.
-- Seat POST: requires full `driverHeat`/`driverVent`/`passengerHeat`/`passengerVent` when sending composite state (handler lines 2582–2590).
+- Climate schedule GET: `bookings.listInfo[]`, `mainSettingTemp` + `timeSpan`; `bookingId` always string.
+- AC charge current: GET `{success,supported,available,state,label}`; POST `{state:1..5}` with readback (`VehicleControlApiHandler` §4161–4226).
+- Battery heat POST: `{enabled: bool}`; state GET may include `batteryHeat: bool` when cloud read succeeds.
 
 ## Tests & evidence
 
-- `flutter test` — includes `app_shell_nav_test`, `controls_confirm_test`, `handler_json_shapes_test`, screenshot harness **v2.3** (`test/screenshot/goldens/v2.3/`).
-- Artifacts: **`/cursor/stores/self/artifacts/v2.3-0/screenshots/`** (2.2.0 folder unchanged).
-- Screenshots: nav `selectedIndex` asserted; async panels settled; map tile skipped in screenshot mode (coordinates + nav button shown).
+- `flutter test` — contract, widget (`extended_controls`, `controls_confirm`), screenshots **v2.4**.
+- Artifacts: **`/cursor/stores/self/artifacts/v2.4-0/`**
 - **No live car / device install** verified.
 
-## Signing (unchanged from 2.2 release lineage)
+## Signing
 
-Signer SHA-256 debug keystore: `0d1b4493…932956`. Stage1 `c869d2fa…` incompatible install-over.
+Signer SHA-256 debug keystore: `0d1b4493…932956` (unchanged lineage).

@@ -16,6 +16,17 @@ class MockOverdriveBackend {
   final List<Map<String, dynamic>> _climateBookings;
   int _chargeCapPercent = 100;
   bool _chargeCapEnabled = false;
+  int _acChargeCurrentState = 3;
+  bool _acChargeCurrentSupported = true;
+  bool _acChargeCurrentAvailable = true;
+
+  static const _acChargeLabels = {
+    1: '6A',
+    2: '8A',
+    3: '10A',
+    4: '13A',
+    5: '16A',
+  };
   String? _jwt;
   bool authRequired = false;
 
@@ -51,6 +62,7 @@ class MockOverdriveBackend {
           'rr': {'kPa': 250, 'psi': 36.3, 'temperatureC': 25, 'available': true},
         },
         'timestamp': DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        'batteryHeat': false,
       };
 
   static Future<MockOverdriveBackend> fromFixture() async {
@@ -168,13 +180,18 @@ class MockOverdriveBackend {
       case '/api/vehicle/charge-cap':
         return _handleChargeCapPost(body);
       case '/api/vehicle/power-on':
-        return _ok('power-on', message: 'power on', confirmation: 'local');
+        return _handleVehiclePower(on: true);
       case '/api/vehicle/power-off':
-        return _ok('power-off', message: 'power off', confirmation: 'local');
+        return _handleVehiclePower(on: false);
       case '/api/vehicle/battery-heat':
         final en = body['enabled'] == true;
         _state['batteryHeat'] = en;
-        return _ok('battery-heat', message: 'batteryHeat=$en');
+        return {
+          ..._ok('battery-heat', message: 'batteryHeat=$en', confirmation: 'local'),
+          'enabled': en,
+        };
+      case '/api/vehicle/ac-charge-current-limit':
+        return _handleAcChargeCurrentLimitPost(body);
       case '/api/vehicle/system':
         if (body['target'] == 'screenshot') {
           final d = body['display'] ?? 0;
@@ -227,6 +244,8 @@ class MockOverdriveBackend {
           'percent': _chargeCapPercent,
           'enabled': _chargeCapEnabled,
         };
+      case '/api/vehicle/ac-charge-current-limit':
+        return _acChargeCurrentGet();
       default:
         return {'success': false, 'error': 'unsupported GET $path'};
     }
@@ -353,6 +372,77 @@ class MockOverdriveBackend {
       'durationMinutes': body['durationMinutes'] ?? 20,
     });
     return _ok('climate-schedule', message: 'created');
+  }
+
+  Map<String, dynamic> _acChargeCurrentGet() {
+    if (!_acChargeCurrentSupported) {
+      return {
+        'success': true,
+        'supported': false,
+        'available': true,
+        'configState': 0,
+        'state': null,
+        'label': null,
+      };
+    }
+    if (!_acChargeCurrentAvailable) {
+      return {
+        'success': false,
+        'supported': _acChargeCurrentSupported,
+        'available': false,
+        'error': 'vehicle_data_unavailable',
+      };
+    }
+    return {
+      'success': true,
+      'supported': true,
+      'available': true,
+      'configState': 1,
+      'state': _acChargeCurrentState,
+      'label': _acChargeLabels[_acChargeCurrentState],
+    };
+  }
+
+  Map<String, dynamic> _handleAcChargeCurrentLimitPost(Map<String, dynamic> body) {
+    final raw = body['state'];
+    final state = raw is num ? raw.toInt() : int.tryParse('$raw');
+    if (state == null || state < 1 || state > 5) {
+      return {'success': false, 'error': 'state must be an integer from 1 to 5'};
+    }
+    if (!_acChargeCurrentSupported || !_acChargeCurrentAvailable) {
+      return {
+        'success': false,
+        'supported': _acChargeCurrentSupported,
+        'available': _acChargeCurrentAvailable,
+        'error': 'vehicle_control.not_supported',
+      };
+    }
+    _acChargeCurrentState = state;
+    return {
+      'success': true,
+      'commandSuccess': true,
+      'outcome': 'success',
+      'path': 'sdk',
+      'message': 'local_sent',
+      'supported': true,
+      'available': true,
+      'state': state,
+      'label': _acChargeLabels[state],
+      'confirmation': 'local',
+    };
+  }
+
+  Map<String, dynamic> _handleVehiclePower({required bool on}) {
+    return {
+      'success': true,
+      'commandSuccess': true,
+      'confirmation': 'local',
+      'outcome': 'success',
+      'message': on ? 'power on · confirmed by the car' : 'power off · confirmed by the car',
+      'powerBefore': on ? 0 : 1,
+      'powerAfter': on ? 1 : 0,
+      'path': 'sdk',
+    };
   }
 
   Map<String, dynamic> _handleChargeCapPost(Map<String, dynamic> body) {

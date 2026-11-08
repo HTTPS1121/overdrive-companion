@@ -378,4 +378,15 @@ class VehicleRepository {
         OverdriveEndpoints.system,
         body: {'target': 'screenshot', 'display': display},
       );
+
+  Future<AcChargeCurrentLimitState> fetchAcChargeCurrentLimit() async {
+    await ensureAuthenticated();
+    final json = await _client.getJson(OverdriveEndpoints.acChargeCurrentLimit);
+    return AcChargeCurrentLimitState.fromJson(json);
+  }
+
+  Future<CommandResult> setAcChargeCurrentLimit(int state) => postJsonCommand(
+        OverdriveEndpoints.acChargeCurrentLimit,
+        body: {'state': state},
+      );
 }

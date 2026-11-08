@@ -9,6 +9,7 @@ import 'package:overdrive_companion/core/config/app_settings.dart';
 import 'package:overdrive_companion/data/api/overdrive_api_client.dart';
 import 'package:overdrive_companion/data/models/vehicle_state.dart';
 import 'package:overdrive_companion/data/repositories/vehicle_repository.dart';
+import 'package:overdrive_companion/features/controls/controls_commands_tab.dart';
 import 'package:overdrive_companion/features/controls/controls_hub_screen.dart';
 import 'package:overdrive_companion/providers/app_providers.dart';
 import 'package:overdrive_companion/providers/settings_repository.dart';
@@ -18,10 +19,10 @@ import '../support/fixture_api_client.dart';
 import 'test_fonts.dart';
 
 const _artifactRoots = [
-  '/opt/cursor/artifacts/v2.3-0/screenshots',
-  '/cursor/stores/self/artifacts/v2.3-0/screenshots',
+  '/opt/cursor/artifacts/v2.4-0/screenshots',
+  '/cursor/stores/self/artifacts/v2.4-0/screenshots',
 ];
-const _goldenRoot = 'goldens/v2.3';
+const _goldenRoot = 'goldens/v2.4';
 
 late SettingsRepository _settingsRepo;
 late VehicleSnapshot _fixtureSnap;
@@ -56,7 +57,7 @@ void main() {
     );
   });
 
-  testWidgets('v2.3 setup unconfigured light', (tester) async {
+  testWidgets('v2.4 setup unconfigured light', (tester) async {
     await _capture(
       tester,
       '01_setup_unconfigured_light',
@@ -68,7 +69,7 @@ void main() {
     );
   });
 
-  testWidgets('v2.3 status fixture dark', (tester) async {
+  testWidgets('v2.4 status fixture dark', (tester) async {
     await _capture(
       tester,
       '02_status_fixture_dark',
@@ -78,7 +79,7 @@ void main() {
     );
   });
 
-  testWidgets('v2.3 controls fixture light', (tester) async {
+  testWidgets('v2.4 controls fixture light', (tester) async {
     await _capture(
       tester,
       '03_controls_fixture_light',
@@ -92,7 +93,7 @@ void main() {
     );
   });
 
-  testWidgets('v2.3 location fixture light', (tester) async {
+  testWidgets('v2.4 location fixture light', (tester) async {
     await _capture(
       tester,
       '04_location_fixture_light',
@@ -106,7 +107,7 @@ void main() {
     );
   });
 
-  testWidgets('v2.3 schedules fixture dark', (tester) async {
+  testWidgets('v2.4 schedules fixture dark', (tester) async {
     await _capture(
       tester,
       '05_schedules_fixture_dark',
@@ -121,7 +122,7 @@ void main() {
     );
   });
 
-  testWidgets('v2.3 comfort fixture light', (tester) async {
+  testWidgets('v2.4 comfort fixture light', (tester) async {
     await _capture(
       tester,
       '06_comfort_fixture_light',
@@ -136,7 +137,7 @@ void main() {
     );
   });
 
-  testWidgets('v2.3 charge cap fixture light', (tester) async {
+  testWidgets('v2.4 charge cap fixture light', (tester) async {
     await _capture(
       tester,
       '09_charge_cap_fixture_light',
@@ -147,11 +148,36 @@ void main() {
         await _tapControlsHubTab(t, 'טעינה');
         await _awaitChargeCapLoaded(t);
         expect(find.text('שמירה לשרת'), findsOneWidget);
+        expect(find.text('זרם טעינה AC'), findsOneWidget);
       },
     );
   });
 
-  testWidgets('v2.3 settings configured light', (tester) async {
+  testWidgets('v2.4 extended controls fixture light', (tester) async {
+    await _capture(
+      tester,
+      '11_extended_controls_fixture_light',
+      settings: _fixtureSettings(),
+      snapshot: _fixtureSnap,
+      expectNavIndex: 1,
+      afterPump: (t) async {
+        await _tapControlsHubTab(t, 'פקודות');
+        final scrollable = find.descendant(
+          of: find.byType(ControlsCommandsTab),
+          matching: find.byType(Scrollable),
+        );
+        await t.scrollUntilVisible(
+          find.text('הדלקה וכיבוי'),
+          120,
+          scrollable: scrollable,
+        );
+        await t.pumpAndSettle();
+        expect(find.text('צילום מסך מולטימדיה'), findsOneWidget);
+      },
+    );
+  });
+
+  testWidgets('v2.4 settings configured light', (tester) async {
     await _capture(
       tester,
       '07_settings_light',
@@ -164,7 +190,7 @@ void main() {
     );
   });
 
-  testWidgets('v2.3 status offline dark', (tester) async {
+  testWidgets('v2.4 status offline dark', (tester) async {
     await _capture(
       tester,
       '08_status_offline_dark',
@@ -179,7 +205,7 @@ void main() {
     );
   });
 
-  testWidgets('v2.3 lock confirmation dialog', (tester) async {
+  testWidgets('v2.4 lock confirmation dialog', (tester) async {
     await _pumpHarness(
       tester,
       settings: _fixtureSettings(),
@@ -262,7 +288,9 @@ Future<void> _awaitChargeCapLoaded(WidgetTester tester) async {
       of: find.byType(ControlsHubScreen),
       matching: find.byType(CircularProgressIndicator),
     );
-    if (spinners.evaluate().isEmpty && find.text('מגבלת טעינה').evaluate().isNotEmpty) {
+    if (spinners.evaluate().isEmpty &&
+        find.text('מגבלת טעינה').evaluate().isNotEmpty &&
+        find.text('זרם טעינה AC').evaluate().isNotEmpty) {
       return;
     }
   }

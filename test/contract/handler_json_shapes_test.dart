@@ -48,6 +48,19 @@ void main() {
     expect(cap.supported, isFalse);
   });
 
+  test('ac-charge-current-limit GET fields', () {
+    final s = AcChargeCurrentLimitState.fromJson({
+      'success': true,
+      'supported': true,
+      'available': true,
+      'state': 3,
+      'label': '10A',
+      'configState': 1,
+    });
+    expect(s.isOperational, isTrue);
+    expect(s.state, 3);
+  });
+
   test('bookingId larger than JS safe int round-trips as string', () {
     const huge = '18446744073709551615';
     final b = ClimateBooking.fromCloudListEntry({

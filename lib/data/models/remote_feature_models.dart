@@ -171,6 +171,44 @@ class AdasState {
   final bool? itacOn;
 }
 
+/// GET/POST `/api/vehicle/ac-charge-current-limit` (SDK_ONLY, state 1..5 + label).
+class AcChargeCurrentLimitState {
+  AcChargeCurrentLimitState({
+    required this.success,
+    this.supported,
+    this.available,
+    this.state,
+    this.label,
+    this.configState,
+    this.error,
+  });
+
+  factory AcChargeCurrentLimitState.fromJson(Map<String, dynamic> json) {
+    int? state;
+    final raw = json['state'];
+    if (raw is num) state = raw.toInt();
+    return AcChargeCurrentLimitState(
+      success: json['success'] == true,
+      supported: json['supported'] as bool?,
+      available: json['available'] as bool?,
+      state: state,
+      label: json['label']?.toString(),
+      configState: (json['configState'] as num?)?.toInt(),
+      error: json['error'] as String?,
+    );
+  }
+
+  final bool success;
+  final bool? supported;
+  final bool? available;
+  final int? state;
+  final String? label;
+  final int? configState;
+  final String? error;
+
+  bool get isOperational => supported == true && available == true && state != null;
+}
+
 class ChargeCapState {
   ChargeCapState({
     required this.success,
