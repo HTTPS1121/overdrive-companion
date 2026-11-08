@@ -59,7 +59,11 @@ class _AppShellState extends State<AppShell> {
 
     return Scaffold(
       extendBody: true,
-      appBar: AppBar(title: Text(l10n.appTitle)),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(
+        title: Text(l10n.appTitle),
+        titleTextStyle: Theme.of(context).textTheme.titleLarge,
+      ),
       body: SafeArea(
         bottom: false,
         child: IndexedStack(index: _index, children: pages),

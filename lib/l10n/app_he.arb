@@ -103,6 +103,8 @@
   "statusDriving": "בנסיעה",
   "statusParked": "חונה",
   "statusRangeUnit": "ק״מ",
+  "statusBatteryLabel": "סוללה",
+  "statusRangeLabel": "טווח",
   "sectionClimate": "מיזוג",
   "sectionWindows": "חלונות",
   "sectionTyres": "צמיגים",

@@ -9,7 +9,7 @@
   "apkSigningCertSummary": "debug (Flutter template release)",
   "goldens": "test/screenshot/goldens/v2.8.5",
   "screenshotArtifacts": "v2.8.5/screenshots",
-  "screenshotCount": 93,
+  "screenshotCount": 94,
   "artifactDirectory": "v2.8.5",
   "implementationInventoryComplete": "IMPLEMENTATION_INVENTORY_COMPLETE_build28.md",
   "android": {
@@ -19,11 +19,11 @@
   "dynamicColorGoldenNote": "02c uses seeded CompanionColorSchemes \u2014 not OS wallpaper dynamic color",
   "upstreamRef": "4807e94389de38feca3a8f8582e811a6c63eb2a2",
   "screenshotCountBreakdown": {
-    "core": 17,
+    "core": 18,
     "integration": 60,
     "pushDetail": 16
   },
-  "testsPassed": 161,
+  "testsPassed": 162,
   "priorImmutableReleases": [
     {
       "version": "2.8.3+24",

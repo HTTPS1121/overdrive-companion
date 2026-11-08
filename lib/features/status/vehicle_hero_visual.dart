@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/l10n/l10n_x.dart';
 
-/// Bundled BYD Atto 3 reference image — see `assets/images/ATTRIBUTION.md`.
+/// Bundled BYD Atto 3 reference — see `assets/images/ATTRIBUTION.md`.
+/// Rendered as a center hero (contain, soft ground) without a framed showroom card.
 class VehicleHeroVisual extends StatelessWidget {
   const VehicleHeroVisual({super.key});
 
@@ -12,53 +13,81 @@ class VehicleHeroVisual extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
+    final ground = Color.lerp(
+      scheme.surface,
+      scheme.primaryContainer,
+      scheme.brightness == Brightness.dark ? 0.22 : 0.12,
+    )!;
+
     return Semantics(
       label: l10n.statusHeroImageLabel,
-      child: Column(
-        children: [
-          const SizedBox(height: 8),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  scheme.surfaceContainerHighest.withValues(alpha: 0.35),
-                  scheme.surfaceContainerLow,
-                ],
+      child: SizedBox(
+        height: 188,
+        width: double.infinity,
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              bottom: 8,
+              left: 24,
+              right: 24,
+              child: Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 1.1,
+                    colors: [
+                      scheme.primary.withValues(
+                        alpha: scheme.brightness == Brightness.dark ? 0.22 : 0.12,
+                      ),
+                      ground.withValues(alpha: 0),
+                    ],
+                  ),
+                ),
               ),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
+            Positioned.fill(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Center(
-                  child: Image.asset(
-                    assetPath,
-                    height: 108,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                    filterQuality: FilterQuality.medium,
-                    errorBuilder: (_, __, ___) => Icon(
-                      Icons.directions_car_filled,
-                      size: 88,
-                      color: scheme.primary.withValues(alpha: 0.5),
+                padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
+                child: ShaderMask(
+                  shaderCallback: (rect) => LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      scheme.surface,
+                      scheme.surface,
+                      Colors.transparent,
+                    ],
+                    stops: const [0, 0.12, 0.88, 1],
+                  ).createShader(rect),
+                  blendMode: BlendMode.dstIn,
+                  child: ColorFiltered(
+                    colorFilter: ColorFilter.mode(
+                      scheme.surface.withValues(alpha: scheme.brightness == Brightness.dark ? 0.35 : 0.08),
+                      BlendMode.darken,
+                    ),
+                    child: Image.asset(
+                      assetPath,
+                      height: 168,
+                      fit: BoxFit.contain,
+                      alignment: Alignment.bottomCenter,
+                      filterQuality: FilterQuality.medium,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.directions_car_filled_rounded,
+                        size: 96,
+                        color: scheme.primary.withValues(alpha: 0.45),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.statusHeroAttribution,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

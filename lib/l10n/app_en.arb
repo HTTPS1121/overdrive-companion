@@ -102,6 +102,8 @@
   "statusDriving": "Driving",
   "statusParked": "Parked",
   "statusRangeUnit": "km",
+  "statusBatteryLabel": "Battery",
+  "statusRangeLabel": "Range",
   "sectionClimate": "Climate",
   "sectionWindows": "Windows",
   "sectionTyres": "Tires",

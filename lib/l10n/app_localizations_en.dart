@@ -325,6 +325,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusRangeUnit => 'km';
 
   @override
+  String get statusBatteryLabel => 'Battery';
+
+  @override
+  String get statusRangeLabel => 'Range';
+
+  @override
   String get sectionClimate => 'Climate';
 
   @override

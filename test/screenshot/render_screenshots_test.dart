@@ -111,18 +111,30 @@ void main() {
     );
   });
 
-  testWidgets('v2.7 status fixture light en', (tester) async {
+  testWidgets('v2.7 status fixture light he', (tester) async {
     await _capture(
       tester,
-      '02b_status_fixture_light_en',
+      '02b_status_fixture_light_he',
       settings: _fixtureSettings(),
       snapshot: _fixtureSnap,
       expectNavIndex: 0,
-      locale: const Locale('en'),
+      locale: const Locale('he'),
       afterPump: (t) async {
         await _awaitHeroImage(t);
         expect(find.textContaining('Coordinates'), findsNothing);
       },
+    );
+  });
+
+  testWidgets('v2.7 status fixture dark en', (tester) async {
+    await _capture(
+      tester,
+      '02d_status_fixture_dark_en',
+      settings: _fixtureSettings(dark: true),
+      snapshot: _fixtureSnap,
+      expectNavIndex: 0,
+      locale: const Locale('en'),
+      afterPump: (t) async => _awaitHeroImage(t),
     );
   });
 
@@ -558,6 +570,16 @@ Future<void> _writeGolden(WidgetTester tester, String name, Finder finder) async
     final artifactDir = Directory(root);
     artifactDir.createSync(recursive: true);
     File('${artifactDir.path}/$name.png').writeAsBytesSync(bytes);
+  }
+  if (name == '02d_status_fixture_dark_en' || name == '02b_status_fixture_light_he') {
+    for (final dir in [
+      '/opt/cursor/artifacts/design-home-iter1',
+      '/cursor/stores/self/artifacts/design-home-iter1',
+    ]) {
+      Directory(dir).createSync(recursive: true);
+      final outName = name == '02d_status_fixture_dark_en' ? 'home_status_dark_en.png' : 'home_status_light_he.png';
+      File('$dir/$outName').writeAsBytesSync(bytes);
+    }
   }
 }
 

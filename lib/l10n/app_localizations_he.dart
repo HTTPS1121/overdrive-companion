@@ -319,6 +319,12 @@ class AppLocalizationsHe extends AppLocalizations {
   String get statusRangeUnit => 'ק״מ';
 
   @override
+  String get statusBatteryLabel => 'סוללה';
+
+  @override
+  String get statusRangeLabel => 'טווח';
+
+  @override
   String get sectionClimate => 'מיזוג';
 
   @override

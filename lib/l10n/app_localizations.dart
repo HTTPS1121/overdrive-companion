@@ -674,6 +674,18 @@ abstract class AppLocalizations {
   /// **'km'**
   String get statusRangeUnit;
 
+  /// No description provided for @statusBatteryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery'**
+  String get statusBatteryLabel;
+
+  /// No description provided for @statusRangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get statusRangeLabel;
+
   /// No description provided for @sectionClimate.
   ///
   /// In en, this message translates to:
