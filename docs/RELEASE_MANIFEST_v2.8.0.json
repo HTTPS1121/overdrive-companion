@@ -1,26 +1,18 @@
 {
-  "version": "2.8.0+19",
-  "apkFile": "overdrive-companion-2.8.0.apk",
-  "apkSha256": "e2afb63d3dc118a76c741d421986294ada6320ae860f63d047dd99af151660e3",
-  "goldens": "test/screenshot/goldens/v2.7",
+  "version": "2.8.1+20",
+  "apkFile": "overdrive-companion-2.8.1.apk",
+  "apkSha256": "bef2b9b6fd07a397fd7b73c14fe46c8e738c6bf63342cd482a5b67a8277e2c47",
+  "apkSizeBytes": 59259985,
+  "apkVersionCode": 20,
+  "apkVersionName": "2.8.1",
+  "apkSigningCertSummary": "debug (Flutter template release)",
+  "goldens": "test/screenshot/goldens/v2.8",
   "screenshotArtifacts": "v2.8.0/screenshots",
   "implementationInventory": "IMPLEMENTATION_INVENTORY_v2.8.0.md",
-  "screenshotMatrix": {
-    "locales": [
-      "he-RTL",
-      "en-LTR"
-    ],
-    "themes": [
-      "light",
-      "dark"
-    ],
-    "seedPaletteGolden": "02c_status_fixture_seed_palette_light_en.png"
-  },
   "android": {
-    "signing": "debug (Flutter template release)",
-    "annexBUnitTest": "android/app/src/test/kotlin/.../AnnexBUtilsTest.kt",
-    "mediaCodecDecode": "not verified in CI \u2014 framing only"
+    "signing": "debug (Flutter template release) unless production keystore configured",
+    "mediaCodecDecode": "not verified in CI — framing unit tests only"
   },
-  "tests": "flutter test (71)",
+  "dynamicColorGoldenNote": "02c uses seeded CompanionColorSchemes — not OS wallpaper dynamic color",
   "upstreamRef": "4807e94389de38feca3a8f8582e811a6c63eb2a2"
 }

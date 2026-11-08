@@ -7,6 +7,7 @@ import '../../core/config/app_settings.dart';
 import '../../core/l10n/l10n_x.dart';
 import '../../providers/app_providers.dart';
 import '../inventory/capability_inventory_screen.dart';
+import '../integrations/integrations_hub_screen.dart';
 import '../remote/remote_services_screen.dart';
 import '../setup/connection_form.dart';
 
@@ -105,6 +106,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         ListTile(
           contentPadding: EdgeInsets.zero,
+          title: Text(l10n.integrationsHubTitle),
+          subtitle: Text(l10n.settingsOpenIntegrations),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const IntegrationsHubScreen()),
+          ),
+        ),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
           title: Text(l10n.inventoryTitle),
           subtitle: Text(l10n.settingsOpenCapabilityInventory),
           trailing: const Icon(Icons.chevron_right),
@@ -132,18 +142,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        ListTile(
+        SwitchListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(l10n.settingsDynamicColorTitle),
           subtitle: Text(l10n.settingsDynamicColorSubtitle),
-          trailing: Switch(
-            value: settings.useDynamicColor,
-            onChanged: (v) async {
-              await ref.read(appSettingsProvider.notifier).persist(
-                    settings.copyWith(useDynamicColor: v),
-                  );
-            },
-          ),
+          value: settings.useDynamicColor,
+          onChanged: (v) async {
+            await ref.read(appSettingsProvider.notifier).persist(
+                  settings.copyWith(useDynamicColor: v),
+                );
+          },
         ),
       ],
     );

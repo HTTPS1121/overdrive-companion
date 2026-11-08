@@ -38,7 +38,7 @@ class VehicleStatusScreen extends ConsumerWidget {
           return _CenteredMessage(
             icon: Icons.cloud_off,
             title: l10n.statusServerUnreachable,
-            body: snap.errorMessage ?? l10n.statusCheckTunnel,
+            body: _localizedSnapshotError(l10n, snap.errorMessage),
             action: FilledButton.tonalIcon(
               onPressed: () => ref.read(vehicleSnapshotProvider.notifier).refresh(),
               icon: const Icon(Icons.refresh),
@@ -291,6 +291,16 @@ class _CloudStrip extends StatelessWidget {
       title: Text(l10n.sectionCloud),
       subtitle: Text(ok ? l10n.cloudActive : l10n.cloudPartial),
     );
+  }
+}
+
+String _localizedSnapshotError(dynamic l10n, String? code) {
+  switch (code) {
+    case 'connection_not_configured':
+    case 'connection not configured':
+      return l10n.errorConnectionNotConfigured;
+    default:
+      return code ?? l10n.statusCheckTunnel;
   }
 }
 

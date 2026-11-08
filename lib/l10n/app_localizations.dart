@@ -578,6 +578,18 @@ abstract class AppLocalizations {
   /// **'Overdrive vehicle'**
   String get statusHeroTitle;
 
+  /// No description provided for @statusHeroImageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'BYD Atto 3 reference photo'**
+  String get statusHeroImageLabel;
+
+  /// No description provided for @statusHeroAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo: Chanokchon / Wikimedia (CC BY-SA 4.0)'**
+  String get statusHeroAttribution;
+
   /// No description provided for @statusLocked.
   ///
   /// In en, this message translates to:
@@ -2161,6 +2173,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error'**
   String get commonError;
+
+  /// No description provided for @actionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get actionDelete;
+
+  /// No description provided for @actionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get actionConfirm;
+
+  /// No description provided for @settingsOpenIntegrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Automations, parking, trips, audio, GenAI tools, Telegram, platform APIs'**
+  String get settingsOpenIntegrations;
+
+  /// No description provided for @integrationsHubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Integrations hub'**
+  String get integrationsHubTitle;
+
+  /// No description provided for @integrationsHubIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Grouped remote features from the Overdrive HTTP API — forms, confirmations, and server feedback (not a raw JSON console).'**
+  String get integrationsHubIntro;
+
+  /// No description provided for @integrationsRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get integrationsRefresh;
+
+  /// No description provided for @integrationsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on server'**
+  String get integrationsSaved;
+
+  /// No description provided for @integrationsNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name'**
+  String get integrationsNameRequired;
+
+  /// No description provided for @integrationsCreateAutomation.
+  ///
+  /// In en, this message translates to:
+  /// **'Create automation'**
+  String get integrationsCreateAutomation;
+
+  /// No description provided for @integrationsAutomationNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Automation name'**
+  String get integrationsAutomationNameLabel;
+
+  /// No description provided for @integrationsRunTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Run test'**
+  String get integrationsRunTest;
+
+  /// No description provided for @integrationsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get integrationsDelete;
+
+  /// No description provided for @integrationsTestQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Test queued (mock — no live vehicle actions in CI)'**
+  String get integrationsTestQueued;
+
+  /// No description provided for @integrationsDeleteAutomationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete automation?'**
+  String get integrationsDeleteAutomationTitle;
+
+  /// No description provided for @integrationsDeleteAutomationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove “{name}” from the vehicle automation store.'**
+  String integrationsDeleteAutomationBody(String name);
+
+  /// No description provided for @integrationsAutomationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automations'**
+  String get integrationsAutomationsTitle;
+
+  /// No description provided for @integrationsAutomationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'List, create, test, and delete rules'**
+  String get integrationsAutomationsSubtitle;
+
+  /// No description provided for @integrationsParkingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Parking'**
+  String get integrationsParkingTitle;
+
+  /// No description provided for @integrationsParkingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions and parking assistant config'**
+  String get integrationsParkingSubtitle;
+
+  /// No description provided for @integrationsParkingEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Parking assistant enabled'**
+  String get integrationsParkingEnabled;
+
+  /// No description provided for @integrationsDeleteSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete session?'**
+  String get integrationsDeleteSessionTitle;
+
+  /// No description provided for @integrationsDeleteSessionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes the parking session record on the server.'**
+  String get integrationsDeleteSessionBody;
+
+  /// No description provided for @integrationsTripsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips'**
+  String get integrationsTripsTitle;
+
+  /// No description provided for @integrationsTripsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip history and summary'**
+  String get integrationsTripsSubtitle;
+
+  /// No description provided for @integrationsTripSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get integrationsTripSummary;
+
+  /// No description provided for @integrationsTripTotalKm.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km total'**
+  String integrationsTripTotalKm(String km);
+
+  /// No description provided for @integrationsDeleteTripTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete trip?'**
+  String get integrationsDeleteTripTitle;
+
+  /// No description provided for @integrationsDeleteTripBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes the trip record from history.'**
+  String get integrationsDeleteTripBody;
+
+  /// No description provided for @integrationsAudioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio library'**
+  String get integrationsAudioTitle;
+
+  /// No description provided for @integrationsAudioSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Play clips stored on the vehicle'**
+  String get integrationsAudioSubtitle;
+
+  /// No description provided for @integrationsAudioStopAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop playback'**
+  String get integrationsAudioStopAll;
+
+  /// No description provided for @integrationsAudioStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback stop sent'**
+  String get integrationsAudioStopped;
+
+  /// No description provided for @integrationsAudioPlayQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Play queued: {name}'**
+  String integrationsAudioPlayQueued(String name);
+
+  /// No description provided for @integrationsGenAiToolsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'GenAI tools'**
+  String get integrationsGenAiToolsTitle;
+
+  /// No description provided for @integrationsGenAiToolsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Routines, incidents, action execute'**
+  String get integrationsGenAiToolsSubtitle;
+
+  /// No description provided for @integrationsGenAiRoutines.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine learning'**
+  String get integrationsGenAiRoutines;
+
+  /// No description provided for @integrationsGenAiActionExecute.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle action'**
+  String get integrationsGenAiActionExecute;
+
+  /// No description provided for @integrationsGenAiActionExecuteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'POST /api/genai/action/execute (validated action object)'**
+  String get integrationsGenAiActionExecuteHint;
+
+  /// No description provided for @integrationsExecute.
+  ///
+  /// In en, this message translates to:
+  /// **'Execute'**
+  String get integrationsExecute;
+
+  /// No description provided for @integrationsActionQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Action submitted'**
+  String get integrationsActionQueued;
+
+  /// No description provided for @integrationsTelegramTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram'**
+  String get integrationsTelegramTitle;
+
+  /// No description provided for @integrationsTelegramSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pairing status and preferences (no outbound sends from tests)'**
+  String get integrationsTelegramSubtitle;
+
+  /// No description provided for @integrationsTelegramBot.
+  ///
+  /// In en, this message translates to:
+  /// **'Bot'**
+  String get integrationsTelegramBot;
+
+  /// No description provided for @integrationsNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured'**
+  String get integrationsNotConfigured;
+
+  /// No description provided for @integrationsTelegramVideoUploads.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload dashcam video'**
+  String get integrationsTelegramVideoUploads;
+
+  /// No description provided for @integrationsTelegramClearPairing.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear pairing'**
+  String get integrationsTelegramClearPairing;
+
+  /// No description provided for @integrationsTelegramClearHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Clears owner pairing on the vehicle daemon'**
+  String get integrationsTelegramClearHint;
+
+  /// No description provided for @integrationsTelegramClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Telegram pairing?'**
+  String get integrationsTelegramClearTitle;
+
+  /// No description provided for @integrationsTelegramClearBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You will need to pair again on the vehicle.'**
+  String get integrationsTelegramClearBody;
+
+  /// No description provided for @integrationsPlatformTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform connectors'**
+  String get integrationsPlatformTitle;
+
+  /// No description provided for @integrationsPlatformSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ABRP, MQTT, launcher, RoadSense, BYD cloud, community'**
+  String get integrationsPlatformSubtitle;
+
+  /// No description provided for @integrationsLauncherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Launcher summary'**
+  String get integrationsLauncherTitle;
+
+  /// No description provided for @integrationsBydCloudTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'BYD cloud'**
+  String get integrationsBydCloudTitle;
+
+  /// No description provided for @integrationsCommunityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Community automations'**
+  String get integrationsCommunityTitle;
+
+  /// No description provided for @integrationsHeadUnitNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Android Auto / head-unit projection is not implemented in the companion; local launcher APIs remain on the vehicle.'**
+  String get integrationsHeadUnitNote;
 }
 
 class _AppLocalizationsDelegate

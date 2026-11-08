@@ -110,23 +110,25 @@ class _AcChargeCurrentPanelState extends ConsumerState<AcChargeCurrentPanel> {
         const SizedBox(height: 8),
         Directionality(
           textDirection: TextDirection.ltr,
-          child: SegmentedButton<int>(
-            segments: [
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
               for (var i = 1; i <= 5; i++)
-                ButtonSegment<int>(
-                  value: i,
+                ChoiceChip(
                   label: Text(
                     l10n.acChargeLevelAmps(_amps[i - 1]),
                     style: const TextStyle(fontSize: 13),
                   ),
+                  selected: selected == i,
+                  onSelected: _saving
+                      ? null
+                      : (_) {
+                          if (i != selected) _select(i);
+                        },
                 ),
             ],
-            selected: {selected},
-            onSelectionChanged: _saving
-                ? null
-                : (set) {
-                    if (set.isNotEmpty) _select(set.first);
-                  },
           ),
         ),
         if (s.label != null) ...[

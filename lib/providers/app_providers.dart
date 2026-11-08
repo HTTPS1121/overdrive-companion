@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config/app_settings.dart';
 import '../data/api/overdrive_api_client.dart';
+import '../data/repositories/extended_services_repository.dart';
 import '../data/repositories/vehicle_repository.dart';
 import 'settings_repository.dart';
 
@@ -42,14 +43,17 @@ class AppSettingsNotifier extends Notifier<AppSettings> {
     if (clearJwt) {
       await ref.read(settingsRepositoryProvider).saveJwt(null);
       ref.read(vehicleRepositoryProvider).setJwt(null);
+      ref.read(extendedServicesRepositoryProvider).setJwt(null);
     }
     await ref.read(settingsRepositoryProvider).saveFull(
           settings.copyWith(deviceToken: settings.resolvedDeviceToken()),
           jwt: jwt,
         );
     ref.read(vehicleRepositoryProvider.notifier).rebind(state);
+    ref.read(extendedServicesRepositoryProvider.notifier).rebind(state);
     if (jwt != null) {
       ref.read(vehicleRepositoryProvider).setJwt(jwt);
+      ref.read(extendedServicesRepositoryProvider).setJwt(jwt);
     }
   }
 }
@@ -64,6 +68,26 @@ final vehicleRepositoryProvider =
     NotifierProvider<VehicleRepositoryNotifier, VehicleRepository>(
   VehicleRepositoryNotifier.new,
 );
+
+final extendedServicesRepositoryProvider =
+    NotifierProvider<ExtendedServicesRepositoryNotifier, ExtendedServicesRepository>(
+  ExtendedServicesRepositoryNotifier.new,
+);
+
+class ExtendedServicesRepositoryNotifier extends Notifier<ExtendedServicesRepository> {
+  @override
+  ExtendedServicesRepository build() {
+    final settings = ref.watch(appSettingsProvider);
+    final client = ref.watch(overdriveApiClientProvider);
+    final repo = ExtendedServicesRepository(settings: settings, client: client);
+    ref.read(settingsRepositoryProvider).loadJwt().then(repo.setJwt);
+    return repo;
+  }
+
+  void rebind(AppSettings settings) {
+    state.updateSettings(settings);
+  }
+}
 
 class VehicleRepositoryNotifier extends Notifier<VehicleRepository> {
   @override

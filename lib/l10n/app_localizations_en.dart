@@ -276,6 +276,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusHeroTitle => 'Overdrive vehicle';
 
   @override
+  String get statusHeroImageLabel => 'BYD Atto 3 reference photo';
+
+  @override
+  String get statusHeroAttribution =>
+      'Photo: Chanokchon / Wikimedia (CC BY-SA 4.0)';
+
+  @override
   String get statusLocked => 'Locked';
 
   @override
@@ -1133,4 +1140,189 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonError => 'Error';
+
+  @override
+  String get actionDelete => 'Delete';
+
+  @override
+  String get actionConfirm => 'Confirm';
+
+  @override
+  String get settingsOpenIntegrations =>
+      'Automations, parking, trips, audio, GenAI tools, Telegram, platform APIs';
+
+  @override
+  String get integrationsHubTitle => 'Integrations hub';
+
+  @override
+  String get integrationsHubIntro =>
+      'Grouped remote features from the Overdrive HTTP API — forms, confirmations, and server feedback (not a raw JSON console).';
+
+  @override
+  String get integrationsRefresh => 'Refresh';
+
+  @override
+  String get integrationsSaved => 'Saved on server';
+
+  @override
+  String get integrationsNameRequired => 'Enter a name';
+
+  @override
+  String get integrationsCreateAutomation => 'Create automation';
+
+  @override
+  String get integrationsAutomationNameLabel => 'Automation name';
+
+  @override
+  String get integrationsRunTest => 'Run test';
+
+  @override
+  String get integrationsDelete => 'Delete';
+
+  @override
+  String get integrationsTestQueued =>
+      'Test queued (mock — no live vehicle actions in CI)';
+
+  @override
+  String get integrationsDeleteAutomationTitle => 'Delete automation?';
+
+  @override
+  String integrationsDeleteAutomationBody(String name) {
+    return 'Remove “$name” from the vehicle automation store.';
+  }
+
+  @override
+  String get integrationsAutomationsTitle => 'Automations';
+
+  @override
+  String get integrationsAutomationsSubtitle =>
+      'List, create, test, and delete rules';
+
+  @override
+  String get integrationsParkingTitle => 'Parking';
+
+  @override
+  String get integrationsParkingSubtitle =>
+      'Sessions and parking assistant config';
+
+  @override
+  String get integrationsParkingEnabled => 'Parking assistant enabled';
+
+  @override
+  String get integrationsDeleteSessionTitle => 'Delete session?';
+
+  @override
+  String get integrationsDeleteSessionBody =>
+      'Removes the parking session record on the server.';
+
+  @override
+  String get integrationsTripsTitle => 'Trips';
+
+  @override
+  String get integrationsTripsSubtitle => 'Trip history and summary';
+
+  @override
+  String get integrationsTripSummary => 'Summary';
+
+  @override
+  String integrationsTripTotalKm(String km) {
+    return '$km km total';
+  }
+
+  @override
+  String get integrationsDeleteTripTitle => 'Delete trip?';
+
+  @override
+  String get integrationsDeleteTripBody =>
+      'Removes the trip record from history.';
+
+  @override
+  String get integrationsAudioTitle => 'Audio library';
+
+  @override
+  String get integrationsAudioSubtitle => 'Play clips stored on the vehicle';
+
+  @override
+  String get integrationsAudioStopAll => 'Stop playback';
+
+  @override
+  String get integrationsAudioStopped => 'Playback stop sent';
+
+  @override
+  String integrationsAudioPlayQueued(String name) {
+    return 'Play queued: $name';
+  }
+
+  @override
+  String get integrationsGenAiToolsTitle => 'GenAI tools';
+
+  @override
+  String get integrationsGenAiToolsSubtitle =>
+      'Routines, incidents, action execute';
+
+  @override
+  String get integrationsGenAiRoutines => 'Routine learning';
+
+  @override
+  String get integrationsGenAiActionExecute => 'Vehicle action';
+
+  @override
+  String get integrationsGenAiActionExecuteHint =>
+      'POST /api/genai/action/execute (validated action object)';
+
+  @override
+  String get integrationsExecute => 'Execute';
+
+  @override
+  String get integrationsActionQueued => 'Action submitted';
+
+  @override
+  String get integrationsTelegramTitle => 'Telegram';
+
+  @override
+  String get integrationsTelegramSubtitle =>
+      'Pairing status and preferences (no outbound sends from tests)';
+
+  @override
+  String get integrationsTelegramBot => 'Bot';
+
+  @override
+  String get integrationsNotConfigured => 'Not configured';
+
+  @override
+  String get integrationsTelegramVideoUploads => 'Upload dashcam video';
+
+  @override
+  String get integrationsTelegramClearPairing => 'Clear pairing';
+
+  @override
+  String get integrationsTelegramClearHint =>
+      'Clears owner pairing on the vehicle daemon';
+
+  @override
+  String get integrationsTelegramClearTitle => 'Clear Telegram pairing?';
+
+  @override
+  String get integrationsTelegramClearBody =>
+      'You will need to pair again on the vehicle.';
+
+  @override
+  String get integrationsPlatformTitle => 'Platform connectors';
+
+  @override
+  String get integrationsPlatformSubtitle =>
+      'ABRP, MQTT, launcher, RoadSense, BYD cloud, community';
+
+  @override
+  String get integrationsLauncherTitle => 'Launcher summary';
+
+  @override
+  String get integrationsBydCloudTitle => 'BYD cloud';
+
+  @override
+  String get integrationsCommunityTitle => 'Community automations';
+
+  @override
+  String get integrationsHeadUnitNote =>
+      'Android Auto / head-unit projection is not implemented in the companion; local launcher APIs remain on the vehicle.';
 }

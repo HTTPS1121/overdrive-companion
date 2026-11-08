@@ -270,6 +270,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String get statusHeroTitle => 'רכב Overdrive';
 
   @override
+  String get statusHeroImageLabel => 'תמונת ייחוס BYD Atto 3';
+
+  @override
+  String get statusHeroAttribution =>
+      'צילום: Chanokchon / Wikimedia (CC BY-SA 4.0)';
+
+  @override
   String get statusLocked => 'נעול';
 
   @override
@@ -1116,4 +1123,182 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get commonError => 'שגיאה';
+
+  @override
+  String get actionDelete => 'מחיקה';
+
+  @override
+  String get actionConfirm => 'אישור';
+
+  @override
+  String get settingsOpenIntegrations =>
+      'אוטומציות, חניה, נסיעות, ספריית שמע, כלי GenAI, טלגרם ו־API';
+
+  @override
+  String get integrationsHubTitle => 'מרכז אינטגרציות';
+
+  @override
+  String get integrationsHubIntro =>
+      'יכולות מרוחקות מה־API של Overdrive — טפסים, אישורים ומשוב מהשרת (לא מסוף JSON גולמי).';
+
+  @override
+  String get integrationsRefresh => 'רענון';
+
+  @override
+  String get integrationsSaved => 'נשמר בשרת';
+
+  @override
+  String get integrationsNameRequired => 'הזן שם';
+
+  @override
+  String get integrationsCreateAutomation => 'יצירת אוטומציה';
+
+  @override
+  String get integrationsAutomationNameLabel => 'שם אוטומציה';
+
+  @override
+  String get integrationsRunTest => 'הרצת בדיקה';
+
+  @override
+  String get integrationsDelete => 'מחיקה';
+
+  @override
+  String get integrationsTestQueued =>
+      'בדיקה בתור (מדמה — ללא פעולות רכב ב־CI)';
+
+  @override
+  String get integrationsDeleteAutomationTitle => 'למחוק אוטומציה?';
+
+  @override
+  String integrationsDeleteAutomationBody(String name) {
+    return 'הסרת «$name» ממאגר האוטומציות.';
+  }
+
+  @override
+  String get integrationsAutomationsTitle => 'אוטומציות';
+
+  @override
+  String get integrationsAutomationsSubtitle => 'רשימה, יצירה, בדיקה ומחיקה';
+
+  @override
+  String get integrationsParkingTitle => 'חניה';
+
+  @override
+  String get integrationsParkingSubtitle => 'מפגשים והגדרות עוזר חניה';
+
+  @override
+  String get integrationsParkingEnabled => 'עוזר חניה פעיל';
+
+  @override
+  String get integrationsDeleteSessionTitle => 'למחוק מפגש?';
+
+  @override
+  String get integrationsDeleteSessionBody => 'מוחק את רשומת המפגש בשרת.';
+
+  @override
+  String get integrationsTripsTitle => 'נסיעות';
+
+  @override
+  String get integrationsTripsSubtitle => 'היסטוריה וסיכום';
+
+  @override
+  String get integrationsTripSummary => 'סיכום';
+
+  @override
+  String integrationsTripTotalKm(String km) {
+    return '$km ק״מ סה״כ';
+  }
+
+  @override
+  String get integrationsDeleteTripTitle => 'למחוק נסיעה?';
+
+  @override
+  String get integrationsDeleteTripBody => 'מוחק את רשומת הנסיעה מההיסטוריה.';
+
+  @override
+  String get integrationsAudioTitle => 'ספריית שמע';
+
+  @override
+  String get integrationsAudioSubtitle => 'השמעת קבצים מהרכב';
+
+  @override
+  String get integrationsAudioStopAll => 'עצירת השמעה';
+
+  @override
+  String get integrationsAudioStopped => 'נשלחה פקודת עצירה';
+
+  @override
+  String integrationsAudioPlayQueued(String name) {
+    return 'השמעה בתור: $name';
+  }
+
+  @override
+  String get integrationsGenAiToolsTitle => 'כלי GenAI';
+
+  @override
+  String get integrationsGenAiToolsSubtitle => 'שגרות, אירועים וביצוע פעולות';
+
+  @override
+  String get integrationsGenAiRoutines => 'למידת שגרות';
+
+  @override
+  String get integrationsGenAiActionExecute => 'פעולת רכב';
+
+  @override
+  String get integrationsGenAiActionExecuteHint =>
+      'POST /api/genai/action/execute';
+
+  @override
+  String get integrationsExecute => 'ביצוע';
+
+  @override
+  String get integrationsActionQueued => 'הפעולה נשלחה';
+
+  @override
+  String get integrationsTelegramTitle => 'טלגרם';
+
+  @override
+  String get integrationsTelegramSubtitle =>
+      'סטטוס והעדפות (ללא שליחות בבדיקות)';
+
+  @override
+  String get integrationsTelegramBot => 'בוט';
+
+  @override
+  String get integrationsNotConfigured => 'לא מוגדר';
+
+  @override
+  String get integrationsTelegramVideoUploads => 'העלאת וידאו ממצלמה';
+
+  @override
+  String get integrationsTelegramClearPairing => 'ניקוי צימוד';
+
+  @override
+  String get integrationsTelegramClearHint => 'מנקה צימוד בעלים בדמוון הרכב';
+
+  @override
+  String get integrationsTelegramClearTitle => 'לנקות צימוד טלגרם?';
+
+  @override
+  String get integrationsTelegramClearBody => 'יהיה צורך לצמד מחדש ברכב.';
+
+  @override
+  String get integrationsPlatformTitle => 'מחברי פלטפורמה';
+
+  @override
+  String get integrationsPlatformSubtitle =>
+      'ABRP, MQTT, Launcher, RoadSense, BYD cloud, קהילה';
+
+  @override
+  String get integrationsLauncherTitle => 'סיכום Launcher';
+
+  @override
+  String get integrationsBydCloudTitle => 'BYD cloud';
+
+  @override
+  String get integrationsCommunityTitle => 'אוטומציות קהילה';
+
+  @override
+  String get integrationsHeadUnitNote =>
+      'Android Auto / שיקוף למסך רכב אינו מיושם באפליקציה; ה־API של Launcher נשאר ברכב.';
 }

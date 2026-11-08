@@ -6,6 +6,8 @@ import 'package:overdrive_companion/data/models/cloud_status.dart';
 import 'package:overdrive_companion/data/models/gps_snapshot.dart';
 import 'package:overdrive_companion/data/models/vehicle_state.dart';
 
+import 'mock_extended_backend.dart';
+
 /// In-memory simulation of Overdrive HTTP handlers (vehicle state + controls).
 class MockOverdriveBackend {
   MockOverdriveBackend({Map<String, dynamic>? initialState})
@@ -37,6 +39,7 @@ class MockOverdriveBackend {
   bool _communicateMessages = true;
   bool _communicateListener = true;
   int _communicateOutputLevel = 70;
+  final MockExtendedBackend _extended = MockExtendedBackend();
 
   static Map<String, dynamic> _defaultState() => {
         'success': true,
@@ -277,6 +280,8 @@ class MockOverdriveBackend {
         }
         return {'success': false, 'error': 'unsupported system target'};
       default:
+        final ext = _extended.tryPost(path, body);
+        if (ext != null) return ext;
         if (path.startsWith('/api/stream/view/')) {
           return _ok('stream-view');
         }
@@ -284,8 +289,17 @@ class MockOverdriveBackend {
     }
   }
 
+  Map<String, dynamic> handleDelete(String path) {
+    final ext = _extended.tryDelete(path);
+    if (ext != null) return ext;
+    return {'success': false, 'error': 'unsupported DELETE $path'};
+  }
+
   Map<String, dynamic> handleGet(String path) {
-    switch (path) {
+    final extGet = _extended.tryGet(path);
+    if (extGet != null) return extGet;
+
+    switch (path.split('?').first) {
       case '/api/vehicle/state':
         return vehicleState();
       case '/api/vehicle/climate-schedule':
@@ -427,6 +441,8 @@ class MockOverdriveBackend {
       case '/api/wireguard':
         return wireguardStatus();
       default:
+        final ext = _extended.tryGet(path);
+        if (ext != null) return ext;
         if (path.startsWith('/api/surveillance/snapshot/')) {
           return {'success': false, 'error': 'use binary fixture via getBytes'};
         }

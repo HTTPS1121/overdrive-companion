@@ -54,6 +54,10 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
         if (base == OverdriveEndpoints.genaiInsights) {
           return _backend.handleGet(base);
         }
+        final ext = _backend.handleGet(path);
+        if (ext['error']?.toString().startsWith('unsupported GET') != true) {
+          return ext;
+        }
         throw OverdriveApiException('fixture: unknown GET $path');
     }
   }
@@ -78,7 +82,19 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
         path == OverdriveEndpoints.wireguardConfig) {
       return _backend.handlePost(path, body);
     }
-    return _backend.handlePost(path, body);
+    final result = _backend.handlePost(path, body);
+    if (result['error']?.toString().startsWith('unsupported path') == true) {
+      throw OverdriveApiException('fixture: unknown POST $path');
+    }
+    return result;
+  }
+
+  @override
+  Future<Map<String, dynamic>> putJson(
+    String path, {
+    Map<String, dynamic> body = const {},
+  }) async {
+    throw OverdriveApiException('fixture: unknown PUT $path');
   }
 
   @override
@@ -119,6 +135,10 @@ class FixtureOverdriveApiClient extends OverdriveApiClient {
     }
     if (path == OverdriveEndpoints.wireguardConfigDelete) {
       return _backend.deleteWireGuardConfig();
+    }
+    final result = _backend.handleDelete(path);
+    if (result['error']?.toString().startsWith('unsupported DELETE') != true) {
+      return result;
     }
     throw OverdriveApiException('fixture: unknown DELETE $path');
   }

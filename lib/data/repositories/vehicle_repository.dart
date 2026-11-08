@@ -146,9 +146,9 @@ class VehicleRepository {
   Future<VehicleSnapshot> fetchSnapshot() async {
     if (!_settings.isConfigured) {
       return VehicleSnapshot(
-        state: VehicleState(success: false, error: 'not configured'),
+        state: VehicleState(success: false, error: 'connection_not_configured'),
         offline: true,
-        errorMessage: 'connection not configured',
+        errorMessage: 'connection_not_configured',
       );
     }
     try {

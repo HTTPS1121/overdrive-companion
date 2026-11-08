@@ -86,6 +86,18 @@ class OverdriveApiClient {
     return _decode(response);
   }
 
+  Future<Map<String, dynamic>> putJson(
+    String path, {
+    Map<String, dynamic> body = const {},
+  }) async {
+    final response = await _http.put(
+      _uri(path),
+      headers: _headers(jsonBody: true),
+      body: jsonEncode(body),
+    );
+    return _decode(response);
+  }
+
   Map<String, dynamic> _decode(http.Response response) {
     final body = response.body;
     final trimmed = body.trimLeft();

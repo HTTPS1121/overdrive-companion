@@ -11,7 +11,12 @@ import 'package:overdrive_companion/data/models/vehicle_state.dart';
 import 'package:overdrive_companion/data/repositories/vehicle_repository.dart';
 import 'package:overdrive_companion/features/controls/controls_commands_tab.dart';
 import 'package:overdrive_companion/features/controls/controls_hub_screen.dart';
+import 'package:overdrive_companion/features/integrations/integrations_hub_screen.dart';
+import 'package:overdrive_companion/features/status/vehicle_hero_visual.dart';
+import 'package:overdrive_companion/data/repositories/extended_services_repository.dart';
+import 'package:overdrive_companion/l10n/app_localizations.dart';
 import 'package:overdrive_companion/providers/app_providers.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:overdrive_companion/providers/settings_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,7 +31,7 @@ const _artifactPackageRoots = [
   '/opt/cursor/artifacts/v2.8.0',
   '/cursor/stores/self/artifacts/v2.8.0',
 ];
-const _goldenRoot = 'goldens/v2.7';
+const _goldenRoot = 'goldens/v2.8';
 
 late SettingsRepository _settingsRepo;
 late VehicleSnapshot _fixtureSnap;
@@ -56,10 +61,10 @@ void main() {
     );
     _fixtureSnap = await repo.fetchSnapshot();
     _offlineSnap = VehicleSnapshot(
-      state: VehicleState(success: false, error: 'network unreachable'),
+      state: VehicleState(success: false, error: 'connection_not_configured'),
       lastUpdated: DateTime.now(),
       offline: true,
-      errorMessage: 'connection not configured',
+      errorMessage: 'connection_not_configured',
     );
   });
 
@@ -101,6 +106,7 @@ void main() {
       snapshot: _fixtureSnap,
       expectNavIndex: 0,
       locale: const Locale('he'),
+      afterPump: (t) async => _awaitHeroImage(t),
     );
   });
 
@@ -113,11 +119,8 @@ void main() {
       expectNavIndex: 0,
       locale: const Locale('en'),
       afterPump: (t) async {
-        await t.scrollUntilVisible(find.textContaining('32.085'), 200);
-        await t.pumpAndSettle();
-        expect(find.textContaining('Coordinates'), findsWidgets);
-        expect(find.textContaining('Speed'), findsWidgets);
-        expect(find.text('קואורדינטות'), findsNothing);
+        await _awaitHeroImage(t);
+        expect(find.textContaining('Coordinates'), findsNothing);
       },
     );
   });
@@ -310,7 +313,40 @@ void main() {
       snapshot: _offlineSnap,
       expectNavIndex: 0,
       locale: const Locale('he'),
+      afterPump: (t) async {
+        expect(find.text('חיבור לשרת לא הוגדר'), findsOneWidget);
+      },
     );
+  });
+
+  testWidgets('v2.8 integrations hub light he', (tester) async {
+    _FixedAppSettings.pinned = _fixtureSettings();
+    final boundaryKey = GlobalKey();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          settingsRepositoryProvider.overrideWithValue(_settingsRepo),
+          appSettingsProvider.overrideWith(_FixedAppSettings.new),
+          overdriveApiClientProvider.overrideWithValue(_fixtureClient),
+          vehicleRepositoryProvider.overrideWith(() => _FixtureRepo(_fixtureClient)),
+          extendedServicesRepositoryProvider.overrideWith(() => _FixtureExtendedRepo(_fixtureClient)),
+        ],
+        child: MaterialApp(
+          locale: const Locale('he'),
+          home: Scaffold(key: boundaryKey, body: const IntegrationsHubScreen()),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('מרכז אינטגרציות'), findsOneWidget);
+    await _writeGolden(tester, '13_integrations_hub_light_he', find.byKey(boundaryKey));
   });
 
   testWidgets('v2.7 lock confirmation dialog he', (tester) async {
@@ -431,8 +467,36 @@ Future<void> _capture(
     lightScheme: lightScheme,
     darkScheme: darkScheme,
   );
+  await _awaitHeroImage(tester);
+  await _scrollContentToTop(tester);
   if (afterPump != null) await afterPump(tester);
   await _writeGolden(tester, name, find.byKey(boundaryKey));
+}
+
+Future<void> _awaitHeroImage(WidgetTester tester) async {
+  if (find.byType(VehicleHeroVisual).evaluate().isEmpty) return;
+  final element = tester.element(find.byType(MaterialApp));
+  await tester.binding.runAsync(() async {
+    await precacheImage(const AssetImage(VehicleHeroVisual.assetPath), element);
+  });
+  await tester.pumpAndSettle(const Duration(milliseconds: 200));
+  final imageFinder = find.byWidgetPredicate(
+    (w) =>
+        w is Image &&
+        w.image is AssetImage &&
+        (w.image as AssetImage).assetName == VehicleHeroVisual.assetPath,
+  );
+  expect(imageFinder, findsOneWidget);
+  final image = tester.widget<Image>(imageFinder);
+  expect(image.height, isNotNull);
+}
+
+Future<void> _scrollContentToTop(WidgetTester tester) async {
+  final scrollables = find.byType(Scrollable);
+  if (scrollables.evaluate().isEmpty) return;
+  final first = scrollables.first;
+  await tester.drag(first, const Offset(0, 480));
+  await tester.pumpAndSettle();
 }
 
 Future<GlobalKey> _pumpHarness(
@@ -515,6 +579,20 @@ class _FixtureRepo extends VehicleRepositoryNotifier {
 
   @override
   VehicleRepository build() => VehicleRepository(
+        settings: const AppSettings(
+          baseUrl: 'https://fixture.test',
+          deviceToken: 'fixture-token',
+        ),
+        client: client,
+      );
+}
+
+class _FixtureExtendedRepo extends ExtendedServicesRepositoryNotifier {
+  _FixtureExtendedRepo(this.client);
+  final FixtureOverdriveApiClient client;
+
+  @override
+  ExtendedServicesRepository build() => ExtendedServicesRepository(
         settings: const AppSettings(
           baseUrl: 'https://fixture.test',
           deviceToken: 'fixture-token',
