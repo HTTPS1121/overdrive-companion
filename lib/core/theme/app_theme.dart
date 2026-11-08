@@ -13,10 +13,12 @@ ThemeData buildOverdriveTheme() {
   const muted = Color(0xFF8B9BB0);
 
   const fontFamily = 'NotoSansHebrew';
+  const fontFallback = ['NotoSans', 'sans-serif'];
   final base = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFallback,
     scaffoldBackgroundColor: bg,
     colorScheme: const ColorScheme.dark(
       surface: surface,

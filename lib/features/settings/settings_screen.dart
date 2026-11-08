@@ -108,11 +108,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             children: [
-              Text('חיבור לשרת Overdrive ברכב', style: Theme.of(context).textTheme.titleLarge),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'חיבור לשרת ',
+                      style: hebrewTextStyle(Theme.of(context).textTheme.titleLarge),
+                    ),
+                    TextSpan(
+                      text: 'Overdrive',
+                      style: numericTextStyle(Theme.of(context).textTheme.titleLarge),
+                    ),
+                    TextSpan(
+                      text: ' ברכב',
+                      style: hebrewTextStyle(Theme.of(context).textTheme.titleLarge),
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.start,
+              ),
               const SizedBox(height: 6),
-              Text(
-                'Atto 3 ישראל: בדרך כלל פורט 8080 ב-LAN, או מנהרה (Tailscale / Cloudflare / Zrok) עם אותם נתיבי API.',
-                style: Theme.of(context).textTheme.bodySmall,
+              Text.rich(
+                TextSpan(
+                  style: hebrewTextStyle(Theme.of(context).textTheme.bodySmall),
+                  children: [
+                    const TextSpan(text: 'רכב '),
+                    TextSpan(
+                      text: 'Atto 3',
+                      style: numericTextStyle(Theme.of(context).textTheme.bodySmall),
+                    ),
+                    const TextSpan(text: ' בישראל: פורט '),
+                    TextSpan(
+                      text: '8080',
+                      style: numericTextStyle(Theme.of(context).textTheme.bodySmall),
+                    ),
+                    const TextSpan(text: ' ברשת מקומית, או מנהרה מאובטחת עם אותם נתיבי שרת.'),
+                  ],
+                ),
               ),
               const SizedBox(height: 20),
               SegmentedButton<ConnectionMode>(
@@ -143,8 +175,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               if (_mode == ConnectionMode.live) ...[
                 TextField(
                   controller: _urlCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'כתובת בסיס (HTTPS מומלץ במנהרה)',
+                  decoration: InputDecoration(
+                    labelText: 'כתובת בסיס שרת',
+                    labelStyle: hebrewTextStyle(Theme.of(context).textTheme.bodyLarge),
+                    helperText: 'מומלץ HTTPS במנהרה',
+                    helperStyle: hebrewTextStyle(Theme.of(context).textTheme.bodySmall),
                     hintText: 'https://your-tunnel.example.com',
                   ),
                   keyboardType: TextInputType.url,
@@ -156,9 +191,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 controller: _tokenCtrl,
                 decoration: InputDecoration(
                   labelText: 'אסימון מכשיר',
-                  helperText: 'נשמר מוצפן במכשיר (אימות /auth/token)',
                   helperStyle: hebrewTextStyle(Theme.of(context).textTheme.bodySmall),
                   labelStyle: hebrewTextStyle(Theme.of(context).textTheme.bodyLarge),
+                  helper: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'נשמר מוצפן במכשיר. נתיב אימות ',
+                          style: hebrewTextStyle(Theme.of(context).textTheme.bodySmall),
+                        ),
+                        TextSpan(
+                          text: '/auth/token',
+                          style: numericTextStyle(Theme.of(context).textTheme.bodySmall),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 obscureText: true,
                 textDirection: TextDirection.ltr,
@@ -176,7 +224,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.link),
-                      label: const Text('בדיקת חיבור'),
+                      label: Text(
+                        'בדיקת חיבור',
+                        style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -184,7 +235,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     child: FilledButton.tonalIcon(
                       onPressed: _save,
                       icon: const Icon(Icons.check),
-                      label: const Text('שמירה'),
+                      label: Text(
+                        'שמירה',
+                        style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge),
+                      ),
                     ),
                   ),
                 ],
@@ -192,14 +246,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               if (_testMessage != null) ...[
                 const SizedBox(height: 16),
                 MaterialBanner(
-                  content: Text(_testMessage!),
+                  content: Text(
+                    _testMessage!,
+                    style: hebrewTextStyle(Theme.of(context).textTheme.bodyMedium),
+                  ),
                   backgroundColor: _testOk
                       ? colors.accent.withValues(alpha: 0.15)
                       : colors.danger.withValues(alpha: 0.15),
                   actions: [
                     TextButton(
                       onPressed: () => setState(() => _testMessage = null),
-                      child: const Text('סגור'),
+                      child: Text(
+                        'סגור',
+                        style: hebrewTextStyle(Theme.of(context).textTheme.labelLarge),
+                      ),
                     ),
                   ],
                 ),
