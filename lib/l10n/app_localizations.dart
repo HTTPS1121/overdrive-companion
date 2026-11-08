@@ -2888,6 +2888,24 @@ abstract class AppLocalizations {
   /// **'Auto service debug'**
   String get diagnosticsAutoServiceTitle;
 
+  /// No description provided for @roadSenseMapOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenStreetMap basemap (network)'**
+  String get roadSenseMapOnline;
+
+  /// No description provided for @roadSenseMapOfflineGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Basemap unavailable — hazard positions on lat/lon grid'**
+  String get roadSenseMapOfflineGrid;
+
+  /// No description provided for @roadSenseMapCoordSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{lat}°N, {lon}°E'**
+  String roadSenseMapCoordSummary(String lat, String lon);
+
   /// No description provided for @roadSenseHazardCount.
   ///
   /// In en, this message translates to:

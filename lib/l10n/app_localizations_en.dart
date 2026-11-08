@@ -1528,6 +1528,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diagnosticsAutoServiceTitle => 'Auto service debug';
 
   @override
+  String get roadSenseMapOnline => 'OpenStreetMap basemap (network)';
+
+  @override
+  String get roadSenseMapOfflineGrid =>
+      'Basemap unavailable — hazard positions on lat/lon grid';
+
+  @override
+  String roadSenseMapCoordSummary(String lat, String lon) {
+    return '$lat°N, $lon°E';
+  }
+
+  @override
   String get roadSenseHazardCount => 'Active hazards';
 
   @override

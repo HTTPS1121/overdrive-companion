@@ -125,6 +125,11 @@ class MockExtendedBackend {
               'properties': {'id': 'h1', 'kind': 'pothole'},
               'geometry': {'type': 'Point', 'coordinates': [34.78, 32.08]},
             },
+            {
+              'type': 'Feature',
+              'properties': {'id': 'h2', 'kind': 'debris'},
+              'geometry': {'type': 'Point', 'coordinates': [34.792, 32.091]},
+            },
           ],
         };
       case '/api/bydcloud/status':

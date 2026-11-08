@@ -1498,6 +1498,18 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diagnosticsAutoServiceTitle => 'דיבוג Auto service';
 
   @override
+  String get roadSenseMapOnline => 'מפת OpenStreetMap (רשת)';
+
+  @override
+  String get roadSenseMapOfflineGrid =>
+      'מפת רקע לא זמינה — מיקום מכשולים על רשת lat/lon';
+
+  @override
+  String roadSenseMapCoordSummary(String lat, String lon) {
+    return '$lat°צ׳, $lon°מ׳';
+  }
+
+  @override
   String get roadSenseHazardCount => 'מכשולים פעילים';
 
   @override

@@ -556,6 +556,15 @@
   "diagnosticsLightReadOnly": "קריאה בלבד — כתיבה דורשת אישור בשרת הרכב.",
   "diagnosticsRemoteKeyTitle": "דיבוג מפתח מרחוק",
   "diagnosticsAutoServiceTitle": "דיבוג Auto service",
+  "roadSenseMapOnline": "מפת OpenStreetMap (רשת)",
+  "roadSenseMapOfflineGrid": "מפת רקע לא זמינה — מיקום מכשולים על רשת lat/lon",
+  "roadSenseMapCoordSummary": "{lat}°צ׳, {lon}°מ׳",
+  "@roadSenseMapCoordSummary": {
+    "placeholders": {
+      "lat": {"type": "String"},
+      "lon": {"type": "String"}
+    }
+  },
   "roadSenseHazardCount": "מכשולים פעילים",
   "roadSenseSeverity": "חומרת צליל",
   "roadSenseChannel": "ערוץ שמע",

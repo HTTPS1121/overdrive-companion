@@ -500,6 +500,15 @@
   "diagnosticsLightReadOnly": "Read-only resolve registers (writes need vehicle confirm upstream).",
   "diagnosticsRemoteKeyTitle": "Remote key debug",
   "diagnosticsAutoServiceTitle": "Auto service debug",
+  "roadSenseMapOnline": "OpenStreetMap basemap (network)",
+  "roadSenseMapOfflineGrid": "Basemap unavailable — hazard positions on lat/lon grid",
+  "roadSenseMapCoordSummary": "{lat}°N, {lon}°E",
+  "@roadSenseMapCoordSummary": {
+    "placeholders": {
+      "lat": {"type": "String"},
+      "lon": {"type": "String"}
+    }
+  },
   "roadSenseHazardCount": "Active hazards",
   "roadSenseSeverity": "Chime severity",
   "roadSenseChannel": "Audio channel",
