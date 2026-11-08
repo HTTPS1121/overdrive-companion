@@ -171,16 +171,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          children: [
-            for (final mode in CompanionThemeMode.values)
-              FilterChip(
-                label: Text(_themeLabel(mode)),
-                selected: settings.themeMode == mode,
-                onSelected: (_) => _setThemeMode(mode),
-              ),
-          ],
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Wrap(
+            spacing: 8,
+            children: [
+              for (final mode in CompanionThemeMode.values)
+                FilterChip(
+                  label: Text(_themeLabel(mode)),
+                  selected: settings.themeMode == mode,
+                  onSelected: (_) => _setThemeMode(mode),
+                ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         ListTile(

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../comfort/comfort_screen.dart';
-import '../controls/controls_screen.dart';
+import '../controls/controls_hub_screen.dart';
 import '../gps/gps_screen.dart';
-import '../schedules/schedules_screen.dart';
 import '../settings/settings_screen.dart';
 import '../status/vehicle_status_screen.dart';
 
@@ -29,16 +27,6 @@ class _AppShellState extends State<AppShell> {
       label: 'שליטה',
     ),
     NavigationDestination(
-      icon: Icon(Icons.schedule_outlined),
-      selectedIcon: Icon(Icons.schedule),
-      label: 'תזמונים',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.chair_outlined),
-      selectedIcon: Icon(Icons.chair),
-      label: 'נוחות',
-    ),
-    NavigationDestination(
       icon: Icon(Icons.location_on_outlined),
       selectedIcon: Icon(Icons.location_on),
       label: 'מיקום',
@@ -52,11 +40,9 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final pages = const [
+    const pages = [
       VehicleStatusScreen(),
-      ControlsScreen(),
-      SchedulesScreen(),
-      ComfortScreen(),
+      ControlsHubScreen(),
       GpsScreen(),
       SettingsScreen(),
     ];
@@ -66,10 +52,14 @@ class _AppShellState extends State<AppShell> {
       body: SafeArea(
         child: IndexedStack(index: _index, children: pages),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: _destinations,
+      bottomNavigationBar: Directionality(
+        textDirection: TextDirection.ltr,
+        child: NavigationBar(
+          selectedIndex: _index,
+          labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+          onDestinationSelected: (i) => setState(() => _index = i),
+          destinations: _destinations,
+        ),
       ),
     );
   }

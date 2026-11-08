@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/layout/scroll_insets.dart';
 import '../../core/widgets/requires_connection.dart';
+import 'seat_controls.dart';
 import '../../data/models/remote_feature_models.dart';
 import '../../data/models/vehicle_state.dart';
 import '../../data/repositories/vehicle_repository.dart';
 import '../../providers/app_providers.dart';
 
 class ComfortScreen extends StatefulWidget {
-  const ComfortScreen({super.key});
+  const ComfortScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
   State<ComfortScreen> createState() => _ComfortScreenState();
@@ -71,7 +75,7 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
 
   SeatInfo? get _seats => ref.watch(vehicleSnapshotProvider).valueOrNull?.state.seats;
 
-  Future<void> _heatVent(int position, String kind) async {
+  Future<void> _setLevel(int position, String kind, int level) async {
     final snap = ref.read(vehicleSnapshotProvider).valueOrNull;
     if (snap == null) return;
     final seats = snap.state.seats;
@@ -79,17 +83,17 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
     final cool = List<int>.from(seats?.cool ?? [0, 0]);
     final idx = position - 1;
     if (kind == 'heating') {
-      heat[idx] = (heat[idx] + 1) % 3;
-      cool[idx] = 0;
+      heat[idx] = level;
+      if (level > 0) cool[idx] = 0;
     } else {
-      cool[idx] = (cool[idx] + 1) % 3;
-      heat[idx] = 0;
+      cool[idx] = level;
+      if (level > 0) heat[idx] = 0;
     }
     setState(() => _busy = true);
     final r = await ref.read(vehicleRepositoryProvider).postSeat(
           action: kind,
           position: position,
-          level: kind == 'heating' ? heat[idx] : cool[idx],
+          level: level,
           seatHeat: heat,
           seatCool: cool,
         );
@@ -118,48 +122,16 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
   Widget build(BuildContext context) {
     final seats = _seats;
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: scrollBottomPadding(context),
       children: [
-        Text('חימום / אוורור לפי PWA', style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(height: 12),
-        for (var pos = 1; pos <= 2; pos++) ...[
-          Text('מושב $pos', style: Theme.of(context).textTheme.titleSmall),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.tonal(
-                  onPressed: _busy ? null : () => _heatVent(pos, 'heating'),
-                  child: Text('חימום (רמה ${(seats?.heat.length ?? 0) >= pos ? seats!.heat[pos - 1] : 0})'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: FilledButton.tonal(
-                  onPressed: _busy ? null : () => _heatVent(pos, 'ventilation'),
-                  child: Text('אוורור (רמה ${(seats?.cool.length ?? 0) >= pos ? seats!.cool[pos - 1] : 0})'),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _busy ? null : () => _memory(pos, false),
-                  child: const Text('זכירון — קריאה'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _busy ? null : () => _memory(pos, true),
-                  child: const Text('זכירון — שמירה'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-        ],
+        SeatControlsPanel(
+          seats: seats,
+          busy: _busy,
+          onHeatLevel: (pos, level) => _setLevel(pos, 'heating', level),
+          onVentLevel: (pos, level) => _setLevel(pos, 'ventilation', level),
+          onMemoryRecall: (pos) => _memory(pos, false),
+          onMemorySave: (pos) => _memory(pos, true),
+        ),
       ],
     );
   }
@@ -228,7 +200,7 @@ class _MediaSafetyTabState extends ConsumerState<_MediaSafetyTab> {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: scrollBottomPadding(context),
       children: [
         Text('עוצמת מדיה ובהירות מסך', style: Theme.of(context).textTheme.titleMedium),
         Slider(

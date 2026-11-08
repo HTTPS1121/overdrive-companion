@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/format/seat_levels.dart';
+import '../../core/layout/scroll_insets.dart';
+import '../../core/widgets/ltr_metric.dart';
 import '../../core/widgets/requires_connection.dart';
 import '../../data/models/remote_feature_models.dart';
 import '../../data/repositories/vehicle_repository.dart';
 import '../../providers/app_providers.dart';
 
 class SchedulesScreen extends StatelessWidget {
-  const SchedulesScreen({super.key});
+  const SchedulesScreen({super.key, this.embedded = false});
+
+  /// When true, shown inside [ControlsHubScreen] (no extra scaffold).
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +135,22 @@ class _ClimateScheduleTabState extends ConsumerState<_ClimateScheduleTab> {
     );
   }
 
+  String _bookingWhen(ClimateBooking b) {
+    final t = b.bookingTime;
+    if (t == null) return 'שעה לא ידועה';
+    final dt = DateTime.fromMillisecondsSinceEpoch(t * 1000, isUtc: true).toLocal();
+    return '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')} '
+        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
+  void _selectForEdit(ClimateBooking b) {
+    setState(() {
+      _bookingId = b.bookingId;
+      _temp = b.temp?.round() ?? _temp;
+      _duration = b.durationMinutes ?? _duration;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
@@ -152,48 +174,68 @@ class _ClimateScheduleTabState extends ConsumerState<_ClimateScheduleTab> {
     }
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: scrollBottomPadding(context),
       children: [
-        Text(
-          'תזמון מיזוג דרך ענן BYD (כמו ב-PWA).',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        if (s.bookings.isNotEmpty)
-          Card(
-            child: ListTile(
-              title: Text('הזמנה פעילה: ${_bookingId ?? "לא ידוע"}'),
-              subtitle: Text('טמפ׳ $_temp C · $_duration דק׳'),
-            ),
-          ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            const Text('טמפ׳'),
-            Expanded(
-              child: Slider(
-                value: _temp.toDouble(),
-                min: 15,
-                max: 31,
-                divisions: 16,
-                label: '$_temp',
-                onChanged: (v) => setState(() => _temp = v.round()),
+        Text('תזמוני מיזוג מהשרת', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        if (s.bookings.isEmpty)
+          const Text('אין תזמונים פעילים — צור תזמון חדש למטה.')
+        else
+          ...s.bookings.map(
+            (b) => Card(
+              child: ListTile(
+                selected: _bookingId == b.bookingId,
+                onTap: () => _selectForEdit(b),
+                title: Text(_bookingWhen(b)),
+                subtitle: Text(
+                  '${celsiusLabelHe(b.temp ?? _temp)} · ${b.durationMinutes ?? 0} דק׳',
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      tooltip: 'מחיקה',
+                      onPressed: () async {
+                        _bookingId = b.bookingId;
+                        await _delete();
+                      },
+                      icon: const Icon(Icons.delete_outline),
+                    ),
+                  ],
+                ),
               ),
             ),
-            Text('$_temp', textDirection: TextDirection.ltr),
-          ],
+          ),
+        const Divider(height: 28),
+        Text(
+          _bookingId == null ? 'תזמון חדש' : 'עריכת תזמון $_bookingId',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        Text(celsiusLabelHe(_temp)),
+        Slider(
+          value: _temp.toDouble(),
+          min: 15,
+          max: 31,
+          divisions: 16,
+          label: celsiusLabelHe(_temp),
+          onChanged: (v) => setState(() => _temp = v.round()),
         ),
         DropdownButtonFormField<int>(
-          value: _duration,
-          decoration: const InputDecoration(labelText: 'משך (דקות)'),
+          initialValue: _duration,
+          decoration: const InputDecoration(labelText: 'משך פעולה (דקות)'),
           items: const [10, 15, 20, 25, 30]
-              .map((m) => DropdownMenuItem(value: m, child: Text('$m')))
+              .map((m) => DropdownMenuItem(value: m, child: Text('$m דק׳')))
               .toList(),
           onChanged: (v) => setState(() => _duration = v ?? 20),
         ),
         const SizedBox(height: 16),
-        FilledButton(onPressed: _save, child: const Text('שמירה')),
+        FilledButton(onPressed: _save, child: Text(_bookingId == null ? 'יצירה' : 'עדכון')),
         if (_bookingId != null)
-          TextButton(onPressed: _delete, child: const Text('מחיקת הזמנה')),
+          TextButton(
+            onPressed: () => setState(() => _bookingId = null),
+            child: const Text('ביטול עריכה'),
+          ),
       ],
     );
   }
@@ -299,8 +341,14 @@ class _ChargingScheduleTabState extends ConsumerState<_ChargingScheduleTab> {
     }
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: scrollBottomPadding(context),
       children: [
+        if (s.enabled != null)
+          LtrMetricRow(
+            label: 'סטטוס',
+            value: s.enabled! ? 'פעיל' : 'כבוי',
+          ),
+        const SizedBox(height: 8),
         SwitchListTile(
           title: const Text('טעינה מתוזמנת פעילה'),
           value: _enabled,
@@ -322,11 +370,11 @@ class _ChargingScheduleTabState extends ConsumerState<_ChargingScheduleTab> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: _chargeWay,
-          decoration: const InputDecoration(labelText: 'chargeWay'),
+          initialValue: _chargeWay,
+          decoration: const InputDecoration(labelText: 'סוג חזרה'),
           items: const [
-            DropdownMenuItem(value: 'e', child: Text('e — כל יום')),
-            DropdownMenuItem(value: 's', child: Text('s — חד פעמי')),
+            DropdownMenuItem(value: 'e', child: Text('חוזר בכל יום')),
+            DropdownMenuItem(value: 's', child: Text('חד־פעמי')),
           ],
           onChanged: (v) => setState(() => _chargeWay = v ?? 'e'),
         ),

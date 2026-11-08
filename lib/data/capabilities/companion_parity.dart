@@ -43,7 +43,8 @@ const companionParityMatrix = <CompanionEndpointStatus>[
   CompanionEndpointStatus(method: 'POST', path: '/api/vehicle/adas', labelHe: 'ADAS', implemented: true),
   CompanionEndpointStatus(method: 'POST', path: '/api/vehicle/setting', labelHe: 'הגדרות רכב', implemented: true),
   CompanionEndpointStatus(method: 'POST', path: '/api/vehicle/media', labelHe: 'מדיה / בהירות', implemented: true),
-  CompanionEndpointStatus(method: 'GET', path: '/api/vehicle/charge-cap', labelHe: 'מגבלת טעינה', implemented: false, noteHe: 'מסך עריכה — בגרסה הבאה'),
+  CompanionEndpointStatus(method: 'GET', path: '/api/vehicle/charge-cap', labelHe: 'מגבלת טעינה', implemented: true),
+  CompanionEndpointStatus(method: 'POST', path: '/api/vehicle/charge-cap', labelHe: 'שמירת מגבלת טעינה', implemented: true),
   CompanionEndpointStatus(
     method: 'POST',
     path: '/api/vehicle/system',

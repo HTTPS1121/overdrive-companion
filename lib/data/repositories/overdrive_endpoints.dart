@@ -52,6 +52,7 @@ class ControlCapability {
     required this.labelHe,
     this.defaultBody,
     this.requiresTyres = false,
+    this.requiresConfirmation = false,
   });
 
   final ControlKind kind;
@@ -59,6 +60,7 @@ class ControlCapability {
   final String labelHe;
   final Map<String, dynamic>? defaultBody;
   final bool requiresTyres;
+  final bool requiresConfirmation;
 }
 
 /// Controls implemented in this companion (subset of VehicleControlApiHandler).
@@ -67,17 +69,20 @@ const kCompanionControls = <ControlCapability>[
     kind: ControlKind.lock,
     path: OverdriveEndpoints.lock,
     labelHe: 'נעילה',
+    requiresConfirmation: true,
   ),
   ControlCapability(
     kind: ControlKind.unlock,
     path: OverdriveEndpoints.unlock,
     labelHe: 'פתיחה',
+    requiresConfirmation: true,
   ),
   ControlCapability(
     kind: ControlKind.trunkOpen,
     path: OverdriveEndpoints.trunk,
     labelHe: 'פתיחת תא מטען',
     defaultBody: {'action': 'open'},
+    requiresConfirmation: true,
   ),
   ControlCapability(
     kind: ControlKind.trunkClose,
@@ -90,6 +95,7 @@ const kCompanionControls = <ControlCapability>[
     path: OverdriveEndpoints.window,
     labelHe: 'פתיחת חלונות',
     defaultBody: {'area': 0, 'command': 1},
+    requiresConfirmation: true,
   ),
   ControlCapability(
     kind: ControlKind.windowsClose,
@@ -112,6 +118,7 @@ const kCompanionControls = <ControlCapability>[
     kind: ControlKind.findCar,
     path: OverdriveEndpoints.findCar,
     labelHe: 'מציאת רכב',
+    requiresConfirmation: true,
   ),
   ControlCapability(
     kind: ControlKind.climateOn,

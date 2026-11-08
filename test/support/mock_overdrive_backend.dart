@@ -9,9 +9,13 @@ import 'package:overdrive_companion/data/models/vehicle_state.dart';
 /// In-memory simulation of Overdrive HTTP handlers (vehicle state + controls).
 class MockOverdriveBackend {
   MockOverdriveBackend({Map<String, dynamic>? initialState})
-      : _state = Map<String, dynamic>.from(initialState ?? _defaultState());
+      : _state = Map<String, dynamic>.from(initialState ?? _defaultState()),
+        _climateBookings = List<Map<String, dynamic>>.from(_defaultClimateBookings());
 
   final Map<String, dynamic> _state;
+  final List<Map<String, dynamic>> _climateBookings;
+  int _chargeCapPercent = 100;
+  bool _chargeCapEnabled = false;
   String? _jwt;
   bool authRequired = false;
 
@@ -96,10 +100,29 @@ class MockOverdriveBackend {
         localRemoteKey: true,
       );
 
-  GpsSnapshot gps() => GpsSnapshot(
+  static List<Map<String, dynamic>> _defaultClimateBookings() {
+    final when = DateTime.now().add(const Duration(hours: 6));
+    return [
+      {
+        'bookingId': 'mock-climate-1',
+        'bookingTime': when.millisecondsSinceEpoch ~/ 1000,
+        'temp': 22.0,
+        'durationMinutes': 20,
+      },
+      {
+        'bookingId': 'mock-climate-2',
+        'bookingTime': when.add(const Duration(days: 1)).millisecondsSinceEpoch ~/ 1000,
+        'temp': 20.0,
+        'durationMinutes': 15,
+      },
+    ];
+  }
+
+  GpsSnapshot gps() => const GpsSnapshot(
         success: true,
+        latitude: 32.0853,
+        longitude: 34.7818,
         canSpeedKmh: 0,
-        hasLocation: true,
       );
 
   Map<String, dynamic> handlePost(String path, Map<String, dynamic> body) {
@@ -126,7 +149,7 @@ class MockOverdriveBackend {
       case '/api/vehicle/find-car':
         return _ok('find-car', message: 'find-car');
       case '/api/vehicle/seat':
-        return _ok('seat', message: body['action']?.toString());
+        return _handleSeat(body);
       case '/api/vehicle/media':
         return _ok('media', message: body['target']?.toString());
       case '/api/vehicle/adas':
@@ -134,13 +157,13 @@ class MockOverdriveBackend {
       case '/api/vehicle/setting':
         return _ok('setting');
       case '/api/vehicle/climate-schedule':
-        return _ok('climate-schedule');
+        return _handleClimateSchedule(body);
       case '/api/vehicle/charging-schedule':
         return _ok('charging-schedule');
       case '/api/vehicle/start-charging':
         return _ok('start-charging');
       case '/api/vehicle/charge-cap':
-        return _ok('charge-cap');
+        return _handleChargeCapPost(body);
       default:
         return {'success': false, 'error': 'unsupported path $path'};
     }
@@ -153,7 +176,7 @@ class MockOverdriveBackend {
           'success': true,
           'supported': true,
           'source': 'cloud',
-          'bookings': [],
+          'bookings': _climateBookings,
         };
       case '/api/vehicle/charging-schedule':
         return {
@@ -172,7 +195,12 @@ class MockOverdriveBackend {
           'itac': {'raw': 0, 'on': false},
         };
       case '/api/vehicle/charge-cap':
-        return {'success': true, 'supported': true, 'percent': 100, 'enabled': false};
+        return {
+          'success': true,
+          'supported': true,
+          'percent': _chargeCapPercent,
+          'enabled': _chargeCapEnabled,
+        };
       default:
         return {'success': false, 'error': 'unsupported GET $path'};
     }
@@ -241,6 +269,64 @@ class MockOverdriveBackend {
     }
     _state['climate'] = climate;
     return _ok('climate', message: action);
+  }
+
+  Map<String, dynamic> _handleSeat(Map<String, dynamic> body) {
+    final seats = _map('seats');
+    final heat = List<int>.from((seats['heat'] as List?)?.map((e) => (e as num).toInt()) ?? [0, 0]);
+    final cool = List<int>.from((seats['cool'] as List?)?.map((e) => (e as num).toInt()) ?? [0, 0]);
+    if (body['driverHeat'] != null) heat[0] = (body['driverHeat'] as num).toInt();
+    if (body['passengerHeat'] != null) heat[1] = (body['passengerHeat'] as num).toInt();
+    if (body['driverVent'] != null) cool[0] = (body['driverVent'] as num).toInt();
+    if (body['passengerVent'] != null) cool[1] = (body['passengerVent'] as num).toInt();
+    if (body['level'] != null) {
+      final pos = (body['position'] as num?)?.toInt() ?? 1;
+      final level = (body['level'] as num).toInt();
+      final action = body['action'] as String? ?? '';
+      final idx = pos - 1;
+      if (action == 'heating') heat[idx] = level;
+      if (action == 'ventilation') cool[idx] = level;
+    }
+    seats['heat'] = heat;
+    seats['cool'] = cool;
+    _state['seats'] = seats;
+    return _ok('seat', message: body['action']?.toString());
+  }
+
+  Map<String, dynamic> _handleClimateSchedule(Map<String, dynamic> body) {
+    final action = body['action'] as String? ?? 'create';
+    if (action == 'delete') {
+      final id = body['bookingId'] as String?;
+      _climateBookings.removeWhere((b) => b['bookingId'] == id);
+      return _ok('climate-schedule', message: 'deleted');
+    }
+    if (action == 'update') {
+      final id = body['bookingId'] as String?;
+      final existing = _climateBookings.indexWhere((b) => b['bookingId'] == id);
+      if (existing >= 0) {
+        _climateBookings[existing] = {
+          ..._climateBookings[existing],
+          if (body['bookingTime'] != null) 'bookingTime': body['bookingTime'],
+          if (body['temp'] != null) 'temp': body['temp'],
+          if (body['durationMinutes'] != null) 'durationMinutes': body['durationMinutes'],
+        };
+      }
+      return _ok('climate-schedule', message: 'updated');
+    }
+    final id = body['bookingId'] as String? ?? 'mock-climate-${_climateBookings.length + 1}';
+    _climateBookings.add({
+      'bookingId': id,
+      'bookingTime': body['bookingTime'] ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      'temp': body['temp'] ?? 22,
+      'durationMinutes': body['durationMinutes'] ?? 20,
+    });
+    return _ok('climate-schedule', message: 'created');
+  }
+
+  Map<String, dynamic> _handleChargeCapPost(Map<String, dynamic> body) {
+    if (body['percent'] != null) _chargeCapPercent = (body['percent'] as num).toInt();
+    if (body['enabled'] != null) _chargeCapEnabled = body['enabled'] == true;
+    return _ok('charge-cap');
   }
 
   Map<String, dynamic> _handleLights(Map<String, dynamic> body) {

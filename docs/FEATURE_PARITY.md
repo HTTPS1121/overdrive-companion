@@ -1,49 +1,51 @@
-# Overdrive Companion — feature parity (2.1)
+# Overdrive Companion — feature parity (2.2.0)
 
-Source of truth (read-only): [HTTPS1121/Overdrive-release](https://github.com/HTTPS1121/Overdrive-release) `main`, especially `VehicleControlApiHandler.java` and PWA `vehicle-control.html` panels.
+**Source evidence:** `lib/data/capabilities/companion_parity.dart` (machine-readable matrix). Reference server: [HTTPS1121/Overdrive-release](https://github.com/HTTPS1121/Overdrive-release) `VehicleControlApiHandler.java` + PWA `vehicle-control.html`.
 
-## Implemented in companion (via tunnel)
+## Implemented (tunnel phone client)
 
-| Method | Path | UI |
-|--------|------|-----|
-| POST | `/auth/token` | Setup / Settings |
+| Method | Path | UI surface |
+|--------|------|------------|
+| POST | `/auth/token` | Setup, Settings |
 | GET | `/auth/status` | Connection test |
-| GET | `/api/vehicle/state` | Status (LTR metrics for units) |
-| GET | `/api/vehicle/cloud-status` | Status |
-| GET | `/api/gps` | Location tab + status summary |
-| POST | `/api/vehicle/lock` / `unlock` / `trunk` / `window` / `flash` | Controls |
-| POST | `/api/vehicle/climate` / `lights` | Controls |
-| POST | `/api/vehicle/find-car` | Controls (find car) |
-| GET/POST | `/api/vehicle/climate-schedule` | Schedules → climate |
-| GET/POST | `/api/vehicle/charging-schedule` | Schedules → charging |
-| POST | `/api/vehicle/seat` | Comfort → seats |
-| GET/POST | `/api/vehicle/adas` | Comfort → media & safety |
-| POST | `/api/vehicle/media` | Comfort → brightness / volume |
-| POST | `/api/vehicle/setting` | Comfort → ADAS toggles |
-| GET | `/api/vehicle/charge-cap` | Repository + fixtures (dedicated UI TBD) |
+| GET | `/api/vehicle/state` | מצב (LTR metrics) |
+| GET | `/api/vehicle/cloud-status` | מצב |
+| GET | `/api/gps` | מיקום + תקציר במצב (קואורדינטות, מפה, ניווט) |
+| POST | lock/unlock/trunk/window/flash/find-car/climate/lights | שליטה → פקודות (+ אישור לפקודות מסוכנות) |
+| GET/POST | `/api/vehicle/climate-schedule` | שליטה → תזמונים (רשימה + יצירה/עריכה/מחיקה) |
+| GET/POST | `/api/vehicle/charging-schedule` | שליטה → תזמונים |
+| POST | `/api/vehicle/start-charging` | תזמון טעינה |
+| GET/POST | `/api/vehicle/charge-cap` | שליטה → טעינה |
+| POST | `/api/vehicle/seat` | שליטה → נוחות → מושבים |
+| GET/POST | `/api/vehicle/adas`, `/api/vehicle/setting`, `/api/vehicle/media` | שליטה → נוחות |
 
-## Phone-relevant gaps (documented only — not shown in Settings UI)
+**Navigation:** 4 bottom destinations (מצב | שליטה | מיקום | הגדרות). תזמונים / נוחות / מגבלת טעינה תחת **שליטה** (M3 ≤5).
 
-Cluster / system-only flows: `power-on/off`, `remote-access`, `surveillance`, `genai`, `dev-view`, `communicate`, `wireguard`, full 3D vehicle model, some cloud-only media paths.
+## Not implemented (with reason — see matrix `carOnlyReason`)
 
-Authoritative matrix for automation: `lib/data/capabilities/companion_parity.dart` (not exposed in the primary Settings screen).
+| Path | Reason |
+|------|--------|
+| POST `/api/vehicle/system` | Head-unit navigation / camera UI |
+| POST `/api/vehicle/cluster-cast` | Cluster projection only |
+| GET `/api/vehicle/cluster-apps` | Cluster projection only |
 
-## Test evidence (2.1.0)
+Additional PWA/server routes **not wired** in companion (no fake UI): `power-on/off`, `battery-heat`, `remote-access`, `surveillance`, `genai`, `dev-view`, `communicate`, `wireguard`, 3D model panel, etc.
 
-- `flutter test` — 23 tests: contracts, widgets, fixture integration, **v2.1** golden screenshots only (`test/screenshot/goldens/v2.1/`).
-- Versioned screenshot artifacts: `/opt/cursor/artifacts/v2.1-0/screenshots/` (light + dark representative tabs: status, controls, location, schedules, comfort, settings).
-- **Not validated:** physical device install, live Atto 3, real tunnel command actuation (QA was cert/manifest comparison only).
+## Tests (fixture-only — no live car)
 
-## Signing / install-over notes
+- `flutter test` — contracts, integration mock, confirm dialogs, **25** cases including `test/widget/controls_confirm_test.dart`.
+- Goldens: `test/screenshot/goldens/v2.2/` only (not legacy `goldens/` root).
 
-| Build | Cert SHA-256 (signer) | Install-over |
-|-------|------------------------|--------------|
-| 1.1.2 / 2.1.0 debug | `0d1b4493974f41eaa061f2f6a4f8f5cc44f0417582b64185a6189fa8cf932956` | Same lineage — upgrade in place when signatures match |
-| stage1 (legacy) | `c869d2fa2ff2faf36cfa7e33abefedaee288b71f1bb67a6f12ff778ed161c644` | **Incompatible** — uninstall stage1 before installing current companion |
+## Validation limits
 
-APK in CI/agent builds is verified with `apksigner verify` on the build VM (v2 scheme).
+- **No on-device install verified** in agent QA (cert/manifest comparison only).
+- Tunnel actuation on real Atto 3 not exercised.
 
-## Production policy
+## Signing
 
-- No embedded mock / demo mode in release UI.
-- Fixtures live under `test/` and `fixtures/` for tests only.
+| Build | Signer SHA-256 | Notes |
+|-------|----------------|-------|
+| 1.1.2 / 2.2.0 release | `0d1b4493974f41eaa061f2f6a4f8f5cc44f0417582b64185a6189fa8cf932956` | Debug keystore on release build (test distribution) |
+| stage1 legacy | `c869d2fa2ff2faf36cfa7e33abefedaee288b71f1bb67a6f12ff778ed161c644` | **Not** install-over compatible |
+
+Release APK: `application:debuggable=false` (not a debug build variant).

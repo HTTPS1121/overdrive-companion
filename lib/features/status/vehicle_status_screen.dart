@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format/freshness.dart';
+import '../../core/layout/scroll_insets.dart';
 import '../../core/widgets/ltr_metric.dart';
+import '../gps/gps_location_card.dart';
 import '../../data/models/gps_snapshot.dart';
 import '../../data/models/vehicle_state.dart';
 import '../../providers/app_providers.dart';
@@ -50,7 +52,7 @@ class VehicleStatusScreen extends ConsumerWidget {
         return RefreshIndicator(
           onRefresh: () => ref.read(vehicleSnapshotProvider.notifier).refresh(),
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            padding: scrollBottomPadding(context),
             children: [
               _SectionCard(
                 title: 'חיבור',
@@ -271,23 +273,6 @@ class _GpsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SectionCard(
-      title: 'מיקום',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            gps.hasLocation ? 'מיקום זמין מהשרת' : 'אין מיקום בגוף התשובה',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          if (drivingLabel != null) Text(drivingLabel!),
-          if (gps.canSpeedKmh != null)
-            LtrMetricRow(
-              label: 'מהירות',
-              value: '${gps.canSpeedKmh!.toStringAsFixed(0)} km/h',
-            ),
-        ],
-      ),
-    );
+    return GpsLocationCard(gps: gps, drivingLabel: drivingLabel, compact: true);
   }
 }

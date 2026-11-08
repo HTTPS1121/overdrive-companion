@@ -51,8 +51,8 @@
     "remoteClimateActive": false
   },
   "seats": {
-    "heat": [0, 0],
-    "cool": [0, 0],
+    "heat": [1, 0],
+    "cool": [0, 2],
     "steeringHeat": false,
     "ventilatedSupported": true
   },

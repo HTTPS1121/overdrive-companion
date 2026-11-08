@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/widgets/ltr_metric.dart';
+import '../../core/layout/scroll_insets.dart';
 import '../../providers/app_providers.dart';
+import 'gps_location_card.dart';
 
 class GpsScreen extends ConsumerWidget {
   const GpsScreen({super.key});
@@ -27,37 +28,13 @@ class GpsScreen extends ConsumerWidget {
           );
         }
         final gps = snap.gps;
-        if (gps == null) {
+        if (gps == null || !gps.success) {
           return const Center(child: Text('השרת לא החזיר נתוני GPS'));
         }
         return ListView(
-          padding: const EdgeInsets.all(16),
+          padding: scrollBottomPadding(context),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('מיקום', style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 8),
-                    Text(
-                      gps.hasLocation ? 'מיקום זמין מהשרת' : 'אין קואורדינטות בגוף התשובה',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    Text(
-                      gps.isDriving == true ? 'בנסיעה' : 'לא בנסיעה',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    if (gps.canSpeedKmh != null)
-                      LtrMetricRow(
-                        label: 'מהירות',
-                        value: '${gps.canSpeedKmh!.toStringAsFixed(0)} km/h',
-                      ),
-                  ],
-                ),
-              ),
-            ),
+            GpsLocationCard(gps: gps, drivingLabel: snap.drivingLabelHe),
           ],
         );
       },

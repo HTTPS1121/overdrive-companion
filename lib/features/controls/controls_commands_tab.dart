@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format/freshness.dart';
+import '../../core/layout/scroll_insets.dart';
+import '../../core/widgets/confirm_risky_action.dart';
+import '../../data/models/vehicle_state.dart';
 import '../../data/repositories/overdrive_endpoints.dart';
 import '../../data/repositories/vehicle_repository.dart';
 import '../../providers/app_providers.dart';
 
-class ControlsScreen extends ConsumerStatefulWidget {
-  const ControlsScreen({super.key});
+/// פקודות שליטה ישירות (נעילה, חלונות, מיזוג).
+class ControlsCommandsTab extends ConsumerStatefulWidget {
+  const ControlsCommandsTab({super.key});
 
   @override
-  ConsumerState<ControlsScreen> createState() => _ControlsScreenState();
+  ConsumerState<ControlsCommandsTab> createState() => _ControlsCommandsTabState();
 }
 
-class _ControlsScreenState extends ConsumerState<ControlsScreen> {
+class _ControlsCommandsTabState extends ConsumerState<ControlsCommandsTab> {
   String? _lastFeedback;
   bool _busy = false;
 
@@ -43,8 +47,10 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
         );
         final staleBlocked = freshness.isStale;
 
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        return Stack(
+          children: [
+            ListView(
+          padding: scrollBottomPadding(context),
           children: [
             if (staleBlocked)
               Card(
@@ -52,9 +58,9 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
                 child: ListTile(
                   leading: Icon(Icons.schedule, color: Theme.of(context).colorScheme.onTertiaryContainer),
                   title: const Text('נתונים ישנים'),
-                        subtitle: Text(
-                          'רענן את המצב לפני שליחת פקודה (${freshness.fetchedAgoLabelHe(snap.lastUpdated)})',
-                        ),
+                  subtitle: Text(
+                    'רענן את המצב לפני שליחת פקודה (${freshness.fetchedAgoLabelHe(snap.lastUpdated)})',
+                  ),
                 ),
               ),
             _ControlSection(
@@ -65,19 +71,19 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
                   label: 'נעילה',
                   icon: Icons.lock,
                   enabled: !_busy && !staleBlocked,
-                  onPressed: () => _run(ControlKind.lock, 'נעילה'),
+                  onPressed: () => _runWithConfirm(ControlKind.lock, 'נעילה'),
                 ),
                 _ActionTile(
                   label: 'פתיחה',
                   icon: Icons.lock_open,
                   enabled: !_busy && !staleBlocked,
-                  onPressed: () => _run(ControlKind.unlock, 'פתיחה'),
+                  onPressed: () => _runWithConfirm(ControlKind.unlock, 'פתיחה'),
                 ),
                 _ActionTile(
                   label: 'פתיחת תא מטען',
                   icon: Icons.luggage,
                   enabled: !_busy && !staleBlocked,
-                  onPressed: () => _run(ControlKind.trunkOpen, 'תא מטען'),
+                  onPressed: () => _runWithConfirm(ControlKind.trunkOpen, 'תא מטען'),
                 ),
                 _ActionTile(
                   label: 'הבהוב אורות',
@@ -89,7 +95,7 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
                   label: 'מציאת רכב',
                   icon: Icons.my_location,
                   enabled: !_busy && !staleBlocked,
-                  onPressed: () => _run(ControlKind.findCar, 'מציאת רכב'),
+                  onPressed: () => _runWithConfirm(ControlKind.findCar, 'מציאת רכב'),
                 ),
               ],
             ),
@@ -102,7 +108,7 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
                   label: 'פתיחה מלאה',
                   icon: Icons.vertical_align_top,
                   enabled: !_busy && !staleBlocked,
-                  onPressed: () => _run(ControlKind.windowsOpen, 'חלונות'),
+                  onPressed: () => _runWithConfirm(ControlKind.windowsOpen, 'חלונות'),
                 ),
                 _ActionTile(
                   label: 'סגירה',
@@ -172,6 +178,15 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
               Text(_lastFeedback!, textAlign: TextAlign.center),
             ],
           ],
+            ),
+            if (_busy)
+              Positioned.fill(
+                child: ColoredBox(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+              ),
+          ],
         );
       },
     );
@@ -179,6 +194,20 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
 
   ControlCapability _cap(ControlKind kind) =>
       kCompanionControls.firstWhere((c) => c.kind == kind);
+
+  Future<void> _runWithConfirm(ControlKind kind, String label) async {
+    final cap = _cap(kind);
+    if (cap.requiresConfirmation) {
+      final ok = await confirmRiskyAction(
+        context,
+        title: 'לאשר $label?',
+        body: 'הפעולה תישלח לרכב דרך השרת. וודא שהרכב במקום בטוח.',
+        confirmLabel: 'שליחה',
+      );
+      if (!ok || !mounted) return;
+    }
+    await _run(kind, label);
+  }
 
   Future<void> _run(ControlKind kind, String label) async {
     final snap = ref.read(vehicleSnapshotProvider).valueOrNull;
