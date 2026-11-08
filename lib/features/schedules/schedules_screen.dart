@@ -173,6 +173,19 @@ class _ClimateScheduleTabState extends ConsumerState<_ClimateScheduleTab> {
       );
     }
 
+    if (s.bookingsUnavailable) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'רשימת תזמונים לא זמינה כעת (${s.reason ?? "הרכב לא נגיש"}).\n'
+            'לא מוצגת רשימה ריקה כהוכחה להיעדר תזמונים.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     return ListView(
       padding: scrollBottomPadding(context),
       children: [

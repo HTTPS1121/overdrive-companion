@@ -1,3 +1,5 @@
+/// Models aligned with Overdrive-release VehicleControlApiHandler + vehicle-control.js.
+
 class ClimateScheduleState {
   ClimateScheduleState({
     required this.success,
@@ -5,24 +7,40 @@ class ClimateScheduleState {
     this.reason,
     this.bookings = const [],
     this.source,
+    this.bookingsUnavailable = false,
+    this.emptyBookingsMayBeStale = false,
   });
 
   factory ClimateScheduleState.fromJson(Map<String, dynamic> json) {
-    final raw = json['bookings'];
     final list = <ClimateBooking>[];
-    if (raw is List) {
-      for (final b in raw) {
-        if (b is Map<String, dynamic>) {
-          list.add(ClimateBooking.fromJson(b));
+    final rawBookings = json['bookings'];
+    if (json['bookingsUnavailable'] == true) {
+      // Omit list — stale; do not treat as empty schedule.
+    } else if (rawBookings is Map<String, dynamic>) {
+      final entries = rawBookings['listInfo'];
+      if (entries is List) {
+        for (final e in entries) {
+          if (e is Map<String, dynamic>) {
+            list.add(ClimateBooking.fromCloudListEntry(e));
+          }
+        }
+      }
+    } else if (rawBookings is List) {
+      for (final e in rawBookings) {
+        if (e is Map<String, dynamic>) {
+          list.add(ClimateBooking.fromCloudListEntry(e));
         }
       }
     }
+
     return ClimateScheduleState(
       success: json['success'] == true,
       supported: json['supported'] == true,
       reason: json['reason'] as String?,
       bookings: list,
       source: json['source'] as String?,
+      bookingsUnavailable: json['bookingsUnavailable'] == true,
+      emptyBookingsMayBeStale: json['emptyBookingsMayBeStale'] == true,
     );
   }
 
@@ -31,6 +49,8 @@ class ClimateScheduleState {
   final String? reason;
   final List<ClimateBooking> bookings;
   final String? source;
+  final bool bookingsUnavailable;
+  final bool emptyBookingsMayBeStale;
 }
 
 class ClimateBooking {
@@ -41,12 +61,38 @@ class ClimateBooking {
     this.durationMinutes,
   });
 
-  factory ClimateBooking.fromJson(Map<String, dynamic> json) {
+  /// BYD cloud list entry (`listInfo[]`) per vehicle-control.js.
+  factory ClimateBooking.fromCloudListEntry(Map<String, dynamic> json) {
+    final id = json['bookingId']?.toString();
+    int? when;
+    final bt = json['bookingTime'] ?? json['bookTime'] ?? json['appointmentTime'];
+    if (bt is num) {
+      final v = bt.toInt();
+      if (v > 1000000000 && v < 4000000000) when = v;
+    }
+    double? tempC;
+    final rawTemp = json['mainSettingTemp'];
+    if (rawTemp is num) {
+      final raw = rawTemp.toInt();
+      if (raw >= 1 && raw <= 17) tempC = (raw + 14).toDouble();
+    }
+    final tempPlain = json['temp'];
+    if (tempC == null && tempPlain is num) {
+      tempC = tempPlain.toDouble();
+    }
+    int? duration;
+    final span = json['timeSpan'] ?? json['timespan'];
+    if (span is num && span >= 1 && span <= 5) {
+      duration = span.toInt() * 5 + 5;
+    }
+    final dur = json['durationMinutes'];
+    if (duration == null && dur is num) duration = dur.toInt();
+
     return ClimateBooking(
-      bookingId: json['bookingId']?.toString(),
-      bookingTime: (json['bookingTime'] as num?)?.toInt(),
-      temp: (json['temp'] as num?)?.toDouble(),
-      durationMinutes: (json['durationMinutes'] as num?)?.toInt(),
+      bookingId: id,
+      bookingTime: when,
+      temp: tempC,
+      durationMinutes: duration,
     );
   }
 
@@ -69,14 +115,26 @@ class ChargingScheduleState {
   });
 
   factory ChargingScheduleState.fromJson(Map<String, dynamic> json) {
+    bool? enabled;
+    final en = json['enabled'];
+    if (en is bool) enabled = en;
+
+    String? t(String k) {
+      final v = json[k];
+      if (v == null) return null;
+      final s = v.toString();
+      if (s == 'null' || s.isEmpty) return null;
+      return s;
+    }
+
     return ChargingScheduleState(
       success: json['success'] == true,
       supported: json['supported'] == true,
       reason: json['reason'] as String?,
-      enabled: json['enabled'] as bool?,
-      startChargeTime: json['startChargeTime']?.toString(),
-      endChargeTime: json['endChargeTime']?.toString(),
-      chargeWay: json['chargeWay']?.toString(),
+      enabled: enabled,
+      startChargeTime: t('startChargeTime'),
+      endChargeTime: t('endChargeTime'),
+      chargeWay: t('chargeWay'),
       source: json['source'] as String?,
     );
   }

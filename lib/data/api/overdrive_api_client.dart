@@ -138,3 +138,20 @@ String normalizeBaseUrl(String input) {
   return url;
 }
 
+/// True for explicit `http://` to a non-TLS endpoint (local/LAN use only).
+bool isLocalHttpUrl(String input) {
+  final n = normalizeBaseUrl(input);
+  if (!n.startsWith('http://')) return false;
+  final host = Uri.tryParse(n)?.host.toLowerCase() ?? '';
+  if (host == 'localhost' || host == '127.0.0.1') return true;
+  if (host.startsWith('192.168.') || host.startsWith('10.')) return true;
+  if (host.startsWith('172.')) {
+    final parts = host.split('.');
+    if (parts.length >= 2) {
+      final second = int.tryParse(parts[1]);
+      if (second != null && second >= 16 && second <= 31) return true;
+    }
+  }
+  return n.startsWith('http://');
+}
+

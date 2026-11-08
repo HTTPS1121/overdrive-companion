@@ -50,3 +50,4 @@ app.*.map.json
 # Local tooling / agent artifacts
 .tools/
 agent-tools/
+tools/parity-ref/

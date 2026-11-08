@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/layout/screenshot_scope.dart';
 import '../../core/widgets/ltr_metric.dart';
 import '../../data/models/gps_snapshot.dart';
 
@@ -45,22 +46,46 @@ class GpsLocationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (!compact)
+          if (!compact) ...[
             AspectRatio(
               aspectRatio: 600 / 280,
-              child: Image.network(
-                gps.staticMapUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => ColoredBox(
-                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                  child: const Center(child: Icon(Icons.map_outlined, size: 48)),
-                ),
-                loadingBuilder: (ctx, child, progress) {
-                  if (progress == null) return child;
-                  return const Center(child: CircularProgressIndicator());
-                },
-              ),
+              child: ScreenshotScope.of(context)
+                  ? ColoredBox(
+                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                      child: Center(
+                        child: Text(
+                          'תצוגת מפה דורשת רשת במכשיר.\nהקואורדינטות והניווט למטה תקפים מהשרת.',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    )
+                  : Image.network(
+                      gps.staticMapUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => ColoredBox(
+                        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.map_outlined, size: 48),
+                              const SizedBox(height: 8),
+                              Text(
+                                'לא ניתן לטעון מפה — הקואורדינטות זמינות',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      loadingBuilder: (ctx, child, progress) {
+                        if (progress == null) return child;
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                    ),
             ),
+          ],
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(

@@ -1,51 +1,53 @@
-# Overdrive Companion — feature parity (2.2.0)
+# Overdrive Companion — feature parity (2.3.0)
 
-**Source evidence:** `lib/data/capabilities/companion_parity.dart` (machine-readable matrix). Reference server: [HTTPS1121/Overdrive-release](https://github.com/HTTPS1121/Overdrive-release) `VehicleControlApiHandler.java` + PWA `vehicle-control.html`.
+**Authoritative server source (vendored for audit):** `tools/parity-ref/.../VehicleControlApiHandler.java` from [HTTPS1121/Overdrive-release](https://github.com/HTTPS1121/Overdrive-release) `main`. **PWA:** `vehicle-control.js`.
 
-## Implemented (tunnel phone client)
+**Matrix:** `lib/data/capabilities/companion_parity.dart`. **Contract tests:** `test/contract/handler_json_shapes_test.dart` (shapes from handler, not invented fixtures).
 
-| Method | Path | UI surface |
-|--------|------|------------|
-| POST | `/auth/token` | Setup, Settings |
-| GET | `/auth/status` | Connection test |
-| GET | `/api/vehicle/state` | מצב (LTR metrics) |
-| GET | `/api/vehicle/cloud-status` | מצב |
-| GET | `/api/gps` | מיקום + תקציר במצב (קואורדינטות, מפה, ניווט) |
-| POST | lock/unlock/trunk/window/flash/find-car/climate/lights | שליטה → פקודות (+ אישור לפקודות מסוכנות) |
-| GET/POST | `/api/vehicle/climate-schedule` | שליטה → תזמונים (רשימה + יצירה/עריכה/מחיקה) |
-| GET/POST | `/api/vehicle/charging-schedule` | שליטה → תזמונים |
-| POST | `/api/vehicle/start-charging` | תזמון טעינה |
-| GET/POST | `/api/vehicle/charge-cap` | שליטה → טעינה |
-| POST | `/api/vehicle/seat` | שליטה → נוחות → מושבים |
-| GET/POST | `/api/vehicle/adas`, `/api/vehicle/setting`, `/api/vehicle/media` | שליטה → נוחות |
+## Implemented (tunnel)
 
-**Navigation:** 4 bottom destinations (מצב | שליטה | מיקום | הגדרות). תזמונים / נוחות / מגבלת טעינה תחת **שליטה** (M3 ≤5).
+| Path | UI |
+|------|-----|
+| Auth + `/api/vehicle/state`, `/cloud-status`, `/api/gps` | מצב, מיקום |
+| Lock/unlock/trunk/window/flash/find-car/climate/lights | שליטה → פקודות |
+| Climate/charging schedules, charge-cap, seat, adas, setting, media | שליטה → sub-tabs |
 
-## Not implemented (with reason — see matrix `carOnlyReason`)
+Navigation: **4** bottom items (מצב \| שליטה \| מיקום \| הגדרות), RTL `NavigationBar`, `alwaysShow` labels.
 
-| Path | Reason |
-|------|--------|
-| POST `/api/vehicle/system` | Head-unit navigation / camera UI |
-| POST `/api/vehicle/cluster-cast` | Cluster projection only |
-| GET `/api/vehicle/cluster-apps` | Cluster projection only |
+## Planned phone-remote (handler exposes; companion wiring in progress)
 
-Additional PWA/server routes **not wired** in companion (no fake UI): `power-on/off`, `battery-heat`, `remote-access`, `surveillance`, `genai`, `dev-view`, `communicate`, `wireguard`, 3D model panel, etc.
+| Path | Handler routing | Companion status |
+|------|-----------------|------------------|
+| `POST /api/vehicle/power-on` \| `power-off` | SDK_ONLY; parked+stationary guard | **Not in UI yet** — requires confirmation + driving gate |
+| `POST /api/vehicle/battery-heat` | CLOUD_ONLY `{enabled:bool}` | **Not in UI yet** — state from `/api/vehicle/state` `batteryHeat` |
+| `POST /api/vehicle/system` `{target:screenshot\|...}` | UID-2000 shell; surveillance capture | **Not in UI yet** — explicit confirm per capture |
+| `GET/POST /api/vehicle/ac-charge-current-limit` | SDK trim-dependent | **Not wired** |
 
-## Tests (fixture-only — no live car)
+## Not on phone client (specific reasons)
 
-- `flutter test` — contracts, integration mock, confirm dialogs, **25** cases including `test/widget/controls_confirm_test.dart`.
-- Goldens: `test/screenshot/goldens/v2.2/` only (not legacy `goldens/` root).
+| Path | Why omitted |
+|------|-------------|
+| `POST /api/vehicle/cluster-cast`, `cluster-stop`, `cluster-touch`, … | Requires in-car cluster projection / mirror controllers (`ClusterCast`, `ClusterMirrorController`) — not a tunnel JSON command from phone |
+| `GET /api/vehicle/cluster-apps` | Lists head-unit launcher apps for cluster cast — no phone UX |
+| `POST /api/vehicle/play-audio`, `stop-audio`, `speak`, `message` | Voice/audio daemon on HU; not remote companion flows |
+| `remote-access.html` / WireGuard UI | Separate PWA page; changes tunnel credentials — **no tunnel mutation** from companion without dedicated remote-access API review |
+| `POST /api/system/ivi-reboot` | Factory/service reboot — not offered in companion |
+| `POST /api/vehicle/genai`, `dev-view`, `communicate` | Head-unit dev / GenAI panels |
+| PWA 3D model (`/api/models/*`) | GLB asset pipeline on HU; not phone control surface |
 
-## Validation limits
+## JSON contract fixes (2.3)
 
-- **No on-device install verified** in agent QA (cert/manifest comparison only).
-- Tunnel actuation on real Atto 3 not exercised.
+- Climate schedule GET: `bookings.listInfo[]`, `mainSettingTemp` (raw)+`timeSpan` → °C/minutes (`ClimateBooking.fromCloudListEntry`).
+- `bookingsUnavailable` / `emptyBookingsMayBeStale` honoured in schedules UI.
+- Seat POST: requires full `driverHeat`/`driverVent`/`passengerHeat`/`passengerVent` when sending composite state (handler lines 2582–2590).
 
-## Signing
+## Tests & evidence
 
-| Build | Signer SHA-256 | Notes |
-|-------|----------------|-------|
-| 1.1.2 / 2.2.0 release | `0d1b4493974f41eaa061f2f6a4f8f5cc44f0417582b64185a6189fa8cf932956` | Debug keystore on release build (test distribution) |
-| stage1 legacy | `c869d2fa2ff2faf36cfa7e33abefedaee288b71f1bb67a6f12ff778ed161c644` | **Not** install-over compatible |
+- `flutter test` — includes `app_shell_nav_test`, `controls_confirm_test`, `handler_json_shapes_test`, screenshot harness **v2.3** (`test/screenshot/goldens/v2.3/`).
+- Artifacts: **`/cursor/stores/self/artifacts/v2.3-0/screenshots/`** (2.2.0 folder unchanged).
+- Screenshots: nav `selectedIndex` asserted; async panels settled; map tile skipped in screenshot mode (coordinates + nav button shown).
+- **No live car / device install** verified.
 
-Release APK: `application:debuggable=false` (not a debug build variant).
+## Signing (unchanged from 2.2 release lineage)
+
+Signer SHA-256 debug keystore: `0d1b4493…932956`. Stage1 `c869d2fa…` incompatible install-over.

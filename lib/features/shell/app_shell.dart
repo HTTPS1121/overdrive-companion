@@ -52,14 +52,11 @@ class _AppShellState extends State<AppShell> {
       body: SafeArea(
         child: IndexedStack(index: _index, children: pages),
       ),
-      bottomNavigationBar: Directionality(
-        textDirection: TextDirection.ltr,
-        child: NavigationBar(
-          selectedIndex: _index,
-          labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-          onDestinationSelected: (i) => setState(() => _index = i),
-          destinations: _destinations,
-        ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        onDestinationSelected: (i) => setState(() => _index = i),
+        destinations: _destinations,
       ),
     );
   }

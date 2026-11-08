@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/config/app_settings.dart';
 import 'core/layout/phone_viewport.dart';
+import 'core/layout/screenshot_scope.dart';
 import 'core/theme/companion_color_schemes.dart';
 import 'core/theme/companion_theme.dart';
 import 'features/shell/app_root.dart';
@@ -45,7 +46,10 @@ class _OverdriveAppState extends ConsumerState<OverdriveApp> {
   Widget build(BuildContext context) {
     final settings = ref.watch(appSettingsProvider);
 
-    Widget home = const AppRoot();
+    Widget home = ScreenshotScope(
+      active: widget.screenshotMode,
+      child: const AppRoot(),
+    );
     if (widget.lockPhoneViewport) {
       home = PhoneViewport(child: home);
     }

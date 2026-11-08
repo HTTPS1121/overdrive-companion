@@ -101,19 +101,20 @@ class MockOverdriveBackend {
       );
 
   static List<Map<String, dynamic>> _defaultClimateBookings() {
-    final when = DateTime.now().add(const Duration(hours: 6));
+    const t1 = 1735689600; // fixed epoch for stable goldens
+    const t2 = 1735776000;
     return [
       {
-        'bookingId': 'mock-climate-1',
-        'bookingTime': when.millisecondsSinceEpoch ~/ 1000,
-        'temp': 22.0,
-        'durationMinutes': 20,
+        'bookingId': '18446744073709551615',
+        'bookingTime': t1,
+        'mainSettingTemp': 8,
+        'timeSpan': 3,
       },
       {
         'bookingId': 'mock-climate-2',
-        'bookingTime': when.add(const Duration(days: 1)).millisecondsSinceEpoch ~/ 1000,
-        'temp': 20.0,
-        'durationMinutes': 15,
+        'bookingTime': t2,
+        'mainSettingTemp': 6,
+        'timeSpan': 2,
       },
     ];
   }
@@ -176,7 +177,10 @@ class MockOverdriveBackend {
           'success': true,
           'supported': true,
           'source': 'cloud',
-          'bookings': _climateBookings,
+          'emptyBookingsMayBeStale': true,
+          'bookings': {
+            'listInfo': _climateBookings,
+          },
         };
       case '/api/vehicle/charging-schedule':
         return {

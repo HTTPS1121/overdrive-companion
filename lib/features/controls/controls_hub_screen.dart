@@ -5,7 +5,7 @@ import '../schedules/schedules_screen.dart';
 import 'charge_cap_panel.dart';
 import 'controls_commands_tab.dart';
 
-/// שליטה — פקודות בסיס, תזמונים, נוחות ומגבלת טעינה תחת לשוניות (≤5 יעדי ניווט תחתון).
+/// שליטה — פקודות בסיס, תזמונים, נוחות ומגבלת טעינה תחת לשוניות.
 class ControlsHubScreen extends StatelessWidget {
   const ControlsHubScreen({super.key});
 
@@ -22,6 +22,8 @@ class ControlsHubScreen extends StatelessWidget {
             child: TabBar(
               isScrollable: true,
               tabAlignment: TabAlignment.start,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 12),
               tabs: [for (final label in tabLabels) Tab(text: label)],
             ),
           ),

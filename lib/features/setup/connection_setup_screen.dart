@@ -92,21 +92,36 @@ class _ConnectionSetupScreenState extends ConsumerState<ConnectionSetupScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'הזן את כתובת בסיס ה-HTTPS של המנהרה ואת אסימון המכשיר מהגדרות הרכב. '
-              'ללא חיבור אמיתי לא יוצגו נתוני רכב.',
+              'מומלץ HTTPS למנהרה מרחוק. חיבור HTTP מקומי (רשת ביתית/LAN) בלבד — לא לשלוח אסימונים דרך HTTP ציבורי.',
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
             TextField(
               controller: _urlCtrl,
+              onChanged: (_) => setState(() {}),
               decoration: const InputDecoration(
                 labelText: 'כתובת שרת (מנהרה)',
                 hintText: 'https://example.trycloudflare.com',
+                helperText: 'מומלץ: כתובת HTTPS של המנהרה',
               ),
               keyboardType: TextInputType.url,
               textDirection: TextDirection.ltr,
               autocorrect: false,
             ),
+            if (isLocalHttpUrl(_urlCtrl.text)) ...[
+              const SizedBox(height: 8),
+              Card(
+                color: theme.colorScheme.tertiaryContainer,
+                child: ListTile(
+                  leading: Icon(Icons.warning_amber, color: theme.colorScheme.onTertiaryContainer),
+                  title: const Text('שימוש מקומי בלבד'),
+                  subtitle: Text(
+                    'כתובת HTTP ללא הצפנה — מתאימה לרשת מקומית בלבד, לא למנהרה ציבורית.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             TextField(
               controller: _tokenCtrl,
