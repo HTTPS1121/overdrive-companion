@@ -902,6 +902,30 @@ class AppLocalizationsHe extends AppLocalizations {
   String get remoteWireGuardTitle => 'מנהרת WireGuard';
 
   @override
+  String get remoteCommunicateTab => 'תא';
+
+  @override
+  String get remoteGenAiTab => 'GenAI';
+
+  @override
+  String get remoteWireGuardTab => 'WireGuard';
+
+  @override
+  String get communicateCarStateOn => 'פועל';
+
+  @override
+  String get communicateCarStateOff => 'כבוי';
+
+  @override
+  String get communicateCarStateParked => 'בחנייה';
+
+  @override
+  String get stateEnabled => 'פעיל';
+
+  @override
+  String get stateDisabled => 'כבוי';
+
+  @override
   String get communicateAudioReady => 'קול מוכן';
 
   @override
@@ -1041,82 +1065,80 @@ class AppLocalizationsHe extends AppLocalizations {
       'השרת החזיר דף HTML במקום JSON — בדוק את כתובת המנהרה.';
 
   @override
-  String get communicateSettingsTitle => 'Cabin audio & messages';
+  String get communicateSettingsTitle => 'שמע תא והודעות';
 
   @override
-  String get communicateVoiceEnabled => 'Remote voice enabled';
+  String get communicateVoiceEnabled => 'קול מרחוק';
 
   @override
-  String get communicateMessagesEnabled => 'On-screen messages enabled';
+  String get communicateMessagesEnabled => 'הודעות על המסך';
 
   @override
-  String get communicateListenerEnabled => 'Cabin listener enabled';
+  String get communicateListenerEnabled => 'האזנה לתא';
 
   @override
-  String get communicateOutputLevel => 'Speaker output level';
+  String get communicateOutputLevel => 'עוצמת רמקול';
 
   @override
-  String get communicateSaveSettings => 'Save communication settings';
+  String get communicateSaveSettings => 'שמירת הגדרות תקשורת';
 
   @override
-  String get communicateMessageKind => 'Message style';
+  String get communicateMessageKind => 'סגנון הודעה';
 
   @override
-  String get communicateKindToast => 'Toast';
+  String get communicateKindToast => 'התראה קצרה';
 
   @override
-  String get communicateKindDialog => 'Dialog';
+  String get communicateKindDialog => 'חלון';
 
   @override
-  String get communicateEmergencyStopTitle => 'Emergency stop?';
+  String get communicateEmergencyStopTitle => 'עצירת חירום?';
 
   @override
   String get communicateEmergencyStopBody =>
-      'Stops active remote voice/listening sessions on the vehicle.';
+      'עוצר שיחות קול והאזנה פעילות ברכב.';
 
   @override
   String get communicateWsNote =>
-      'Live push-to-talk uses /ws/communicate in the browser PWA; this app uses HTTP settings, messages, and test speaker.';
+      'לחיצה לדיבור שולחת שמע לרכב. ההגדרות וההודעות נשלחות כרגיל.';
 
   @override
-  String get genAiInsightsList => 'Load insight history';
+  String get genAiInsightsList => 'טעינת היסטוריית תובנות';
 
   @override
-  String get genAiTest => 'Run GenAI self-test';
+  String get genAiTest => 'בדיקת GenAI';
 
   @override
-  String get genAiWsNote =>
-      'Voice sessions use /ws/genai; chat and insights use HTTP.';
+  String get genAiWsNote => 'שיחת קול בזמן אמת; צ׳אט ותובנות דרך בקשות רגילות.';
 
   @override
-  String get wireGuardConfigTitle => 'Tunnel configuration';
+  String get wireGuardConfigTitle => 'הגדרות מנהרה';
 
   @override
   String get wireGuardConfigHint =>
-      'Paste wg-quick text. Private keys never leave the vehicle server.';
+      'הדבק טקסט wg-quick. מפתחות פרטיים נשארים בשרת הרכב.';
 
   @override
   String get wireGuardConfigPlaceholder => '[Interface]\\nPrivateKey = …';
 
   @override
-  String get wireGuardConfigSave => 'Upload config';
+  String get wireGuardConfigSave => 'העלאת הגדרה';
 
   @override
-  String get wireGuardConfigDelete => 'Remove config';
+  String get wireGuardConfigDelete => 'הסרת הגדרה';
 
   @override
-  String get wireGuardConfigConfirmTitle => 'Upload WireGuard config?';
+  String get wireGuardConfigConfirmTitle => 'להעלות הגדרת WireGuard?';
 
   @override
   String get wireGuardConfigConfirmBody =>
-      'Replaces the stored tunnel config on the vehicle daemon.';
+      'מחליף את הגדרת המנהרה השמורה בדמוון הרכב.';
 
   @override
-  String get wireGuardConfigDeleteTitle => 'Delete WireGuard config?';
+  String get wireGuardConfigDeleteTitle => 'למחוק הגדרת WireGuard?';
 
   @override
-  String get wireGuardConfigDeleteBody =>
-      'Removes stored tunnel configuration from the vehicle.';
+  String get wireGuardConfigDeleteBody => 'מסיר את הגדרת המנהרה מהרכב.';
 
   @override
   String get commonSuccess => 'הצלחה';
@@ -1139,7 +1161,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get integrationsHubIntro =>
-      'יכולות מרוחקות מה־API של Overdrive — טפסים, אישורים ומשוב מהשרת (לא מסוף JSON גולמי).';
+      'יכולות מרוחקות מהרכב — טפסים, אישורים ומשוב ברור מהשרת.';
 
   @override
   String get integrationsRefresh => 'רענון';
@@ -1163,8 +1185,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String get integrationsDelete => 'מחיקה';
 
   @override
-  String get integrationsTestQueued =>
-      'בדיקה בתור (מדמה — ללא פעולות רכב ב־CI)';
+  String get integrationsTestQueued => 'הבדיקה נשלחה לרכב';
+
+  @override
+  String get integrationsAutomationModeAutomatic => 'אוטומטי';
+
+  @override
+  String get integrationsAutomationModeManual => 'ידני';
 
   @override
   String get integrationsDeleteAutomationTitle => 'למחוק אוטומציה?';
@@ -1245,8 +1272,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get integrationsGenAiActionExecute => 'פעולת רכב';
 
   @override
-  String get integrationsGenAiActionExecuteHint =>
-      'POST /api/genai/action/execute';
+  String get integrationsGenAiActionExecuteHint => 'מריץ פעולת רכב מאומתת בשרת';
 
   @override
   String get integrationsExecute => 'ביצוע';
@@ -1258,8 +1284,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get integrationsTelegramTitle => 'טלגרם';
 
   @override
-  String get integrationsTelegramSubtitle =>
-      'סטטוס והעדפות (ללא שליחות בבדיקות)';
+  String get integrationsTelegramSubtitle => 'סטטוס והעדפות';
 
   @override
   String get integrationsTelegramBot => 'בוט';
@@ -1306,7 +1331,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get voicePttTitle => 'לחץ לדבר';
 
   @override
-  String get voicePttHint => 'החזקה לשליחת PCM ל־/ws/communicate (16 kHz).';
+  String get voicePttHint => 'החזק את הכפתור בזמן דיבור; השמע נשלח לרכב.';
 
   @override
   String get voicePttHold => 'החזק לדיבור';
@@ -1356,7 +1381,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get genAiVoiceTitle => 'קול בזמן אמת';
 
   @override
-  String get genAiVoiceHint => 'משתמש ב־/ws/genai עם PCM דו־כיווני.';
+  String get genAiVoiceHint => 'פותח שיחת קול חיה דו־כיוונית עם העוזר.';
 
   @override
   String get genAiVoiceStart => 'התחלת שיחת קול';
@@ -1473,7 +1498,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diagnosticsAutoServiceTitle => 'דיבוג Auto service';
 
   @override
-  String get roadSenseHazardCount => 'מכשולים פעילים (fixture)';
+  String get roadSenseHazardCount => 'מכשולים פעילים';
 
   @override
   String get roadSenseSeverity => 'חומרת צליל';
@@ -1485,7 +1510,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get roadSenseVolumePercent => 'עוצמה %';
 
   @override
-  String get roadSenseTestChime => 'בדיקת צליל (POST)';
+  String get roadSenseTestChime => 'בדיקת צליל';
 
   @override
   String get roadSenseDeleteLocalTitle => 'למחוק נתוני RoadSense מקומיים?';
@@ -1507,7 +1532,22 @@ class AppLocalizationsHe extends AppLocalizations {
   String get roadSenseDeleteCloud => 'מחיקת נתונים בענן';
 
   @override
-  String get voiceFixtureUnsupported => 'קול מושבת בהגדרות הרכב (fixture)';
+  String get voiceFixtureUnsupported => 'הקול כבוי בהגדרות הרכב';
+
+  @override
+  String formatBytesBytes(int bytes) {
+    return '$bytes ב׳';
+  }
+
+  @override
+  String formatBytesKib(String size) {
+    return '$size ק״ב';
+  }
+
+  @override
+  String formatBytesMib(String size) {
+    return '$size מ״ב';
+  }
 
   @override
   String get releaseSigningDebugNote =>

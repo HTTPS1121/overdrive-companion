@@ -1754,6 +1754,54 @@ abstract class AppLocalizations {
   /// **'WireGuard tunnel'**
   String get remoteWireGuardTitle;
 
+  /// No description provided for @remoteCommunicateTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabin'**
+  String get remoteCommunicateTab;
+
+  /// No description provided for @remoteGenAiTab.
+  ///
+  /// In en, this message translates to:
+  /// **'GenAI'**
+  String get remoteGenAiTab;
+
+  /// No description provided for @remoteWireGuardTab.
+  ///
+  /// In en, this message translates to:
+  /// **'WireGuard'**
+  String get remoteWireGuardTab;
+
+  /// No description provided for @communicateCarStateOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get communicateCarStateOn;
+
+  /// No description provided for @communicateCarStateOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get communicateCarStateOff;
+
+  /// No description provided for @communicateCarStateParked.
+  ///
+  /// In en, this message translates to:
+  /// **'Parked'**
+  String get communicateCarStateParked;
+
+  /// No description provided for @stateEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get stateEnabled;
+
+  /// No description provided for @stateDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get stateDisabled;
+
   /// No description provided for @communicateAudioReady.
   ///
   /// In en, this message translates to:
@@ -2027,19 +2075,19 @@ abstract class AppLocalizations {
   /// No description provided for @communicateVoiceEnabled.
   ///
   /// In en, this message translates to:
-  /// **'Remote voice enabled'**
+  /// **'Remote voice'**
   String get communicateVoiceEnabled;
 
   /// No description provided for @communicateMessagesEnabled.
   ///
   /// In en, this message translates to:
-  /// **'On-screen messages enabled'**
+  /// **'On-screen messages'**
   String get communicateMessagesEnabled;
 
   /// No description provided for @communicateListenerEnabled.
   ///
   /// In en, this message translates to:
-  /// **'Cabin listener enabled'**
+  /// **'Cabin listener'**
   String get communicateListenerEnabled;
 
   /// No description provided for @communicateOutputLevel.
@@ -2087,7 +2135,7 @@ abstract class AppLocalizations {
   /// No description provided for @communicateWsNote.
   ///
   /// In en, this message translates to:
-  /// **'Live push-to-talk uses /ws/communicate in the browser PWA; this app uses HTTP settings, messages, and test speaker.'**
+  /// **'Hold-to-talk streams audio to the vehicle. Settings and messages use the usual remote API.'**
   String get communicateWsNote;
 
   /// No description provided for @genAiInsightsList.
@@ -2105,7 +2153,7 @@ abstract class AppLocalizations {
   /// No description provided for @genAiWsNote.
   ///
   /// In en, this message translates to:
-  /// **'Voice sessions use /ws/genai; chat and insights use HTTP.'**
+  /// **'Realtime voice uses a live session; chat and insights use standard requests.'**
   String get genAiWsNote;
 
   /// No description provided for @wireGuardConfigTitle.
@@ -2201,7 +2249,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsHubIntro.
   ///
   /// In en, this message translates to:
-  /// **'Grouped remote features from the Overdrive HTTP API — forms, confirmations, and server feedback (not a raw JSON console).'**
+  /// **'Remote vehicle features — forms, confirmations, and clear server feedback.'**
   String get integrationsHubIntro;
 
   /// No description provided for @integrationsRefresh.
@@ -2249,8 +2297,20 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsTestQueued.
   ///
   /// In en, this message translates to:
-  /// **'Test queued (mock — no live vehicle actions in CI)'**
+  /// **'Test sent to the vehicle'**
   String get integrationsTestQueued;
+
+  /// No description provided for @integrationsAutomationModeAutomatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get integrationsAutomationModeAutomatic;
+
+  /// No description provided for @integrationsAutomationModeManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get integrationsAutomationModeManual;
 
   /// No description provided for @integrationsDeleteAutomationTitle.
   ///
@@ -2399,7 +2459,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsGenAiActionExecuteHint.
   ///
   /// In en, this message translates to:
-  /// **'POST /api/genai/action/execute (validated action object)'**
+  /// **'Runs a validated vehicle action from the server'**
   String get integrationsGenAiActionExecuteHint;
 
   /// No description provided for @integrationsExecute.
@@ -2423,7 +2483,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsTelegramSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Pairing status and preferences (no outbound sends from tests)'**
+  /// **'Pairing status and preferences'**
   String get integrationsTelegramSubtitle;
 
   /// No description provided for @integrationsTelegramBot.
@@ -2513,7 +2573,7 @@ abstract class AppLocalizations {
   /// No description provided for @voicePttHint.
   ///
   /// In en, this message translates to:
-  /// **'Hold to send PCM to /ws/communicate (16 kHz s16le).'**
+  /// **'Hold the button while speaking; audio is sent to the vehicle.'**
   String get voicePttHint;
 
   /// No description provided for @voicePttHold.
@@ -2609,7 +2669,7 @@ abstract class AppLocalizations {
   /// No description provided for @genAiVoiceHint.
   ///
   /// In en, this message translates to:
-  /// **'Uses /ws/genai with bidirectional PCM after live.'**
+  /// **'Starts a live two-way voice session with the assistant.'**
   String get genAiVoiceHint;
 
   /// No description provided for @genAiVoiceStart.
@@ -2831,7 +2891,7 @@ abstract class AppLocalizations {
   /// No description provided for @roadSenseHazardCount.
   ///
   /// In en, this message translates to:
-  /// **'Active hazards (fixture)'**
+  /// **'Active hazards'**
   String get roadSenseHazardCount;
 
   /// No description provided for @roadSenseSeverity.
@@ -2855,7 +2915,7 @@ abstract class AppLocalizations {
   /// No description provided for @roadSenseTestChime.
   ///
   /// In en, this message translates to:
-  /// **'Test chime (POST)'**
+  /// **'Test chime'**
   String get roadSenseTestChime;
 
   /// No description provided for @roadSenseDeleteLocalTitle.
@@ -2897,8 +2957,26 @@ abstract class AppLocalizations {
   /// No description provided for @voiceFixtureUnsupported.
   ///
   /// In en, this message translates to:
-  /// **'Voice disabled in vehicle settings (fixture)'**
+  /// **'Voice is turned off in vehicle settings'**
   String get voiceFixtureUnsupported;
+
+  /// No description provided for @formatBytesBytes.
+  ///
+  /// In en, this message translates to:
+  /// **'{bytes} B'**
+  String formatBytesBytes(int bytes);
+
+  /// No description provided for @formatBytesKib.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} KB'**
+  String formatBytesKib(String size);
+
+  /// No description provided for @formatBytesMib.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} MB'**
+  String formatBytesMib(String size);
 
   /// No description provided for @releaseSigningDebugNote.
   ///

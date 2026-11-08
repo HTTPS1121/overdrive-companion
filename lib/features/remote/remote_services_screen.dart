@@ -107,10 +107,17 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
           title: Text(l10n.remoteServicesTitle),
           bottom: TabBar(
             controller: _tabs,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             tabs: [
-              Tab(text: l10n.remoteCommunicateTitle),
-              Tab(text: l10n.remoteGenAiTitle),
-              Tab(text: l10n.remoteWireGuardTitle),
+              Tab(text: l10n.remoteCommunicateTab),
+              Tab(text: l10n.remoteGenAiTab),
+              Tab(
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(l10n.remoteWireGuardTab),
+                ),
+              ),
             ],
           ),
         ),
@@ -139,7 +146,7 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
         if (status != null) ...[
           ListTile(
             title: Text(l10n.communicateCarState),
-            subtitle: Text(status.carState ?? '—'),
+            subtitle: Text(_carStateLabel(l10n, status.carState)),
           ),
           ListTile(
             dense: true,
@@ -311,7 +318,7 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
             subtitle: Text(
               [
                 if (_genAiConfig?.provider != null) _genAiConfig!.provider!,
-                _genAi!.enabled == true ? 'enabled' : 'disabled',
+                _genAi!.enabled == true ? l10n.stateEnabled : l10n.stateDisabled,
               ].join(' · '),
             ),
           ),
@@ -483,4 +490,14 @@ class _RemoteServicesScreenState extends ConsumerState<RemoteServicesScreen>
       ],
     );
   }
+}
+
+String _carStateLabel(AppLocalizations l10n, String? raw) {
+  final v = raw?.toLowerCase().trim();
+  return switch (v) {
+    'on' || 'running' => l10n.communicateCarStateOn,
+    'off' || 'idle' => l10n.communicateCarStateOff,
+    'parked' => l10n.communicateCarStateParked,
+    _ => raw ?? '—',
+  };
 }

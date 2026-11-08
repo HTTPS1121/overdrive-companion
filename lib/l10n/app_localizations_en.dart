@@ -917,6 +917,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get remoteWireGuardTitle => 'WireGuard tunnel';
 
   @override
+  String get remoteCommunicateTab => 'Cabin';
+
+  @override
+  String get remoteGenAiTab => 'GenAI';
+
+  @override
+  String get remoteWireGuardTab => 'WireGuard';
+
+  @override
+  String get communicateCarStateOn => 'On';
+
+  @override
+  String get communicateCarStateOff => 'Off';
+
+  @override
+  String get communicateCarStateParked => 'Parked';
+
+  @override
+  String get stateEnabled => 'Enabled';
+
+  @override
+  String get stateDisabled => 'Disabled';
+
+  @override
   String get communicateAudioReady => 'Voice ready';
 
   @override
@@ -1061,13 +1085,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communicateSettingsTitle => 'Cabin audio & messages';
 
   @override
-  String get communicateVoiceEnabled => 'Remote voice enabled';
+  String get communicateVoiceEnabled => 'Remote voice';
 
   @override
-  String get communicateMessagesEnabled => 'On-screen messages enabled';
+  String get communicateMessagesEnabled => 'On-screen messages';
 
   @override
-  String get communicateListenerEnabled => 'Cabin listener enabled';
+  String get communicateListenerEnabled => 'Cabin listener';
 
   @override
   String get communicateOutputLevel => 'Speaker output level';
@@ -1093,7 +1117,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communicateWsNote =>
-      'Live push-to-talk uses /ws/communicate in the browser PWA; this app uses HTTP settings, messages, and test speaker.';
+      'Hold-to-talk streams audio to the vehicle. Settings and messages use the usual remote API.';
 
   @override
   String get genAiInsightsList => 'Load insight history';
@@ -1103,7 +1127,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get genAiWsNote =>
-      'Voice sessions use /ws/genai; chat and insights use HTTP.';
+      'Realtime voice uses a live session; chat and insights use standard requests.';
 
   @override
   String get wireGuardConfigTitle => 'Tunnel configuration';
@@ -1156,7 +1180,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsHubIntro =>
-      'Grouped remote features from the Overdrive HTTP API — forms, confirmations, and server feedback (not a raw JSON console).';
+      'Remote vehicle features — forms, confirmations, and clear server feedback.';
 
   @override
   String get integrationsRefresh => 'Refresh';
@@ -1180,8 +1204,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationsDelete => 'Delete';
 
   @override
-  String get integrationsTestQueued =>
-      'Test queued (mock — no live vehicle actions in CI)';
+  String get integrationsTestQueued => 'Test sent to the vehicle';
+
+  @override
+  String get integrationsAutomationModeAutomatic => 'Automatic';
+
+  @override
+  String get integrationsAutomationModeManual => 'Manual';
 
   @override
   String get integrationsDeleteAutomationTitle => 'Delete automation?';
@@ -1268,7 +1297,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get integrationsGenAiActionExecuteHint =>
-      'POST /api/genai/action/execute (validated action object)';
+      'Runs a validated vehicle action from the server';
 
   @override
   String get integrationsExecute => 'Execute';
@@ -1280,8 +1309,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationsTelegramTitle => 'Telegram';
 
   @override
-  String get integrationsTelegramSubtitle =>
-      'Pairing status and preferences (no outbound sends from tests)';
+  String get integrationsTelegramSubtitle => 'Pairing status and preferences';
 
   @override
   String get integrationsTelegramBot => 'Bot';
@@ -1331,7 +1359,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voicePttHint =>
-      'Hold to send PCM to /ws/communicate (16 kHz s16le).';
+      'Hold the button while speaking; audio is sent to the vehicle.';
 
   @override
   String get voicePttHold => 'Hold to talk';
@@ -1382,7 +1410,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get genAiVoiceHint =>
-      'Uses /ws/genai with bidirectional PCM after live.';
+      'Starts a live two-way voice session with the assistant.';
 
   @override
   String get genAiVoiceStart => 'Start voice session';
@@ -1500,7 +1528,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diagnosticsAutoServiceTitle => 'Auto service debug';
 
   @override
-  String get roadSenseHazardCount => 'Active hazards (fixture)';
+  String get roadSenseHazardCount => 'Active hazards';
 
   @override
   String get roadSenseSeverity => 'Chime severity';
@@ -1512,7 +1540,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roadSenseVolumePercent => 'Volume %';
 
   @override
-  String get roadSenseTestChime => 'Test chime (POST)';
+  String get roadSenseTestChime => 'Test chime';
 
   @override
   String get roadSenseDeleteLocalTitle => 'Delete local RoadSense data?';
@@ -1536,7 +1564,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceFixtureUnsupported =>
-      'Voice disabled in vehicle settings (fixture)';
+      'Voice is turned off in vehicle settings';
+
+  @override
+  String formatBytesBytes(int bytes) {
+    return '$bytes B';
+  }
+
+  @override
+  String formatBytesKib(String size) {
+    return '$size KB';
+  }
+
+  @override
+  String formatBytesMib(String size) {
+    return '$size MB';
+  }
 
   @override
   String get releaseSigningDebugNote =>

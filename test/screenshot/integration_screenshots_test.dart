@@ -9,6 +9,7 @@ import 'package:overdrive_companion/features/integrations/diagnostics_screens.da
 import 'package:overdrive_companion/features/integrations/family_screens.dart';
 import 'package:overdrive_companion/features/integrations/integrations_hub_screen.dart';
 import 'package:overdrive_companion/features/remote/remote_services_screen.dart';
+import 'package:overdrive_companion/features/screenshot/screenshot_settings_stub.dart';
 import 'package:overdrive_companion/l10n/app_localizations.dart';
 import 'package:overdrive_companion/providers/settings_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -67,7 +68,14 @@ void main() {
       for (final c in matrix) {
         final tag = '${c.slug}_${mode.name}_${locale.languageCode}';
         testWidgets('v2.8.3 integration $tag', (tester) async {
-          await _captureRoute(tester, 'int_$tag', locale: locale, theme: mode, child: c.widget);
+          await _captureRoute(
+            tester,
+            'int_$tag',
+            locale: locale,
+            theme: mode,
+            child: c.widget,
+            pushFromParent: c.slug != 'integrations_hub',
+          );
         });
       }
     }
@@ -129,6 +137,7 @@ Future<void> _captureRoute(
   required Locale locale,
   required CompanionThemeMode theme,
   required Widget child,
+  bool pushFromParent = true,
 }) async {
   configurePhoneView(tester);
   final boundaryKey = GlobalKey();
@@ -141,6 +150,7 @@ Future<void> _captureRoute(
     fixtureClient: _fixtureClient,
     fixtureSnap: _fixtureSnap,
     boundaryKey: boundaryKey,
+    pushFromParent: pushFromParent,
   );
   await writeScreenshotGolden(tester, name, find.byKey(boundaryKey));
 }
@@ -163,10 +173,12 @@ Future<void> _captureRemoteVoice(
     fixtureClient: _fixtureClient,
     fixtureSnap: _fixtureSnap,
     boundaryKey: boundaryKey,
+    pushFromParent: true,
+    parentForPush: const ScreenshotSettingsStub(),
   );
   final l10n = lookupAppLocalizations(locale);
   if (genAiTab) {
-    await tester.tap(find.text(l10n.remoteGenAiTitle));
+    await tester.tap(find.text(l10n.remoteGenAiTab));
     await tester.pumpAndSettle();
     await tester.tap(find.text(l10n.genAiLoadStatus));
   } else {

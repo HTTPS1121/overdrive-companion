@@ -1,4 +1,4 @@
-# Implementation inventory (2.8.3+23)
+# Implementation inventory (2.8.3+24)
 
 ## Screenshot QA (v2.8.3)
 
@@ -7,7 +7,8 @@
 | Golden root | `test/screenshot/goldens/v2.8.3` |
 | Total PNGs | **77** (17 core `0x_`/`1x_` … `13_` + **60** `int_*`) |
 | Harness | `test/screenshot/screenshot_harness.dart` — `ensureBundledFontsLoaded`, `PhoneViewport` (390×844), `companionLightTheme` / `companionDarkTheme` |
-| Integration routes | Full production `Scaffold` screens; voice via **`RemoteServicesScreen`** (tabs, load, margins) |
+| Integration routes | **`ScreenshotPushNavigator`** → production push stack with **back arrow**; voice via **`RemoteServicesScreen`** |
+| L10n QA | Hebrew remote/communicate strings; short scrollable tabs; no developer POST/PCM/fixture labels in runtime UI |
 | Fixture banner | `screenshotFixtureDisclaimer` — does not replace readable UI |
 
 Artifact dir: `artifacts/v2.8.3/` (`app-release.apk`, `RELEASE_MANIFEST_v2.8.3.json`, `screenshots/`).

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +16,10 @@ import 'package:overdrive_companion/data/repositories/vehicle_repository.dart';
 import 'package:overdrive_companion/l10n/app_localizations.dart';
 import 'package:overdrive_companion/providers/app_providers.dart';
 import 'package:overdrive_companion/providers/settings_repository.dart';
+
+import 'package:overdrive_companion/features/integrations/integrations_hub_screen.dart';
+import 'package:overdrive_companion/features/screenshot/screenshot_push_navigator.dart';
+import 'package:overdrive_companion/features/screenshot/screenshot_settings_stub.dart';
 
 import '../support/fixture_api_client.dart';
 import 'test_fonts.dart';
@@ -41,8 +46,12 @@ Future<GlobalKey> pumpScreenshotApp(
   required FixtureOverdriveApiClient fixtureClient,
   required VehicleSnapshot fixtureSnap,
   required GlobalKey boundaryKey,
+  bool pushFromParent = false,
+  Widget? parentForPush,
 }) async {
   await ensureScreenshotFonts();
+  await initializeDateFormatting('en');
+  await initializeDateFormatting('he');
   final settings = AppSettings(
     baseUrl: 'https://fixture.test',
     deviceToken: 'fixture-token',
@@ -77,15 +86,25 @@ Future<GlobalKey> pumpScreenshotApp(
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          home: RepaintBoundary(
+          builder: (context, appChild) => RepaintBoundary(
             key: boundaryKey,
-            child: PhoneViewport(child: child),
+            child: PhoneViewport(child: appChild ?? const SizedBox.shrink()),
           ),
+          home: pushFromParent
+              ? ScreenshotPushNavigator(
+                  parent: parentForPush ?? const IntegrationsHubScreen(),
+                  route: child,
+                )
+              : child,
         ),
       ),
     ),
   );
-  await tester.pumpAndSettle(const Duration(milliseconds: 600));
+  await tester.pumpAndSettle(const Duration(milliseconds: 800));
+  if (pushFromParent) {
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+  }
   return boundaryKey;
 }
 

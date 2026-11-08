@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/formatting/format_helpers.dart';
 import '../../core/l10n/l10n_x.dart';
 import '../../core/layout/scroll_insets.dart';
 import '../../core/widgets/confirm_risky_action.dart';
@@ -10,6 +11,12 @@ import '../../providers/app_providers.dart';
 import 'integrations_loader.dart';
 
 Future<void> _snack(BuildContext context, String text) => integrationSnack(context, text);
+
+String _automationModeLabel(dynamic l10n, String? mode) => switch (mode) {
+      'automatic' => l10n.integrationsAutomationModeAutomatic,
+      'manual' => l10n.integrationsAutomationModeManual,
+      _ => mode ?? '—',
+    };
 
 
 class AutomationsFamilyScreen extends ConsumerStatefulWidget {
@@ -88,7 +95,7 @@ class _AutomationsFamilyScreenState extends ConsumerState<AutomationsFamilyScree
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: ListTile(
                   title: Text(a.name),
-                  subtitle: Text('${a.id} · ${a.mode ?? '—'}'),
+                  subtitle: Text('${a.id} · ${_automationModeLabel(l10n, a.mode)}'),
                   trailing: PopupMenuButton<String>(
                     onSelected: (v) async {
                       final repo = ref.read(extendedServicesRepositoryProvider);
@@ -193,7 +200,7 @@ class _ParkingFamilyScreenState extends ConsumerState<ParkingFamilyScreen> with 
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: ListTile(
                 title: Text(s.place ?? s.id),
-                subtitle: Text(s.startedAt ?? ''),
+                subtitle: Text(formatVehicleTimestamp(context, s.startedAt)),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () async {
@@ -281,7 +288,9 @@ class _TripsFamilyScreenState extends ConsumerState<TripsFamilyScreen> with Fami
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: ListTile(
                 title: Text(t.label ?? t.id),
-                subtitle: Text('${t.distanceKm ?? '—'} km · ${t.startedAt ?? ''}'),
+                subtitle: Text(
+                  '${t.distanceKm ?? '—'} km · ${formatVehicleTimestamp(context, t.startedAt)}',
+                ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () async {
@@ -355,7 +364,7 @@ class _AudioLibraryFamilyScreenState extends ConsumerState<AudioLibraryFamilyScr
             for (final c in _clips)
               ListTile(
                 title: Text(c.name),
-                subtitle: c.sizeBytes != null ? Text('${c.sizeBytes} B') : null,
+                subtitle: c.sizeBytes != null ? Text(formatByteCount(context, c.sizeBytes)) : null,
                 trailing: IconButton(
                   icon: const Icon(Icons.play_arrow),
                   onPressed: () => guard(() async {
