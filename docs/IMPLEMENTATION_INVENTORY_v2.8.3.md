@@ -1,5 +1,7 @@
 # Implementation inventory (2.8.3+24)
 
+**Exhaustive feature map:** see **`IMPLEMENTATION_INVENTORY_COMPLETE_build24.md`** (upstream families, routes, repository calls, tests, and explicit gaps). This file is screenshot/QA evidence only.
+
 ## Screenshot QA (v2.8.3)
 
 | Item | Value |

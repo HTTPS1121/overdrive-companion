@@ -12,6 +12,7 @@
   "screenshotCount": 77,
   "screenshotCountBreakdown": {"core": 17, "integration": 60},
   "implementationInventory": "IMPLEMENTATION_INVENTORY_v2.8.3.md",
+  "implementationInventoryComplete": "IMPLEMENTATION_INVENTORY_COMPLETE_build24.md",
   "artifactDirectory": "v2.8.3",
   "android": {
     "signing": "debug (Flutter template release) unless production keystore configured",
