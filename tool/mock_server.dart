@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:overdrive_companion/data/mock/mock_overdrive_backend.dart';
-import 'package:overdrive_companion/data/mock/mock_overdrive_http_server.dart';
+import '../test/support/mock_overdrive_backend.dart';
+import '../test/support/mock_overdrive_http_server.dart';
 
 /// Local mock Overdrive HTTP server for development.
 ///

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:overdrive_companion/data/mock/mock_overdrive_backend.dart';
+import 'support/mock_overdrive_backend.dart';
 import 'package:overdrive_companion/data/models/vehicle_state.dart';
 
 void main() {

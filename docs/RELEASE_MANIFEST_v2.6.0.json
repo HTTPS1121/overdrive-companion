@@ -1,0 +1,27 @@
+{
+  "version": "2.6.0",
+  "versionCode": 14,
+  "upstreamOverdriveRef": "4807e94389de38feca3a8f8582e811a6c63eb2a2",
+  "artifacts": {
+    "apk": "build/app/outputs/flutter-apk/app-release.apk",
+    "goldenSet": "test/screenshot/goldens/v2.6",
+    "screenshots": "/cursor/stores/self/artifacts/v2.6-0/screenshots"
+  },
+  "verification": {
+    "flutterTest": "60 passed",
+    "liveVehicle": false,
+    "deviceInstall": false
+  },
+  "implemented": [
+    "Android native H.264 /ws preview (OkHttp + MediaCodec)",
+    "Recording play/download via /video/id/ + bearer",
+    "Surveillance config/snapshot/enable",
+    "Tunnel login parity + en/he l10n (nav, cameras, connection, status hero)"
+  ],
+  "genuinelyBlockedWithoutCar": [
+    "Live frames when car stream encoder offline",
+    "GenAI /ws/genai* voice protocols",
+    "WireGuard provisioning on HU",
+    "Full surveillance heatmap/screen-deterrent UI"
+  ]
+}

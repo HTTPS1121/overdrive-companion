@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config/app_settings.dart';
-import '../data/mock/mock_overdrive_backend.dart';
+import '../data/api/overdrive_api_client.dart';
+import '../data/repositories/extended_services_repository.dart';
 import '../data/repositories/vehicle_repository.dart';
 import 'settings_repository.dart';
 
@@ -16,17 +17,51 @@ final appSettingsProvider =
 
 class AppSettingsNotifier extends Notifier<AppSettings> {
   @override
-  AppSettings build() => ref.read(settingsRepositoryProvider).load();
+  AppSettings build() {
+    final repo = ref.read(settingsRepositoryProvider);
+    return repo.load();
+  }
 
-  Future<void> persist(AppSettings settings) async {
+  void applyInitial(AppSettings settings) => state = settings;
+
+  void patchDeviceId(String deviceId) => state = state.copyWith(deviceId: deviceId);
+
+  Future<void> bootstrap() async {
+    final repo = ref.read(settingsRepositoryProvider);
+    final token = await repo.loadDeviceToken();
+    if (token.isNotEmpty) {
+      state = state.copyWith(deviceToken: token);
+    }
+    final jwt = await repo.loadJwt();
+    if (jwt != null && jwt.isNotEmpty) {
+      ref.read(vehicleRepositoryProvider).setJwt(jwt);
+    }
+  }
+
+  Future<void> persist(AppSettings settings, {String? jwt, bool clearJwt = false}) async {
     state = settings;
-    await ref.read(settingsRepositoryProvider).save(settings);
-    ref.read(vehicleRepositoryProvider.notifier).rebind(settings);
+    if (clearJwt) {
+      await ref.read(settingsRepositoryProvider).saveJwt(null);
+      ref.read(vehicleRepositoryProvider).setJwt(null);
+      ref.read(extendedServicesRepositoryProvider).setJwt(null);
+    }
+    await ref.read(settingsRepositoryProvider).saveFull(
+          settings.copyWith(deviceToken: settings.resolvedDeviceToken()),
+          jwt: jwt,
+        );
+    ref.read(vehicleRepositoryProvider.notifier).rebind(state);
+    ref.read(extendedServicesRepositoryProvider.notifier).rebind(state);
+    if (jwt != null) {
+      ref.read(vehicleRepositoryProvider).setJwt(jwt);
+      ref.read(extendedServicesRepositoryProvider).setJwt(jwt);
+    }
   }
 }
 
-final mockBackendProvider = Provider<MockOverdriveBackend>((ref) {
-  return MockOverdriveBackend();
+final overdriveApiClientProvider = Provider<OverdriveApiClient>((ref) {
+  final settings = ref.watch(appSettingsProvider);
+  final base = settings.baseUrl.trim().isEmpty ? 'http://127.0.0.1' : settings.baseUrl;
+  return OverdriveApiClient(baseUrl: base);
 });
 
 final vehicleRepositoryProvider =
@@ -34,16 +69,46 @@ final vehicleRepositoryProvider =
   VehicleRepositoryNotifier.new,
 );
 
-class VehicleRepositoryNotifier extends Notifier<VehicleRepository> {
+final extendedServicesRepositoryProvider =
+    NotifierProvider<ExtendedServicesRepositoryNotifier, ExtendedServicesRepository>(
+  ExtendedServicesRepositoryNotifier.new,
+);
+
+class ExtendedServicesRepositoryNotifier extends Notifier<ExtendedServicesRepository> {
   @override
-  VehicleRepository build() {
+  ExtendedServicesRepository build() {
     final settings = ref.watch(appSettingsProvider);
-    final mock = ref.watch(mockBackendProvider);
-    return VehicleRepository(settings: settings, mockBackend: mock);
+    final client = ref.watch(overdriveApiClientProvider);
+    final repo = ExtendedServicesRepository(settings: settings, client: client);
+    ref.read(settingsRepositoryProvider).loadJwt().then(repo.setJwt);
+    return repo;
   }
 
   void rebind(AppSettings settings) {
     state.updateSettings(settings);
+  }
+}
+
+class VehicleRepositoryNotifier extends Notifier<VehicleRepository> {
+  @override
+  VehicleRepository build() {
+    final settings = ref.watch(appSettingsProvider);
+    final client = ref.watch(overdriveApiClientProvider);
+    final repo = VehicleRepository(settings: settings, client: client);
+    ref.read(settingsRepositoryProvider).loadJwt().then(repo.setJwt);
+    return repo;
+  }
+
+  void rebind(AppSettings settings) {
+    state.updateSettings(settings);
+  }
+
+  Future<void> authenticateAndStoreJwt() async {
+    await state.loginWithStoredCredentials();
+    final token = state.sessionJwt;
+    if (token != null && token.isNotEmpty) {
+      await ref.read(settingsRepositoryProvider).saveJwt(token);
+    }
   }
 }
 
@@ -58,6 +123,10 @@ class VehicleSnapshotNotifier extends AsyncNotifier<VehicleSnapshot?> {
   @override
   Future<VehicleSnapshot?> build() async {
     ref.onDispose(() => _timer?.cancel());
+    final configured = ref.watch(appSettingsProvider.select((s) => s.isConfigured));
+    if (!configured) {
+      return null;
+    }
     _schedulePoll();
     return _refresh();
   }
@@ -69,6 +138,10 @@ class VehicleSnapshotNotifier extends AsyncNotifier<VehicleSnapshot?> {
   }
 
   Future<void> refresh() async {
+    if (!ref.read(appSettingsProvider).isConfigured) {
+      state = const AsyncData(null);
+      return;
+    }
     state = const AsyncLoading<VehicleSnapshot?>();
     state = AsyncData(await _refresh());
   }

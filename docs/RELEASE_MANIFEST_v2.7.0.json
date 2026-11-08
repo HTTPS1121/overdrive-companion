@@ -1,0 +1,12 @@
+{
+  "version": "2.7.0+15",
+  "apkSha256": "3609bee804c897f7cc5f77766572dbec4458a0d4205ca396b9eb1960baf8a786",
+  "goldens": "test/screenshot/goldens/v2.7",
+  "screenshotMatrix": {
+    "locales": ["he-RTL", "en-LTR"],
+    "themes": ["light", "dark"],
+    "dynamicAccent": "CompanionColorSchemes.evAccentLight/Dark (screenshot injection)"
+  },
+  "tests": "flutter test (64 passing)",
+  "notes": "Design QA: vehicle hero + silhouette, camera stream panel with harness placeholder, polished connection copy, NotoSans device ID, 2-column controls grid."
+}

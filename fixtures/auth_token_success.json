@@ -1,0 +1,6 @@
+{
+  "success": true,
+  "jwt": "eyJmock.header.payload",
+  "deviceId": "atto3-il-demo-unit",
+  "expiresIn": 86400
+}

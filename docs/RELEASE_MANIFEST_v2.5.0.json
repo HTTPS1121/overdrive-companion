@@ -1,0 +1,29 @@
+{
+  "version": "2.5.0",
+  "versionCode": 13,
+  "gitRef": "cursor/polished-companion-ui-940e",
+  "upstreamOverdriveRef": "4807e94389de38feca3a8f8582e811a6c63eb2a2",
+  "artifacts": {
+    "apk": {
+      "path": "app-release.apk",
+      "sha256": "9844c702405f93f485ac3ae5afcd8759e1cd774109b16eb77af9c2a1ef07b8e1",
+      "sizeBytes": 56109958
+    },
+    "apkGzip": {
+      "path": "app-release.apk.gz",
+      "sha256": "e6c9389ae8f7b80146c4f1eb408aa7451bcd00d95239607a90b004a61a5c24ad"
+    },
+    "screenshots": "screenshots/",
+    "goldenSet": "goldens/v2.5"
+  },
+  "verification": {
+    "flutterTest": "56 passed",
+    "liveVehicle": false,
+    "deviceInstall": false
+  },
+  "blockers": [
+    "Live H.264 camera preview via wss /ws?token=JWT (see docs/OVERDRIVE_SOURCE_INVENTORY.md)",
+    "Recording download/playback streaming",
+    "Surveillance config POST surface"
+  ]
+}

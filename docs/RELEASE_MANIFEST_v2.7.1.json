@@ -1,0 +1,26 @@
+{
+  "version": "2.7.1+17",
+  "goldens": "test/screenshot/goldens/v2.7",
+  "screenshotMatrix": {
+    "locales": [
+      "he-RTL (explicit screenshotLocale)",
+      "en-LTR"
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "themeInjection": {
+      "file": "02c_status_fixture_seed_palette_light_en.png",
+      "method": "CompanionColorSchemes.evAccentLight/Dark passed via OverdriveApp screenshotLightScheme \u2014 NOT device Wallpaper dynamic extraction",
+      "useDynamicColorFlag": "may be true in settings but palette is fixture-injected for golden only"
+    }
+  },
+  "vehicleHero": {
+    "asset": "assets/images/byd-atto3-hero.png",
+    "provenance": "assets/images/ATTRIBUTION.md"
+  },
+  "tests": "flutter test",
+  "notes": "System locale follows device unless screenshotLocale override in harness.",
+  "apkSha256": "ee71d3358c0c5edd0e9749a638ed49c861e05a090f2d994e3a319b8e94767d37"
+}

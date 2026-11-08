@@ -11,12 +11,14 @@ class VehicleState {
     this.seats,
     this.lights,
     this.timestamp,
+    this.batteryHeat,
   });
 
   factory VehicleState.fromJson(Map<String, dynamic> json) {
     return VehicleState(
       success: json['success'] == true,
       error: json['error'] as String?,
+      batteryHeat: json['batteryHeat'] as bool?,
       doors: json['doors'] != null
           ? DoorLocks.fromJson(json['doors'] as Map<String, dynamic>)
           : null,
@@ -56,6 +58,8 @@ class VehicleState {
   final SeatInfo? seats;
   final LightInfo? lights;
   final int? timestamp;
+  /// Cloud telemetry when available (`VehicleControlApiHandler` state GET).
+  final bool? batteryHeat;
 
   bool? get isLocked {
     final overall = doors?.overall;
@@ -237,13 +241,34 @@ class TyreBlock {
 }
 
 class SeatInfo {
-  SeatInfo({this.steeringHeat});
+  SeatInfo({
+    this.steeringHeat,
+    this.heat = const [0, 0],
+    this.cool = const [0, 0],
+    this.ventilatedSupported,
+  });
 
   factory SeatInfo.fromJson(Map<String, dynamic> json) {
-    return SeatInfo(steeringHeat: json['steeringHeat'] as bool?);
+    List<int> levels(String key) {
+      final raw = json[key];
+      if (raw is List) {
+        return raw.map((e) => (e as num).toInt()).toList();
+      }
+      return const [0, 0];
+    }
+
+    return SeatInfo(
+      steeringHeat: json['steeringHeat'] as bool?,
+      heat: levels('heat'),
+      cool: levels('cool'),
+      ventilatedSupported: json['ventilatedSupported'] as bool?,
+    );
   }
 
   final bool? steeringHeat;
+  final List<int> heat;
+  final List<int> cool;
+  final bool? ventilatedSupported;
 }
 
 class LightInfo {

@@ -1,72 +1,96 @@
-enum ConnectionMode {
-  live,
-  embeddedMock,
-  localMockServer,
-}
+import 'package:flutter/material.dart';
+
+import '../auth/tunnel_credentials.dart';
+
+enum CompanionThemeMode { system, light, dark }
 
 class AppSettings {
   const AppSettings({
-    required this.baseUrl,
+    this.baseUrl = '',
     this.deviceToken = '',
-    this.connectionMode = ConnectionMode.embeddedMock,
-    this.mockRequireAuth = false,
-    this.mockServerPort = 18080,
-    this.pollIntervalSeconds = 5,
+    this.deviceId = '',
+    this.accessCode = '',
+    this.pollIntervalSeconds = 15,
+    this.themeMode = CompanionThemeMode.system,
+    this.useDynamicColor = true,
   });
 
-  factory AppSettings.defaults() => const AppSettings(
-        baseUrl: 'http://127.0.0.1:18080',
-        connectionMode: ConnectionMode.embeddedMock,
-      );
+  factory AppSettings.defaults() => const AppSettings();
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
+    var baseUrl = (json['baseUrl'] as String? ?? '').trim();
+    if (baseUrl.startsWith('mock://')) {
+      baseUrl = '';
+    }
+    final legacyMode = json['connectionMode'] as String?;
+    if (legacyMode == 'embeddedMock' && baseUrl.isEmpty) {
+      baseUrl = '';
+    }
     return AppSettings(
-      baseUrl: json['baseUrl'] as String? ?? '',
-      deviceToken: json['deviceToken'] as String? ?? '',
-      connectionMode: ConnectionMode.values.byName(
-        json['connectionMode'] as String? ?? ConnectionMode.embeddedMock.name,
+      baseUrl: baseUrl,
+      deviceId: json['deviceId'] as String? ?? '',
+      pollIntervalSeconds: (json['pollIntervalSeconds'] as num?)?.toInt() ?? 15,
+      themeMode: CompanionThemeMode.values.byName(
+        json['themeMode'] as String? ?? CompanionThemeMode.system.name,
       ),
-      mockRequireAuth: json['mockRequireAuth'] == true,
-      mockServerPort: (json['mockServerPort'] as num?)?.toInt() ?? 18080,
-      pollIntervalSeconds: (json['pollIntervalSeconds'] as num?)?.toInt() ?? 5,
+      useDynamicColor: json['useDynamicColor'] != false,
     );
   }
 
   final String baseUrl;
+  /// Full `{deviceId}-{accessCode}` sent to `POST /auth/token`.
   final String deviceToken;
-  final ConnectionMode connectionMode;
-  final bool mockRequireAuth;
-  final int mockServerPort;
+  /// From public `GET /auth/status` (login.html "Device ID").
+  final String deviceId;
+  /// User-entered access code only (login.html token field).
+  final String accessCode;
   final int pollIntervalSeconds;
+  final CompanionThemeMode themeMode;
+  final bool useDynamicColor;
 
-  bool get isConfigured =>
-      connectionMode == ConnectionMode.embeddedMock ||
-      baseUrl.trim().isNotEmpty;
+  bool get isConfigured {
+    if (baseUrl.trim().isEmpty) return false;
+    if (resolvedDeviceToken().isNotEmpty) return true;
+    return false;
+  }
+
+  String resolvedDeviceToken() {
+    final direct = deviceToken.trim();
+    if (direct.isNotEmpty) return direct;
+    return composeDeviceToken(deviceId: deviceId, accessCode: accessCode);
+  }
+
+  ThemeMode get materialThemeMode => switch (themeMode) {
+        CompanionThemeMode.light => ThemeMode.light,
+        CompanionThemeMode.dark => ThemeMode.dark,
+        CompanionThemeMode.system => ThemeMode.system,
+      };
 
   AppSettings copyWith({
     String? baseUrl,
     String? deviceToken,
-    ConnectionMode? connectionMode,
-    bool? mockRequireAuth,
-    int? mockServerPort,
+    String? deviceId,
+    String? accessCode,
     int? pollIntervalSeconds,
+    CompanionThemeMode? themeMode,
+    bool? useDynamicColor,
   }) {
     return AppSettings(
       baseUrl: baseUrl ?? this.baseUrl,
       deviceToken: deviceToken ?? this.deviceToken,
-      connectionMode: connectionMode ?? this.connectionMode,
-      mockRequireAuth: mockRequireAuth ?? this.mockRequireAuth,
-      mockServerPort: mockServerPort ?? this.mockServerPort,
+      deviceId: deviceId ?? this.deviceId,
+      accessCode: accessCode ?? this.accessCode,
       pollIntervalSeconds: pollIntervalSeconds ?? this.pollIntervalSeconds,
+      themeMode: themeMode ?? this.themeMode,
+      useDynamicColor: useDynamicColor ?? this.useDynamicColor,
     );
   }
 
   Map<String, dynamic> toJson() => {
         'baseUrl': baseUrl,
-        'deviceToken': deviceToken,
-        'connectionMode': connectionMode.name,
-        'mockRequireAuth': mockRequireAuth,
-        'mockServerPort': mockServerPort,
+        'deviceId': deviceId,
         'pollIntervalSeconds': pollIntervalSeconds,
+        'themeMode': themeMode.name,
+        'useDynamicColor': useDynamicColor,
       };
 }
