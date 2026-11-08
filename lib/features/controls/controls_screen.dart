@@ -76,7 +76,7 @@ class _ControlsScreenState extends ConsumerState<ControlsScreen> {
                         onPressed: () => _run(ControlKind.unlock, 'פתיחה'),
                       ),
                       _ActionTile(
-                        label: 'תא מטען — פתיחה',
+                        label: 'פתיחת תא מטען',
                         icon: Icons.luggage,
                         enabled: !_busy && !staleBlocked,
                         onPressed: () => _run(ControlKind.trunkOpen, 'תא מטען'),
