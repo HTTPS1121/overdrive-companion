@@ -1,0 +1,34 @@
+{
+  "version": "2.8.5+29",
+  "buildPackage": "build29",
+  "artifactDirectory": "build29",
+  "gitCommit": "519a576",
+  "designNote": "Home reference composition iter 2 (BYD Atto 3 cutout hero)",
+  "apkFile": "app-release.apk",
+  "apkSha256": "3de271de8af4a97827a0834a7f24889483603feba532acb1d1fc87db3987e87d",
+  "apkSizeBytes": 62379178,
+  "apkVersionCode": 29,
+  "apkVersionName": "2.8.5",
+  "apkSigningCertSha256": "0d1b4493974f41eaa061f2f6a4f8f5cc44f0417582b64185a6189fa8cf932956",
+  "apkSigningCertSummary": "Android Debug (Flutter template release)",
+  "releaseDebuggable": false,
+  "goldens": "test/screenshot/goldens/v2.8.5",
+  "screenshotCount": 94,
+  "screenshotCountBreakdown": {
+    "core": 18,
+    "integration": 60,
+    "pushDetail": 16
+  },
+  "screenshotPreviews": [
+    "screenshots/home_status_light_he.png",
+    "screenshots/home_status_dark_en.png"
+  ],
+  "priorFrozenRelease": {
+    "buildPackage": "v2.8.5",
+    "version": "2.8.4+28",
+    "apkSha256": "88bc58bf19af55aa9ee708876be82db4f64d8d830f429abf086fe0377ee54580",
+    "note": "build28 unchanged under /cursor/stores/self/artifacts/v2.8.5/"
+  },
+  "testsPassed": 162,
+  "changelog": "docs/CHANGELOG_build29.md"
+}
