@@ -502,13 +502,16 @@
   "diagnosticsAutoServiceTitle": "Auto service debug",
   "roadSenseMapOnline": "OpenStreetMap basemap (network)",
   "roadSenseMapOfflineGrid": "Basemap unavailable — hazard positions on lat/lon grid",
-  "roadSenseMapCoordSummary": "{lat}°N, {lon}°E",
-  "@roadSenseMapCoordSummary": {
+  "roadSenseMapMarkersSummary": "{count} markers on map",
+  "@roadSenseMapMarkersSummary": {
     "placeholders": {
-      "lat": {"type": "String"},
-      "lon": {"type": "String"}
+      "count": {"type": "int"}
     }
   },
+  "automationLabelSchemaVersion": "Schema version",
+  "automationLabelSignals": "Signals",
+  "automationLabelEngineState": "Engine state",
+  "automationLabelGlobalEnabled": "Global enabled",
   "roadSenseHazardCount": "Active hazards",
   "roadSenseSeverity": "Chime severity",
   "roadSenseChannel": "Audio channel",

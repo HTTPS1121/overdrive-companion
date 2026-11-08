@@ -1,28 +1,30 @@
 {
-  "version": "2.8.4+26",
+  "version": "2.8.4+27",
   "apkFile": "app-release.apk",
   "apkArtifactName": "app-release.apk",
-  "apkSha256": "73ebf236dc720fb35bb4f063bcb40ef42723f5aef04b1918045ecddeeaaa8200",
+  "apkSha256": "5a3b0fab1d2993495ae1f226228205feb5113aac04f9b4543fe38b0d6cf3081e",
   "apkSizeBytes": 62009551,
-  "apkVersionCode": 26,
+  "apkVersionCode": 27,
   "apkVersionName": "2.8.4",
   "apkSigningCertSummary": "debug (Flutter template release)",
-  "goldens": "test/screenshot/goldens/v2.8.5",
-  "screenshotArtifacts": "v2.8.5/screenshots",
+  "goldens": "test/screenshot/goldens/v2.8.4",
+  "screenshotArtifacts": "v2.8.4/screenshots",
   "screenshotCount": 93,
   "screenshotCountBreakdown": {
     "core": 17,
     "integration": 60,
     "pushDetail": 16
   },
-  "artifactDirectory": "v2.8.5",
+  "implementationInventory": "IMPLEMENTATION_INVENTORY_v2.8.4.md",
+  "artifactDirectory": "v2.8.4",
   "android": {
     "signing": "debug (Flutter template release) unless production keystore configured",
     "mediaCodecDecode": "not verified in CI \u2014 framing unit tests only"
   },
   "dynamicColorGoldenNote": "02c uses seeded CompanionColorSchemes \u2014 not OS wallpaper dynamic color",
   "upstreamRef": "4807e94389de38feca3a8f8582e811a6c63eb2a2",
-  "implementationInventoryComplete": "IMPLEMENTATION_INVENTORY_COMPLETE_build26.md",
+  "implementationInventoryComplete": "IMPLEMENTATION_INVENTORY_COMPLETE_build27.md",
+  "testsPassed": 159,
   "priorImmutableReleases": [
     {
       "version": "2.8.3+24",
@@ -31,6 +33,11 @@
     {
       "version": "2.8.4+25",
       "artifactDirectory": "v2.8.4"
+    },
+    {
+      "version": "2.8.4+26",
+      "artifactDirectory": "v2.8.5",
+      "note": "build26 APK superseded by build27 in same folder"
     }
   ]
 }

@@ -999,7 +999,7 @@ class _PlatformConnectorsScreenState extends ConsumerState<PlatformConnectorsScr
               ListTile(
                 title: Text(l10n.mqttTelemetryTitle),
                 subtitle: Text(
-                  'SOC ${_mqttTelemetry!['soc'] ?? '—'} · ${formatVehicleTimestamp(context, _mqttTelemetry!['timestamp']?.toString())}',
+                  'SOC ${_mqttTelemetry!['soc'] ?? '—'} · ${formatVehicleTimestamp(context, _mqttTelemetry!['timestamp'])}',
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.refresh),

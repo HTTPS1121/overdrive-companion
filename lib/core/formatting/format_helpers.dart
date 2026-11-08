@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../l10n/l10n_x.dart';
+import 'timestamp_normalize.dart';
 
-/// ISO-8601 vehicle timestamps → local, human-readable.
-String formatVehicleTimestamp(BuildContext context, String? iso) {
-  if (iso == null || iso.trim().isEmpty) return '—';
-  final parsed = DateTime.tryParse(iso);
-  if (parsed == null) return iso;
-  final local = parsed.toLocal();
+/// Vehicle timestamps (ISO or Unix epoch) → local, human-readable.
+String formatVehicleTimestamp(BuildContext context, Object? raw) {
+  if (raw == null) return '—';
+  final text = raw.toString().trim();
+  if (text.isEmpty) return '—';
+  final local = parseVehicleTimestampValue(raw);
+  if (local == null) return '—';
   final locale = Localizations.localeOf(context);
   final pattern = locale.languageCode == 'he' ? 'd בMMM yyyy, HH:mm' : 'MMM d, yyyy, h:mm a';
   try {

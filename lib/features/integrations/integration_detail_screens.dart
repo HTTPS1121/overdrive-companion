@@ -70,9 +70,9 @@ class _AutomationSettingsScreenState extends ConsumerState<AutomationSettingsScr
                 child: KeyValueReadoutCard(
                   title: l10n.automationSchemaTitle,
                   rows: [
-                    MapEntry('schemaVersion', '${_schema!['schemaVersion'] ?? '—'}'),
+                    MapEntry(l10n.automationLabelSchemaVersion, '${_schema!['schemaVersion'] ?? '—'}'),
                     MapEntry(
-                      'signals',
+                      l10n.automationLabelSignals,
                       (_schema!['signals'] is List) ? (_schema!['signals'] as List).join(', ') : '—',
                     ),
                   ],
@@ -87,9 +87,10 @@ class _AutomationSettingsScreenState extends ConsumerState<AutomationSettingsScr
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: KeyValueReadoutCard(title: l10n.automationStateTitle, rows: [
-                  for (final e in _state!.entries)
-                    if (e.value is! Map && e.value is! List)
-                      MapEntry(e.key.toString(), e.value?.toString() ?? '—'),
+                  if (_state!['engine'] != null)
+                    MapEntry(l10n.automationLabelEngineState, _state!['engine']?.toString() ?? '—'),
+                  if (_state!['activeCount'] != null)
+                    MapEntry(l10n.automationStateTitle, _state!['activeCount']?.toString() ?? '—'),
                 ]),
               ),
           ],

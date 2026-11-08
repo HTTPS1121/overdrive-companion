@@ -2900,11 +2900,35 @@ abstract class AppLocalizations {
   /// **'Basemap unavailable — hazard positions on lat/lon grid'**
   String get roadSenseMapOfflineGrid;
 
-  /// No description provided for @roadSenseMapCoordSummary.
+  /// No description provided for @roadSenseMapMarkersSummary.
   ///
   /// In en, this message translates to:
-  /// **'{lat}°N, {lon}°E'**
-  String roadSenseMapCoordSummary(String lat, String lon);
+  /// **'{count} markers on map'**
+  String roadSenseMapMarkersSummary(int count);
+
+  /// No description provided for @automationLabelSchemaVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Schema version'**
+  String get automationLabelSchemaVersion;
+
+  /// No description provided for @automationLabelSignals.
+  ///
+  /// In en, this message translates to:
+  /// **'Signals'**
+  String get automationLabelSignals;
+
+  /// No description provided for @automationLabelEngineState.
+  ///
+  /// In en, this message translates to:
+  /// **'Engine state'**
+  String get automationLabelEngineState;
+
+  /// No description provided for @automationLabelGlobalEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Global enabled'**
+  String get automationLabelGlobalEnabled;
 
   /// No description provided for @roadSenseHazardCount.
   ///

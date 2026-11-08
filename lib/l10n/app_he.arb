@@ -558,13 +558,16 @@
   "diagnosticsAutoServiceTitle": "דיבוג Auto service",
   "roadSenseMapOnline": "מפת OpenStreetMap (רשת)",
   "roadSenseMapOfflineGrid": "מפת רקע לא זמינה — מיקום מכשולים על רשת lat/lon",
-  "roadSenseMapCoordSummary": "{lat}°צ׳, {lon}°מ׳",
-  "@roadSenseMapCoordSummary": {
+  "roadSenseMapMarkersSummary": "{count} סימונים על המפה",
+  "@roadSenseMapMarkersSummary": {
     "placeholders": {
-      "lat": {"type": "String"},
-      "lon": {"type": "String"}
+      "count": {"type": "int"}
     }
   },
+  "automationLabelSchemaVersion": "גרסת סכימה",
+  "automationLabelSignals": "אותות",
+  "automationLabelEngineState": "מצב מנוע",
+  "automationLabelGlobalEnabled": "פעיל גלובלית",
   "roadSenseHazardCount": "מכשולים פעילים",
   "roadSenseSeverity": "חומרת צליל",
   "roadSenseChannel": "ערוץ שמע",

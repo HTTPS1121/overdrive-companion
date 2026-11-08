@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../geojson/hazard_geojson.dart';
 import '../layout/screenshot_scope.dart';
 import '../l10n/l10n_x.dart';
 
@@ -28,30 +29,9 @@ class _GeoJsonPointMapState extends State<GeoJsonPointMap> {
   final MapController _controller = MapController();
   bool _tileLoadFailed = false;
 
-  List<_HazardPoint> _parsePoints() {
-    final points = <_HazardPoint>[];
-    for (final f in widget.features) {
-      if (f is! Map) continue;
-      final geom = f['geometry'];
-      final props = f['properties'];
-      if (geom is Map && geom['type'] == 'Point') {
-        final coords = geom['coordinates'];
-        if (coords is List && coords.length >= 2) {
-          final lon = (coords[0] as num).toDouble();
-          final lat = (coords[1] as num).toDouble();
-          points.add(
-            _HazardPoint(
-              position: LatLng(lat, lon),
-              properties: props is Map ? Map<String, dynamic>.from(props) : const {},
-            ),
-          );
-        }
-      }
-    }
-    return points;
-  }
+  List<HazardMapPoint> _parsePoints() => parseHazardGeoJsonFeatures(widget.features);
 
-  LatLngBounds _boundsFor(List<_HazardPoint> points) {
+  LatLngBounds _boundsFor(List<HazardMapPoint> points) {
     const pad = 0.018;
     if (points.isEmpty) {
       return LatLngBounds(const LatLng(32.08, 34.78), const LatLng(32.085, 34.785));
@@ -109,7 +89,18 @@ class _GeoJsonPointMapState extends State<GeoJsonPointMap> {
             width: double.infinity,
             child: Stack(
               fit: StackFit.expand,
+              clipBehavior: Clip.hardEdge,
               children: [
+                if (!useTiles)
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: _LatLonGridPainter(
+                        bounds: bounds,
+                        color: theme.colorScheme.outline.withValues(alpha: 0.35),
+                        labelColor: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
                 FlutterMap(
                   mapController: _controller,
                   options: MapOptions(
@@ -147,8 +138,8 @@ class _GeoJsonPointMapState extends State<GeoJsonPointMap> {
                             point: p.position,
                             width: 44,
                             height: 44,
-                            child: Tooltip(
-                              message: p.properties['kind']?.toString() ?? p.properties['id']?.toString() ?? '',
+                            alignment: Alignment.center,
+                            child: IgnorePointer(
                               child: Icon(Icons.place, color: theme.colorScheme.error, size: 36),
                             ),
                           ),
@@ -156,16 +147,6 @@ class _GeoJsonPointMapState extends State<GeoJsonPointMap> {
                     ),
                   ],
                 ),
-                if (!useTiles)
-                  IgnorePointer(
-                    child: CustomPaint(
-                      painter: _LatLonGridPainter(
-                        bounds: bounds,
-                        color: theme.colorScheme.outline.withValues(alpha: 0.35),
-                        labelColor: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
                 Positioned(
                   left: 8,
                   top: 8,
@@ -178,6 +159,7 @@ class _GeoJsonPointMapState extends State<GeoJsonPointMap> {
                       child: Text(
                         useTiles ? l10n.roadSenseMapOnline : l10n.roadSenseMapOfflineGrid,
                         style: theme.textTheme.labelMedium,
+                        textDirection: TextDirection.ltr,
                       ),
                     ),
                   ),
@@ -192,11 +174,9 @@ class _GeoJsonPointMapState extends State<GeoJsonPointMap> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         child: Text(
-                          l10n.roadSenseMapCoordSummary(
-                            points.first.position.latitude.toStringAsFixed(4),
-                            points.first.position.longitude.toStringAsFixed(4),
-                          ),
+                          l10n.roadSenseMapMarkersSummary(points.length),
                           style: theme.textTheme.labelSmall,
+                          textDirection: TextDirection.ltr,
                         ),
                       ),
                     ),
@@ -215,13 +195,7 @@ class _GeoJsonPointMapState extends State<GeoJsonPointMap> {
   }
 }
 
-class _HazardPoint {
-  const _HazardPoint({required this.position, required this.properties});
-  final LatLng position;
-  final Map<String, dynamic> properties;
-}
-
-/// Lat/lon grid drawn when basemap tiles are unavailable (fixtures / offline).
+/// Lat/lon grid drawn behind markers when basemap tiles are unavailable.
 class _LatLonGridPainter extends CustomPainter {
   _LatLonGridPainter({
     required this.bounds,
@@ -235,6 +209,9 @@ class _LatLonGridPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    canvas.save();
+    canvas.clipRect(Offset.zero & size);
+
     final bg = Paint()..color = const Color(0xFFE8ECEF);
     canvas.drawRect(Offset.zero & size, bg);
 
@@ -253,20 +230,27 @@ class _LatLonGridPainter extends CustomPainter {
     final latSpan = bounds.north - bounds.south;
     final lonSpan = bounds.east - bounds.west;
     final tp = TextPainter(textDirection: TextDirection.ltr);
+
     for (var i = 0; i <= lines; i++) {
-      final lat = bounds.south + latSpan * (1 - i / lines);
-      final lon = bounds.west + lonSpan * (i / lines);
-      final latLabel = lat.toStringAsFixed(3);
-      final lonLabel = lon.toStringAsFixed(3);
-      tp.text = TextSpan(text: latLabel, style: TextStyle(fontSize: 9, color: labelColor));
-      tp.layout();
-      tp.paint(canvas, Offset(4, size.height * i / lines - 4));
       if (i == 0 || i == lines) {
-        tp.text = TextSpan(text: lonLabel, style: TextStyle(fontSize: 9, color: labelColor));
+        final lat = bounds.south + latSpan * (1 - i / lines);
+        final latLabel = lat.toStringAsFixed(3);
+        tp.text = TextSpan(text: latLabel, style: TextStyle(fontSize: 9, color: labelColor));
         tp.layout();
-        tp.paint(canvas, Offset(size.width * i / lines + 2, size.height - 14));
+        final y = (size.height * i / lines).clamp(2.0, size.height - tp.height - 2);
+        tp.paint(canvas, Offset(6, y));
       }
     }
+    for (var i in [0, lines]) {
+      final lon = bounds.west + lonSpan * (i / lines);
+      final lonLabel = lon.toStringAsFixed(3);
+      tp.text = TextSpan(text: lonLabel, style: TextStyle(fontSize: 9, color: labelColor));
+      tp.layout();
+      final x = (size.width * i / lines + 4).clamp(4.0, size.width - tp.width - 4);
+      tp.paint(canvas, Offset(x, size.height - tp.height - 4));
+    }
+
+    canvas.restore();
   }
 
   @override

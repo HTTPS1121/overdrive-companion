@@ -1535,9 +1535,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Basemap unavailable — hazard positions on lat/lon grid';
 
   @override
-  String roadSenseMapCoordSummary(String lat, String lon) {
-    return '$lat°N, $lon°E';
+  String roadSenseMapMarkersSummary(int count) {
+    return '$count markers on map';
   }
+
+  @override
+  String get automationLabelSchemaVersion => 'Schema version';
+
+  @override
+  String get automationLabelSignals => 'Signals';
+
+  @override
+  String get automationLabelEngineState => 'Engine state';
+
+  @override
+  String get automationLabelGlobalEnabled => 'Global enabled';
 
   @override
   String get roadSenseHazardCount => 'Active hazards';

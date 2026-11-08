@@ -1505,9 +1505,21 @@ class AppLocalizationsHe extends AppLocalizations {
       'מפת רקע לא זמינה — מיקום מכשולים על רשת lat/lon';
 
   @override
-  String roadSenseMapCoordSummary(String lat, String lon) {
-    return '$lat°צ׳, $lon°מ׳';
+  String roadSenseMapMarkersSummary(int count) {
+    return '$count סימונים על המפה';
   }
+
+  @override
+  String get automationLabelSchemaVersion => 'גרסת סכימה';
+
+  @override
+  String get automationLabelSignals => 'אותות';
+
+  @override
+  String get automationLabelEngineState => 'מצב מנוע';
+
+  @override
+  String get automationLabelGlobalEnabled => 'פעיל גלובלית';
 
   @override
   String get roadSenseHazardCount => 'מכשולים פעילים';
