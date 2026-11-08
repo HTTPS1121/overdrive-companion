@@ -3,10 +3,11 @@
 | Field | Value |
 |-------|--------|
 | Version | `2.8.4+27` (`versionCode` **27**) |
+| APK SHA-256 | `5a3b0fab1d2993495ae1f226228205feb5113aac04f9b4543fe38b0d6cf3081e` |
 | APK | `app-release.apk` (sole binary name in artifact dir) |
 | Manifest | `RELEASE_MANIFEST_v2.8.5.json` |
 | Inventory (this file) | `IMPLEMENTATION_INVENTORY_COMPLETE_build27.md` |
-| Tests | `flutter test` — fixture HTTP/WS only |
+| Tests | **159** `flutter test` (fixture HTTP/WS only) |
 | Goldens | `test/screenshot/goldens/v2.8.5` (93 PNG: 17 core + 60 integration + 16 push) |
 | Immutable snapshots | `v2.8.3/` b24 · `v2.8.4/` b25 · `v2.8.5/` b26 |
 
