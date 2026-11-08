@@ -270,6 +270,30 @@ class AppLocalizationsHe extends AppLocalizations {
   String get statusHeroTitle => 'רכב Overdrive';
 
   @override
+  String get statusModelName => 'BYD Atto 3';
+
+  @override
+  String get statusIdentityLabel => 'הרכב שלי';
+
+  @override
+  String get statusIdentityCaption => 'מלווה Overdrive';
+
+  @override
+  String get statusConnected => 'מחובר';
+
+  @override
+  String get statusSecuredLocked => 'נעול ומאובטח';
+
+  @override
+  String get statusSecuredUnlocked => 'לא נעול';
+
+  @override
+  String get statusRangeHint => 'טווח תצוגה מהרכב';
+
+  @override
+  String get statusTyresOk => 'קריאות מהרכב';
+
+  @override
   String get statusHeroImageLabel => 'תמונת ייחוס BYD Atto 3';
 
   @override

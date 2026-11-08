@@ -481,10 +481,11 @@ Future<void> _awaitHeroImage(WidgetTester tester) async {
   });
   await tester.pumpAndSettle(const Duration(milliseconds: 200));
   final imageFinder = find.byWidgetPredicate(
-    (w) =>
-        w is Image &&
-        w.image is AssetImage &&
-        (w.image as AssetImage).assetName == VehicleHeroVisual.assetPath,
+    (w) {
+      if (w is! Image || w.image is! AssetImage) return false;
+      final name = (w.image as AssetImage).assetName;
+      return name == VehicleHeroVisual.assetPath || name == VehicleHeroVisual.legacyAssetPath;
+    },
   );
   expect(imageFinder, findsOneWidget);
   final image = tester.widget<Image>(imageFinder);
@@ -571,13 +572,19 @@ Future<void> _writeGolden(WidgetTester tester, String name, Finder finder) async
     artifactDir.createSync(recursive: true);
     File('${artifactDir.path}/$name.png').writeAsBytesSync(bytes);
   }
-  if (name == '02d_status_fixture_dark_en' || name == '02b_status_fixture_light_he') {
+  if (name == '02d_status_fixture_dark_en' ||
+      name == '02b_status_fixture_light_he' ||
+      name == '02_status_fixture_dark_he') {
     for (final dir in [
-      '/opt/cursor/artifacts/design-home-iter1',
-      '/cursor/stores/self/artifacts/design-home-iter1',
+      '/opt/cursor/artifacts/design-home-iter2',
+      '/cursor/stores/self/artifacts/design-home-iter2',
     ]) {
       Directory(dir).createSync(recursive: true);
-      final outName = name == '02d_status_fixture_dark_en' ? 'home_status_dark_en.png' : 'home_status_light_he.png';
+      final outName = switch (name) {
+        '02d_status_fixture_dark_en' => 'home_status_dark_en.png',
+        '02b_status_fixture_light_he' => 'home_status_light_he.png',
+        _ => 'home_status_dark_he.png',
+      };
       File('$dir/$outName').writeAsBytesSync(bytes);
     }
   }

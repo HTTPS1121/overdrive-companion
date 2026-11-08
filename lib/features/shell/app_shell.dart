@@ -6,6 +6,7 @@ import '../camera/camera_hub_screen.dart';
 import '../controls/controls_hub_screen.dart';
 import '../gps/gps_screen.dart';
 import '../settings/settings_screen.dart';
+import '../status/status_shell_scope.dart';
 import '../status/vehicle_status_screen.dart';
 
 class AppShell extends StatefulWidget {
@@ -60,13 +61,18 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        title: Text(l10n.appTitle),
-        titleTextStyle: Theme.of(context).textTheme.titleLarge,
-      ),
+      appBar: _index == 0
+          ? null
+          : AppBar(
+              title: Text(l10n.appTitle),
+              titleTextStyle: Theme.of(context).textTheme.titleLarge,
+            ),
       body: SafeArea(
         bottom: false,
-        child: IndexedStack(index: _index, children: pages),
+        child: StatusShellScope(
+          selectTab: (i) => setState(() => _index = i),
+          child: IndexedStack(index: _index, children: pages),
+        ),
       ),
       bottomNavigationBar: FloatingNavigationBar(
         selectedIndex: _index,

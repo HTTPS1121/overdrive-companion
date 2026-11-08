@@ -62,3 +62,4 @@ flutter:
     - fixtures/command_lock_confirmed.json
     - fixtures/command_lock_unconfirmed.json
     - assets/images/byd-atto3-hero.png
+    - assets/images/byd-atto3-hero-cutout.png

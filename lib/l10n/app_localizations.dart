@@ -578,6 +578,54 @@ abstract class AppLocalizations {
   /// **'Overdrive vehicle'**
   String get statusHeroTitle;
 
+  /// No description provided for @statusModelName.
+  ///
+  /// In en, this message translates to:
+  /// **'BYD Atto 3'**
+  String get statusModelName;
+
+  /// No description provided for @statusIdentityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'My EV'**
+  String get statusIdentityLabel;
+
+  /// No description provided for @statusIdentityCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdrive companion'**
+  String get statusIdentityCaption;
+
+  /// No description provided for @statusConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get statusConnected;
+
+  /// No description provided for @statusSecuredLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Secured & locked'**
+  String get statusSecuredLocked;
+
+  /// No description provided for @statusSecuredUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get statusSecuredUnlocked;
+
+  /// No description provided for @statusRangeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle display range'**
+  String get statusRangeHint;
+
+  /// No description provided for @statusTyresOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Readings from vehicle'**
+  String get statusTyresOk;
+
   /// No description provided for @statusHeroImageLabel.
   ///
   /// In en, this message translates to:

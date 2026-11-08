@@ -5,12 +5,10 @@ import '../../core/format/freshness.dart';
 import '../../core/l10n/l10n_x.dart';
 import '../../core/layout/scroll_insets.dart';
 import '../../core/layout/screenshot_scope.dart';
-import '../../data/models/cloud_status.dart';
-import '../../data/models/vehicle_state.dart';
 import '../../providers/app_providers.dart';
-import '../gps/gps_location_card.dart';
-import 'status_quick_actions.dart';
-import 'vehicle_hero_panel.dart';
+import 'status_home_cards.dart';
+import 'status_shell_scope.dart';
+import 'vehicle_hero_visual.dart';
 
 class VehicleStatusScreen extends ConsumerWidget {
   const VehicleStatusScreen({super.key});
@@ -56,44 +54,43 @@ class VehicleStatusScreen extends ConsumerWidget {
         final freshnessLabel = ScreenshotScope.of(context)
             ? l10n.freshnessUpdated(l10n.freshnessNow)
             : freshness.fetchedAgoLabelLocalized(l10n, snap.lastUpdated);
+        final shell = StatusShellScope.maybeOf(context);
+        final locationLine = snap.gps?.hasLocation == true ? snap.gps!.coordinatesLabel : null;
 
         return RefreshIndicator(
           onRefresh: () => ref.read(vehicleSnapshotProvider.notifier).refresh(),
           child: ListView(
-            padding: scrollBottomPadding(context, horizontal: 20, extra: 72),
+            padding: scrollBottomPadding(context, extra: 40),
             children: [
-              VehicleHeroPanel(
+              StatusHomeHeader(
+                connected: !snap.offline,
+                freshnessLabel: freshnessLabel,
+                onOpenSettings: shell == null ? null : () => shell.selectTab(4),
+              ),
+              const SizedBox(height: 20),
+              StatusModelHeading(locationLine: locationLine ?? driving),
+              const SizedBox(height: 12),
+              const VehicleHeroVisual(),
+              const SizedBox(height: 12),
+              StatusSecuredPill(locked: snap.state.isLocked),
+              const SizedBox(height: 20),
+              StatusBatteryRangeRow(
                 soc: snap.state.battery?.soc,
                 rangeKm: snap.state.battery?.displayRangeKm,
-                locked: snap.state.isLocked,
-                driving: driving,
-                freshnessLabel: freshnessLabel,
-                quickActions: StatusQuickActions(snap: snap),
               ),
               if (freshness.isStale) ...[
-                const SizedBox(height: 16),
-                _InlineNotice(
-                  icon: Icons.schedule,
-                  text: l10n.statusDataStale,
-                  color: Theme.of(context).colorScheme.tertiaryContainer,
-                ),
+                const SizedBox(height: 14),
+                _StaleBanner(text: l10n.statusDataStale),
               ],
-              const SizedBox(height: 24),
-              _QuietSecondaryRow(
-                climate: snap.state.climate,
-                windows: snap.state.windows,
-              ),
               if (snap.state.tyres?.available == true) ...[
-                const SizedBox(height: 12),
-                _CompactTyreRow(tyres: snap.state.tyres!, l10n: l10n),
+                const SizedBox(height: 16),
+                StatusTyreStrip(tyres: snap.state.tyres!, l10n: l10n),
               ],
-              if (snap.gps != null) ...[
+              const SizedBox(height: 12),
+              StatusSecondaryPair(climate: snap.state.climate, windows: snap.state.windows),
+              if (snap.gps?.hasLocation == true) ...[
                 const SizedBox(height: 12),
-                GpsLocationCard(gps: snap.gps!, compact: true),
-              ],
-              if (snap.cloud != null) ...[
-                const SizedBox(height: 12),
-                _CloudInline(cloud: snap.cloud!),
+                StatusGpsFootnote(coordinates: snap.gps!.coordinatesLabel),
               ],
             ],
           ),
@@ -103,194 +100,26 @@ class VehicleStatusScreen extends ConsumerWidget {
   }
 }
 
-class _QuietSecondaryRow extends StatelessWidget {
-  const _QuietSecondaryRow({this.climate, this.windows});
+class _StaleBanner extends StatelessWidget {
+  const _StaleBanner({required this.text});
 
-  final ClimateInfo? climate;
-  final WindowPercents? windows;
-
-  String _win(int? v) => v == null || v < 0 ? '—' : '$v%';
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            flex: 3,
-            child: _SecondaryTile(
-              icon: Icons.ac_unit_outlined,
-              label: l10n.sectionClimate,
-              value: climate?.acOn == true ? l10n.stateOn : l10n.stateOff,
-              detail: climate?.insideTempC != null
-                  ? '${climate!.insideTempC!.toStringAsFixed(1)}°'
-                  : null,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 2,
-            child: _SecondaryTile(
-              icon: Icons.filter_drama_outlined,
-              label: l10n.sectionWindows,
-              value: _win(windows?.lf),
-              detail: _win(windows?.lr),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SecondaryTile extends StatelessWidget {
-  const _SecondaryTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.detail,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final String? detail;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Material(
-      color: scheme.surfaceContainer,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 20, color: scheme.onSurfaceVariant),
-            const SizedBox(height: 10),
-            Text(label, style: theme.textTheme.labelLarge),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-              textDirection: TextDirection.ltr,
-            ),
-            if (detail != null)
-              Text(detail!, style: theme.textTheme.bodySmall, textDirection: TextDirection.ltr),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CompactTyreRow extends StatelessWidget {
-  const _CompactTyreRow({required this.tyres, required this.l10n});
-
-  final TyreBlock tyres;
-  final dynamic l10n;
-
-  String _kpa(TyreCorner? c) => c?.kPa != null ? '${c!.kPa}' : '—';
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Material(
-      color: scheme.surfaceContainer,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Icon(Icons.tire_repair_outlined, color: scheme.onSurfaceVariant),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(l10n.sectionTyres, style: theme.textTheme.labelLarge),
-            ),
-            _TyreMini(label: 'FL', value: _kpa(tyres.fl)),
-            const SizedBox(width: 8),
-            _TyreMini(label: 'FR', value: _kpa(tyres.fr)),
-            const SizedBox(width: 8),
-            _TyreMini(label: 'RL', value: _kpa(tyres.rl)),
-            const SizedBox(width: 8),
-            _TyreMini(label: 'RR', value: _kpa(tyres.rr)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TyreMini extends StatelessWidget {
-  const _TyreMini({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(label, style: Theme.of(context).textTheme.labelSmall),
-        Text(value, style: Theme.of(context).textTheme.bodyMedium, textDirection: TextDirection.ltr),
-      ],
-    );
-  }
-}
-
-class _CloudInline extends StatelessWidget {
-  const _CloudInline({required this.cloud});
-
-  final CloudStatus cloud;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final ok = cloud.configured && cloud.verified;
     final scheme = Theme.of(context).colorScheme;
     return Material(
-      color: scheme.surfaceContainerLow,
+      color: scheme.tertiaryContainer,
       borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         child: Row(
           children: [
-            Icon(Icons.cloud_outlined, color: scheme.onSurfaceVariant),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                ok ? l10n.cloudActive : l10n.cloudPartial,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
+            Icon(Icons.schedule, size: 18, color: scheme.onTertiaryContainer),
+            const SizedBox(width: 10),
+            Expanded(child: Text(text, style: TextStyle(color: scheme.onTertiaryContainer))),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _InlineNotice extends StatelessWidget {
-  const _InlineNotice({required this.icon, required this.text, required this.color});
-
-  final IconData icon;
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: color,
-      borderRadius: BorderRadius.circular(16),
-      child: ListTile(
-        dense: true,
-        leading: Icon(icon),
-        title: Text(text),
       ),
     );
   }
