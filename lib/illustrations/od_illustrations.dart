@@ -99,22 +99,19 @@ class OdSceneView extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              CustomPaint(painter: const _ScenePainter()),
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xE80C2348),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    '$label · הדמיה',
-                    style: odBody(11, FontWeight.w400, Colors.white),
+              CustomPaint(painter: _ScenePainter(dark: dark)),
+              if (!dark)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 8,
+                  child: Center(
+                    child: Text(
+                      label,
+                      style: odMuted(11).copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF476181)),
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
@@ -124,75 +121,59 @@ class OdSceneView extends StatelessWidget {
 }
 
 class _ScenePainter extends CustomPainter {
-  const _ScenePainter();
+  _ScenePainter({required this.dark});
+
+  final bool dark;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final sx = size.width / 320;
-    final sy = size.height / 180;
+    final sx = size.width / 340;
+    final sy = size.height / 200;
     canvas.save();
     canvas.scale(sx, sy);
-
-    canvas.drawRect(const Rect.fromLTWH(0, 0, 320, 180), Paint()..color = const Color(0xFFC8D8E8));
-    canvas.drawRect(const Rect.fromLTWH(0, 76, 320, 104), Paint()..color = const Color(0xFF667B8F));
-
-    final bldg = Paint()
-      ..color = const Color(0xFF98AFC3)
-      ..style = PaintingStyle.fill;
-    final bStroke = Paint()
-      ..color = const Color(0xFFB6CADA)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
-    canvas.drawRect(const Rect.fromLTWH(0, 25, 65, 50), bldg);
-    canvas.drawRect(const Rect.fromLTWH(0, 25, 65, 50), bStroke);
-    canvas.drawRect(const Rect.fromLTWH(82, 40, 75, 35), bldg);
-    canvas.drawRect(const Rect.fromLTWH(82, 40, 75, 35), bStroke);
-    canvas.drawRect(const Rect.fromLTWH(222, 15, 98, 60), bldg);
-    canvas.drawRect(const Rect.fromLTWH(222, 15, 98, 60), bStroke);
-
-    canvas.drawLine(const Offset(0, 70), const Offset(320, 70), Paint()..color = const Color(0xFF98AFC3)..strokeWidth = 3);
-
-    final lane = Paint()
-      ..color = const Color(0xFFD8E3EA)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
-    canvas.drawLine(const Offset(140, 76), const Offset(106, 180), lane);
-    canvas.drawLine(const Offset(214, 76), const Offset(248, 180), lane);
-    canvas.drawLine(const Offset(0, 159), const Offset(117, 144), lane);
-    canvas.drawLine(const Offset(203, 144), const Offset(320, 159), lane);
-    canvas.drawLine(const Offset(154, 100), const Offset(166, 100), lane);
-    canvas.drawLine(const Offset(139, 125), const Offset(157, 125), lane);
-    canvas.drawLine(const Offset(129, 160), const Offset(161, 160), lane);
-
-    final parked = parseSvgPathData('M26 114h60v24H22v-15l8-9 9-14h31l12 14');
-    canvas.drawPath(parked, Paint()..color = const Color(0xFFC7DAE8)..style = PaintingStyle.fill);
-    canvas.drawPath(
-      parked,
-      Paint()
-        ..color = const Color(0xFF294A69)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2,
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, 340, 200),
+      Paint()..color = dark ? const Color(0xFF13273F) : const Color(0xFFE9EEF4),
     );
-    canvas.drawCircle(const Offset(36, 138), 6, Paint()..color = const Color(0xFF203D5A));
-    canvas.drawCircle(const Offset(73, 138), 6, Paint()..color = const Color(0xFF203D5A));
-
-    final person = Paint()
-      ..color = const Color(0xFF254764)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    canvas.drawLine(const Offset(261, 85), const Offset(261, 117), person);
-    canvas.drawLine(const Offset(253, 101), const Offset(261, 92), person);
-    canvas.drawLine(const Offset(269, 101), const Offset(261, 92), person);
-    canvas.drawLine(const Offset(254, 130), const Offset(261, 117), person);
-    canvas.drawLine(const Offset(268, 130), const Offset(261, 117), person);
-    canvas.drawCircle(const Offset(261, 80), 5, Paint()..color = const Color(0xFF254764));
-
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 340, 200), Paint()..color = const Color(0xFFC9D5E1));
+    final grid = Paint()
+      ..color = const Color(0xFFB8C6D6)
+      ..strokeWidth = 0.75;
+    for (var y = 0.0; y < 200; y += 14) {
+      canvas.drawLine(Offset(0, y), Offset(340, y), grid);
+    }
+    for (var x = 0.0; x < 340; x += 14) {
+      canvas.drawLine(Offset(x, 0), Offset(x, 200), grid);
+    }
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 128, 340, 72),
+      Paint()..color = const Color(0xFFCAD5DF),
+    );
+    final lane = Paint()
+      ..color = const Color(0xFF98A9B9)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(const Offset(0, 164), const Offset(340, 164), lane);
+    canvas.drawRect(const Rect.fromLTWH(56, 78, 98, 50), Paint()..color = const Color(0xFF737373));
+    canvas.drawRect(const Rect.fromLTWH(214, 78, 72, 50), Paint()..color = const Color(0xFF5F5F5F));
+    final car = parseSvgPathData('M92 138h144l12 14H80z');
+    canvas.drawPath(car, Paint()..color = const Color(0xFF90B2CC)..style = PaintingStyle.fill);
+    canvas.drawPath(
+      car,
+      Paint()
+        ..color = const Color(0xFF5A7E9B)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
+    canvas.drawCircle(const Offset(114, 154), 8, Paint()..color = const Color(0xFF203D5A));
+    canvas.drawCircle(const Offset(214, 154), 8, Paint()..color = const Color(0xFF203D5A));
+    canvas.drawCircle(const Offset(170, 90), 11, Paint()..color = const Color(0xFF51606E));
+    canvas.drawCircle(const Offset(170, 84), 9, Paint()..color = const Color(0xFF344250));
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _ScenePainter oldDelegate) => dark != oldDelegate.dark;
 }
 
 class OdMapIllustration extends StatelessWidget {
@@ -219,28 +200,53 @@ class OdMapIllustration extends StatelessWidget {
   }
 }
 
+/// Matches HTML `map()` SVG (340×200).
 class _MapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFE1E8F1));
-    final paint = Paint()
+    final sx = size.width / 340;
+    final sy = size.height / 200;
+    canvas.save();
+    canvas.scale(sx, sy);
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 340, 200), Paint()..color = const Color(0xFFE1E8F1));
+    final street = Paint()
       ..color = Colors.white
-      ..strokeWidth = 12;
-    canvas.drawLine(Offset(0, size.height * 0.22), Offset(size.width, size.height * 0.22), paint);
-    canvas.drawLine(Offset(0, size.height * 0.68), Offset(size.width, size.height * 0.68), paint);
+      ..strokeWidth = 15;
+    canvas.drawLine(const Offset(0, 45), const Offset(340, 45), street);
+    canvas.drawLine(const Offset(0, 136), const Offset(340, 136), street);
+    canvas.drawLine(const Offset(70, 0), const Offset(70, 200), street);
+    canvas.drawLine(const Offset(268, 0), const Offset(268, 200), street);
+    canvas.drawLine(const Offset(88, 200), const Offset(225, 0), street);
     final route = Paint()
-      ..color = OdColors.blue
+      ..color = const Color(0xFF215DBE)
       ..strokeWidth = 5
       ..style = PaintingStyle.stroke
       ..strokeJoin = StrokeJoin.round;
     canvas.drawPath(
       Path()
-        ..moveTo(size.width * 0.2, size.height * 0.68)
-        ..lineTo(size.width * 0.49, size.height * 0.68)
-        ..lineTo(size.width * 0.49, size.height * 0.22)
-        ..lineTo(size.width * 0.79, size.height * 0.22),
+        ..moveTo(70, 136)
+        ..lineTo(170, 136)
+        ..lineTo(170, 45)
+        ..lineTo(268, 45),
       route,
     );
+    canvas.drawCircle(
+      const Offset(70, 136),
+      8,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill,
+    );
+    canvas.drawCircle(
+      const Offset(70, 136),
+      8,
+      Paint()
+        ..color = const Color(0xFF215DBE)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3,
+    );
+    canvas.drawCircle(const Offset(268, 45), 8, Paint()..color = const Color(0xFF215DBE));
+    canvas.restore();
   }
 
   @override

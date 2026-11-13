@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'od_fonts.dart';
 
+export 'od_bidi.dart';
+
 /// Tokens from `overdrive-chosen.html` :root and typography.
 abstract final class OdColors {
   static const ink = Color(0xFF142F50);

@@ -115,8 +115,8 @@ class RecordingPlayerModal extends ConsumerWidget {
                               onPressed: () {},
                               child: const Text('נגן', style: TextStyle(color: Colors.white)),
                             ),
-                            Text('0:02 / ${r.dur}', style: const TextStyle(color: Color(0xFFDCE7F5), fontSize: 12)),
-                            const Text('1.0×', style: TextStyle(color: Color(0xFFDCE7F5), fontSize: 12)),
+                            OdLtrText('0:02 / ${r.dur}', style: const TextStyle(color: Color(0xFFDCE7F5), fontSize: 12)),
+                            const OdLtrText('1.0×', style: TextStyle(color: Color(0xFFDCE7F5), fontSize: 12)),
                           ],
                         ),
                       ],
@@ -127,7 +127,7 @@ class RecordingPlayerModal extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     child: Row(
                       children: [
-                        Expanded(child: Text('${r.day} · ${r.time} · ${r.size}', style: odMuted(12))),
+                        Expanded(child: OdLtrText('${r.day} · ${r.time} · ${r.size}', style: odMuted(12))),
                         TextButton(
                           onPressed: () {},
                           style: TextButton.styleFrom(backgroundColor: OdColors.navActiveBg),

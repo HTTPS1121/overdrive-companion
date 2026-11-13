@@ -45,7 +45,26 @@ class _CameraStage extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          OdSceneView(label: label, height: double.infinity, dark: true),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              var w = constraints.maxWidth;
+              var h = constraints.maxHeight - 56;
+              if (h < 40) h = constraints.maxHeight;
+              var sceneH = w * 9 / 16;
+              var sceneW = w;
+              if (sceneH > h) {
+                sceneH = h;
+                sceneW = sceneH * 16 / 9;
+              }
+              return Center(
+                child: SizedBox(
+                  width: sceneW,
+                  height: sceneH,
+                  child: OdSceneView(label: label, height: sceneH, dark: false),
+                ),
+              );
+            },
+          ),
           Positioned(
             top: 10,
             left: 14,

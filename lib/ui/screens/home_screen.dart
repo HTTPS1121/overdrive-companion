@@ -22,7 +22,7 @@ class HomeScreen extends ConsumerWidget {
             children: [
               _CarChip(name: ctrl.carName, trim: ctrl.carTrim),
               const OdCarSideView(),
-              const SizedBox(height: 10),
+              const SizedBox(height: 6),
               Text(ctrl.parkLine(), style: odMuted(14)),
             ],
           ),
@@ -34,7 +34,7 @@ class HomeScreen extends ConsumerWidget {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
-          childAspectRatio: 0.72,
+          childAspectRatio: 1.05,
           children: [
             for (final a in kControlActions)
               _ControlTile(
@@ -88,7 +88,7 @@ class HomeScreen extends ConsumerWidget {
             children: [
               _ListRow(
                 title: 'הנסיעה האחרונה',
-                subtitle: '18.6 ק״מ · 32 דקות · 2.8 קוט״ש',
+                subtitle: odIsolateLtr('18.6 ק״מ · 32 דקות · 2.8 קוט״ש'),
                 icon: OdIconName.trip,
               ),
               _ListRow(
@@ -125,7 +125,7 @@ class _CarChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -141,7 +141,7 @@ class _CarChip extends StatelessWidget {
             decoration: const BoxDecoration(color: OdColors.dotGreen, shape: BoxShape.circle),
           ),
           const SizedBox(width: 8),
-          Text(name, style: odNum(13, weight: FontWeight.w700), textDirection: TextDirection.ltr),
+          OdLtrText(name, style: odNum(13, weight: FontWeight.w700)),
           Text(' · $trim', style: odBody(13)),
         ],
       ),
@@ -174,7 +174,10 @@ class _RangeCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       textBaseline: TextBaseline.alphabetic,
                       children: [
-                        Text('$range', style: odNum(48, weight: FontWeight.w400).copyWith(letterSpacing: -2, height: 0.9)),
+                        OdLtrText(
+                          '$range',
+                          style: odNum(54, weight: FontWeight.w400).copyWith(letterSpacing: -3, height: 0.95),
+                        ),
                         const SizedBox(width: 6),
                         Text('ק״מ', style: odMuted(16)),
                       ],
@@ -192,7 +195,7 @@ class _RangeCard extends StatelessWidget {
                   children: [
                     Text('סוללה', style: odMuted(12)),
                     const SizedBox(height: 6),
-                    Text('$battery%', style: odNum(28, weight: FontWeight.w600, color: OdColors.blue)),
+                    OdLtrText('$battery%', style: odNum(28, weight: FontWeight.w600, color: OdColors.blue)),
                   ],
                 ),
               ),

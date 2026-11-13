@@ -43,7 +43,7 @@ class TripScreen extends StatelessWidget {
                   Text.rich(
                     TextSpan(
                       children: [
-                        TextSpan(text: '146.2', style: odNum(52).copyWith(letterSpacing: -2)),
+                        TextSpan(text: odIsolateLtr('146.2'), style: odNum(52).copyWith(letterSpacing: -2)),
                         const TextSpan(text: ' ק״מ'),
                       ],
                     ),

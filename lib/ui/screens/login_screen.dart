@@ -77,22 +77,21 @@ class LoginScreen extends ConsumerWidget {
                                 const Expanded(
                                   child: Text('מוכנים לדרך', style: TextStyle(color: Colors.white)),
                                 ),
-                                const Text(
+                                OdLtrText(
                                   'BYD Atto 3',
                                   style: TextStyle(color: Color(0xFFD1DEF0), fontSize: 13),
-                                  textDirection: TextDirection.ltr,
                                 ),
                               ],
                             ),
                             const SizedBox(height: 22),
-                            const Text.rich(
+                            Text.rich(
                               TextSpan(
                                 children: [
                                   TextSpan(
-                                    text: '312',
-                                    style: TextStyle(color: Colors.white, fontSize: 64, fontWeight: FontWeight.w300),
+                                    text: odIsolateLtr('312'),
+                                    style: const TextStyle(color: Colors.white, fontSize: 64, fontWeight: FontWeight.w300),
                                   ),
-                                  TextSpan(text: ' ק״מ טווח מדומה', style: TextStyle(color: Colors.white)),
+                                  const TextSpan(text: ' ק״מ טווח מדומה', style: TextStyle(color: Colors.white)),
                                 ],
                               ),
                             ),

@@ -18,6 +18,6 @@ void main() {
     await tester.tap(find.text('כניסה לדמו'));
     await tester.pumpAndSettle();
     expect(find.text('בית'), findsWidgets);
-    expect(find.text('BYD Atto 3'), findsWidgets);
+    expect(find.textContaining('BYD Atto'), findsWidgets);
   });
 }

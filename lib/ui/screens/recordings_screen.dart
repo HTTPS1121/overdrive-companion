@@ -27,7 +27,14 @@ class RecordingsScreen extends ConsumerWidget {
             children: [
               Text(_title(ctrl.recFilters.type), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
               const SizedBox(width: 8),
-              Text('${list.length} סרטונים', style: odMuted(12)),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(text: odIsolateLtr('${list.length} '), style: odNum(12)),
+                    TextSpan(text: 'סרטונים', style: odMuted(12)),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -88,67 +95,117 @@ class _EventsTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      crossAxisAlignment: WrapCrossAlignment.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _PillButton(
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              OdIcon(OdIconName.trip, size: 17, color: OdColors.blue),
-              SizedBox(width: 8),
-              Text('בחר תאריך', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-            ],
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _CalendarToggle(),
+            const SizedBox(width: 8),
+            Expanded(child: _TypeTabs(ctrl: ctrl)),
+          ],
         ),
-        _TypeTabs(ctrl: ctrl),
-        _PillButton(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('31.2 GB', style: odNum(11, weight: FontWeight.w600)),
-              const SizedBox(width: 8),
-              SizedBox(
-                width: 48,
-                height: 5,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: const LinearProgressIndicator(value: 0.24, backgroundColor: Color(0xFFD5DFEC)),
-                ),
-              ),
-            ],
-          ),
-        ),
-        _PillButton(
-          child: const Text('מצלמת הדרך של היצרן', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: OdColors.blue)),
-        ),
-        _PillButton(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const OdIcon(OdIconName.settings, size: 16, color: OdColors.blue),
-              const SizedBox(width: 6),
-              Text(
-                _filterPillLabel(ctrl.recFilters),
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Expanded(child: _StorageStats()),
+            const SizedBox(width: 8),
+            _OemDvrChip(),
+          ],
         ),
       ],
     );
   }
+}
 
-  static String _filterPillLabel(RecFilters f) {
-    var n = 0;
-    if (f.cls.isNotEmpty) n++;
-    if (f.sev.isNotEmpty) n++;
-    if (f.prox.isNotEmpty) n++;
-    if (f.stor.isNotEmpty) n++;
-    if (f.place.isNotEmpty) n++;
-    return n == 0 ? 'סינון' : 'סינון · $n פעילים';
+class _CalendarToggle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFFE8EDF4),
+      shape: StadiumBorder(side: const BorderSide(color: OdColors.line)),
+      child: InkWell(
+        customBorder: const StadiumBorder(),
+        onTap: () {},
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14),
+          child: SizedBox(
+            height: 42,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                OdIcon(OdIconName.trip, size: 17, color: OdColors.blue),
+                SizedBox(width: 8),
+                Text('בחר תאריך', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StorageStats extends StatelessWidget {
+  const _StorageStats();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 42,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8EDF4),
+        borderRadius: BorderRadius.circular(99),
+        border: Border.all(color: OdColors.line),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          OdLtrText('31.2 GB', style: odNum(11, weight: FontWeight.w600, color: OdColors.muted)),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 48,
+            height: 5,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: const LinearProgressIndicator(
+                value: 0.24,
+                backgroundColor: Color(0xFFD5DFEC),
+                valueColor: AlwaysStoppedAnimation(OdColors.blue),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OemDvrChip extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      shape: StadiumBorder(side: const BorderSide(color: OdColors.line)),
+      child: InkWell(
+        customBorder: const StadiumBorder(),
+        onTap: () {},
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: SizedBox(
+            height: 40,
+            child: Center(
+              child: Text(
+                'מצלמת הדרך של היצרן',
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: OdColors.blue),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -210,6 +267,7 @@ class _FilterRows extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final f = ctrl.recFilters;
+    final places = ref.watch(demoRepoProvider).placeFilters;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -217,44 +275,50 @@ class _FilterRows extends ConsumerWidget {
         border: Border.all(color: OdColors.cardBorder),
         boxShadow: const [OdShadows.card],
       ),
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
+      padding: const EdgeInsets.fromLTRB(0, 6, 0, 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _chipRow(ref, 'זיהוי', 'cls', [
+          _chipRow(ref, 'מה זוהה:', 'cls', [
             ('', 'הכל'),
             ('person', 'אדם'),
             ('vehicle', 'רכב'),
+            ('bike', 'אופניים/אופנוע'),
+            ('animal', 'בעל חיים'),
           ], f.cls),
-          const SizedBox(height: 8),
-          _chipRow(ref, 'חומרה', 'sev', [
+          const Divider(height: 1, color: OdColors.line),
+          _chipRow(ref, 'רמת חומרה:', 'sev', [
             ('', 'הכל'),
-            ('ALERT', 'התרעה'),
             ('NOTICE', 'לידיעה'),
+            ('ALERT', 'התרעה'),
+            ('CRITICAL', 'קריטי'),
           ], f.sev),
-          const SizedBox(height: 8),
-          _chipRow(ref, 'מרחק', 'prox', [
+          const Divider(height: 1, color: OdColors.line),
+          _chipRow(ref, 'מרחק:', 'prox', [
             ('', 'הכל'),
             ('VERY_CLOSE', 'קרוב מאוד'),
             ('CLOSE', 'קרוב'),
-            ('MID', 'בינוני'),
+            ('MID', 'מרחק בינוני'),
             ('FAR', 'רחוק'),
           ], f.prox),
-          const SizedBox(height: 8),
-          _chipRow(ref, 'אחסון', 'stor', [
+          const Divider(height: 1, color: OdColors.line),
+          _chipRow(ref, 'אחסון:', 'stor', [
             ('', 'הכל'),
-            ('INTERNAL', 'פנימי'),
+            ('INTERNAL', 'זיכרון פנימי'),
+            ('SD_CARD', 'כרטיס SD'),
             ('USB', 'USB'),
-            ('SD_CARD', 'SD'),
           ], f.stor),
-          const SizedBox(height: 8),
-          _chipRow(ref, 'מקום', 'place', [
-            ('', 'הכל'),
-            ('קרית יערים', 'קרית יערים'),
-            ('פרדס כץ', 'פרדס כץ'),
-            ('נוה שמיר', 'נוה שמיר'),
-            ('מרכז העיר', 'מרכז העיר'),
-          ], f.place),
+          const Divider(height: 1, color: OdColors.line),
+          _chipRow(
+            ref,
+            'מקום:',
+            'place',
+            [
+              ('', 'הכל'),
+              for (final p in places) (p, p),
+            ],
+            f.place,
+          ),
         ],
       ),
     );
@@ -267,19 +331,19 @@ class _FilterRows extends ConsumerWidget {
     List<(String, String)> options,
     String current,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: odMuted(11).copyWith(fontWeight: FontWeight.w700)),
-        const SizedBox(height: 4),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (final o in options)
-                Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: GestureDetector(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(10, 6, 10, 0),
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 10),
+            child: Text(label, style: odMuted(11).copyWith(fontWeight: FontWeight.w600)),
+          ),
+          for (final o in options)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: 6),
+              child: GestureDetector(
                     onTap: () => ref.read(demoAppControllerProvider).setRecFilter(key, o.$1),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
@@ -301,29 +365,8 @@ class _FilterRows extends ConsumerWidget {
                     ),
                   ),
                 ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PillButton extends StatelessWidget {
-  const _PillButton({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8EDF4),
-        borderRadius: BorderRadius.circular(99),
-        border: Border.all(color: OdColors.line),
+        ],
       ),
-      child: child,
     );
   }
 }
@@ -393,7 +436,10 @@ class _RecordingCard extends ConsumerWidget {
                       color: const Color(0xA8000000),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text('${recording.dur} · ${recording.size}', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+                    child: OdLtrText(
+                      '${recording.dur} · ${recording.size}',
+                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
+                    ),
                   ),
                 ),
               ],
@@ -407,7 +453,7 @@ class _RecordingCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Text(recording.time, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                    OdLtrText(recording.time, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
