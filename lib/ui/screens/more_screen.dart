@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../demo/demo_more_groups.dart';
+import '../../content/more_groups.dart';
 import '../../design/od_design.dart';
 import '../../icons/od_icon.dart';
-import '../sheets/demo_copy_sheets.dart';
+import '../sheets/context_sheets.dart';
 import '../widgets/od_widgets.dart';
 
 class MoreScreen extends StatelessWidget {

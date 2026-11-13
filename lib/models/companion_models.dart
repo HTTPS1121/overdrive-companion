@@ -2,8 +2,8 @@ enum OdScreen { home, camera, record, trip, more }
 
 enum RecordingType { sentry, proximity, normal, replay }
 
-class DemoRecording {
-  const DemoRecording({
+class Recording {
+  const Recording({
     required this.id,
     required this.day,
     required this.type,
@@ -58,3 +58,19 @@ class MoreGroup {
   final String icon;
   final List<MoreGroupItem> items;
 }
+
+class CommandResult {
+  const CommandResult._({required this.ok, this.message, this.errorHebrew});
+
+  factory CommandResult.ok([String? message]) =>
+      CommandResult._(ok: true, message: message ?? 'הפעולה בוצעה בהצלחה');
+
+  factory CommandResult.fail(String errorHebrew) =>
+      CommandResult._(ok: false, errorHebrew: errorHebrew);
+
+  final bool ok;
+  final String? message;
+  final String? errorHebrew;
+}
+
+enum DataLoadState { idle, loading, ready, empty, error, offline }

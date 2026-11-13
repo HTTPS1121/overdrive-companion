@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../demo/demo_models.dart';
+import '../../models/companion_models.dart';
 import '../../design/od_design.dart';
-import '../../state/demo_app_controller.dart';
+import '../../state/companion_app_controller.dart';
 import '../widgets/od_widgets.dart';
 import '../widgets/recording_player_modal.dart';
 import 'camera_screen.dart';
@@ -18,7 +18,7 @@ class MainShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.watch(demoAppControllerProvider);
+    final ctrl = ref.watch(companionAppControllerProvider);
     return Material(
       color: Colors.transparent,
       child: DefaultTextStyle.merge(

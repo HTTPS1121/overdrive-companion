@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../design/od_design.dart';
 import '../../icons/od_icon.dart';
 import '../../illustrations/od_illustrations.dart';
-import '../../state/demo_app_controller.dart';
+import '../../state/companion_app_controller.dart';
 import '../sheets/action_sheets.dart';
 import '../widgets/od_widgets.dart';
 
@@ -13,20 +13,20 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.watch(demoAppControllerProvider);
+    final ctrl = ref.watch(companionAppControllerProvider);
     return OdTabScroll(
       children: [
         Center(
           child: Column(
             children: [
               _CarChip(name: ctrl.carName, trim: ctrl.carTrim),
-              const OdCarSideView(),
-              const SizedBox(height: 6),
+              const OdCarSideView(height: 120),
+              const SizedBox(height: 10),
               Text(ctrl.parkLine(), style: odMuted(14)),
             ],
           ),
         ),
-        _RangeCard(range: ctrl.rangeKm, battery: ctrl.batteryPercent),
+        _RangeCard(range: ctrl.rangeKm, battery: ctrl.batteryPercent, updated: ctrl.refreshLabel),
         GridView.count(
           crossAxisCount: 4,
           shrinkWrap: true,
@@ -53,17 +53,7 @@ class HomeScreen extends ConsumerWidget {
                 children: [
                   Text('מצב הרכב', style: odH2()),
                   const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: OdColors.pillDemoBg,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'מדומה',
-                      style: odBody(11, FontWeight.w600, OdColors.blue),
-                    ),
-                  ),
+                  Text(ctrl.refreshLabel, style: odMuted(11)),
                 ],
               ),
               const SizedBox(height: 14),
@@ -77,7 +67,7 @@ class HomeScreen extends ConsumerWidget {
             children: [
               Text('היום בתנועה', style: odH2()),
               const Spacer(),
-              Text('נתוני דוגמה', style: odMuted(12)),
+              Text('מהשרת', style: odMuted(12)),
             ],
           ),
         ),
@@ -87,12 +77,12 @@ class HomeScreen extends ConsumerWidget {
             children: [
               _ListRow(
                 title: 'הנסיעה האחרונה',
-                subtitle: odIsolateLtr('18.6 ק״מ · 32 דקות · 2.8 קוט״ש'),
+                subtitle: 'אין נתוני נסיעה מהשרת עדיין.',
                 icon: OdIconName.trip,
               ),
               _ListRow(
-                title: '2 אירועי חניה',
-                subtitle: 'שני אירועים לבדיקה, ללא דחיפות מדומה',
+                title: 'אירועי חניה',
+                subtitle: 'טרם נטענו אירועים מהשרת.',
                 icon: OdIconName.shield,
               ),
             ],
@@ -149,10 +139,11 @@ class _CarChip extends StatelessWidget {
 }
 
 class _RangeCard extends StatelessWidget {
-  const _RangeCard({required this.range, required this.battery});
+  const _RangeCard({required this.range, required this.battery, required this.updated});
 
   final int range;
   final int battery;
+  final String updated;
 
   @override
   Widget build(BuildContext context) {
@@ -203,11 +194,25 @@ class _RangeCard extends StatelessWidget {
           const SizedBox(height: 14),
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: battery / 100,
-              minHeight: 6,
-              backgroundColor: OdColors.line,
-              valueColor: const AlwaysStoppedAnimation(OdColors.blue),
+            child: SizedBox(
+              height: 6,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  const ColoredBox(color: OdColors.line),
+                  FractionallySizedBox(
+                    alignment: AlignmentDirectional.centerStart,
+                    widthFactor: (battery / 100).clamp(0.0, 1.0),
+                    child: const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF8EC0F0), Color(0xFF2C68C2)],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 13),
@@ -225,7 +230,7 @@ class _RangeCard extends StatelessWidget {
                 ),
               ),
               Expanded(child: Text('מגבלת טעינה 90%', style: odMuted(11), textAlign: TextAlign.center)),
-              Expanded(child: Text('עודכן לפני 2 דק׳', style: odMuted(11), textAlign: TextAlign.end)),
+              Expanded(child: Text(updated, style: odMuted(11), textAlign: TextAlign.end)),
             ],
           ),
         ],

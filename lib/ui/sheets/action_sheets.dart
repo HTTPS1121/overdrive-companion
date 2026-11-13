@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../design/od_design.dart';
 import '../../illustrations/od_illustrations.dart';
-import '../../state/demo_app_controller.dart';
+import '../../state/companion_app_controller.dart';
 import '../widgets/od_widgets.dart';
 
 const kControlActions = [
@@ -18,11 +18,26 @@ const kControlActions = [
 ];
 
 void showConfirmAction(BuildContext context, WidgetRef ref, String id, String label) {
-  final ctrl = ref.read(demoAppControllerProvider);
+  final ctrl = ref.read(companionAppControllerProvider);
+  final needsConfirm = kControlActions.firstWhere((a) => a.$1 == id).$3;
+  if (!needsConfirm) {
+    _runAndShowResult(ref, id, label);
+    return;
+  }
   ctrl.openSheet(
-    '$label — הדמיה',
+    label,
     (_) => _ConfirmBody(actionId: id, label: label),
   );
+}
+
+Future<void> _runAndShowResult(WidgetRef ref, String id, String label) async {
+  final ctrl = ref.read(companionAppControllerProvider);
+  final result = await ctrl.confirmAction(id);
+  if (result.ok) {
+    ctrl.openSheet(label, (_) => _ResultBody(ok: true, label: label, message: result.message));
+  } else {
+    ctrl.openSheet(label, (_) => _ResultBody(ok: false, label: label, message: result.errorHebrew));
+  }
 }
 
 class _ConfirmBody extends ConsumerWidget {
@@ -33,14 +48,11 @@ class _ConfirmBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.read(demoAppControllerProvider);
-    final footnote = ['power', 'off', 'pin', 'down'].contains(actionId)
-        ? 'התמיכה בפעולה מרחוק עדיין לא אומתה.'
-        : 'זמינות השליטה בפועל כשהרכב נעול או ישן טעונה בדיקה.';
+    final ctrl = ref.read(companionAppControllerProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('לבצע הדמיה של פעולת $label?', style: odMuted()),
+        Text('לבצע $label?', style: odMuted()),
         const SizedBox(height: 16),
         OdCard(
           child: Column(
@@ -49,17 +61,27 @@ class _ConfirmBody extends ConsumerWidget {
               Text('הרכב שלי · ${ctrl.carName}', style: const TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               Text(
-                'אין פקודה שנשלחת לרכב. $footnote',
+                'הפקודה תישלח לשרת Overdrive ברכב. ודא שהרכב במצב המתאים.',
                 style: odMuted(),
               ),
             ],
           ),
         ),
         OdPrimaryButton(
-          label: 'אישור הדמיה בלבד',
+          label: 'אישור',
           onPressed: () async {
-            await ctrl.confirmAction(actionId);
-            ctrl.openSheet('תוצאת ההדמיה', (_) => _ResultBody(actionId: actionId, label: label));
+            final result = await ctrl.confirmAction(actionId);
+            if (result.ok) {
+              ctrl.openSheet(
+                label,
+                (_) => _ResultBody(ok: true, label: label, message: result.message),
+              );
+            } else {
+              ctrl.openSheet(
+                label,
+                (_) => _ResultBody(ok: false, label: label, message: result.errorHebrew),
+              );
+            }
           },
         ),
         OdSecondaryButton(label: 'ביטול', onPressed: ctrl.closeSheet),
@@ -69,10 +91,15 @@ class _ConfirmBody extends ConsumerWidget {
 }
 
 class _ResultBody extends StatelessWidget {
-  const _ResultBody({required this.actionId, required this.label});
+  const _ResultBody({
+    required this.ok,
+    required this.label,
+    this.message,
+  });
 
-  final String actionId;
+  final bool ok;
   final String label;
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
@@ -81,32 +108,29 @@ class _ResultBody extends StatelessWidget {
         Container(
           width: 60,
           height: 60,
-          decoration: const BoxDecoration(
-            color: Color(0xFFD9EEE3),
+          decoration: BoxDecoration(
+            color: ok ? const Color(0xFFD9EEE3) : const Color(0xFFF5D9D9),
             shape: BoxShape.circle,
           ),
           alignment: Alignment.center,
-          child: const Text('✓', style: TextStyle(fontSize: 28, color: Color(0xFF176044))),
+          child: Text(
+            ok ? '✓' : '!',
+            style: TextStyle(fontSize: 28, color: ok ? const Color(0xFF176044) : const Color(0xFF8A1F1F)),
+          ),
         ),
         const SizedBox(height: 16),
-        Text('$label הודגמה', style: odH2()),
+        Text(ok ? '$label בוצע' : '$label נכשל', style: odH2()),
         const SizedBox(height: 8),
         Text(
-          'מצב הרכב האמיתי לא השתנה.\nלא בוצעה פנייה לשרת או למערכת הרכב.',
+          message ?? (ok ? 'השרת אישר את הפעולה.' : 'השרת לא ביצע את הפעולה.'),
           textAlign: TextAlign.center,
           style: odMuted(),
         ),
-        if (actionId == 'pin') ...[
-          const SizedBox(height: 16),
-          const OdMapIllustration(),
-          const SizedBox(height: 8),
-          Text('נקודת מיקום מומצאת לצורך ההמחשה בלבד.', style: odMuted(12)),
-        ],
         const SizedBox(height: 16),
         Consumer(
           builder: (context, ref, _) => OdPrimaryButton(
             label: 'הבנתי',
-            onPressed: () => ref.read(demoAppControllerProvider).closeSheet(),
+            onPressed: () => ref.read(companionAppControllerProvider).closeSheet(),
           ),
         ),
       ],

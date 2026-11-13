@@ -1,7 +1,7 @@
 name: overdrive_companion
-description: Overdrive Companion — design rebuild v1 (demo data, Hebrew RTL).
+description: Overdrive Companion — Hebrew RTL companion for the Overdrive car server.
 publish_to: "none"
-version: 3.0.7+37
+version: 3.1.0+38
 
 environment:
   sdk: ^3.13.0
@@ -16,6 +16,7 @@ dependencies:
   path_drawing: ^1.0.1
   overdrive_server:
     path: packages/overdrive_server
+  flutter_secure_storage: ^9.2.4
 
 dev_dependencies:
   flutter_test:
@@ -26,6 +27,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - fixtures/
   fonts:
     - family: NotoSansHebrew
       fonts:

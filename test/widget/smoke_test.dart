@@ -3,21 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:overdrive_companion/main.dart';
 
+import '../support/test_app_scope.dart';
+
 void main() {
-  testWidgets('login screen shows enter demo', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: OverdriveCompanionApp()));
+  testWidgets('login screen shows connect form', (tester) async {
+    final overrides = await emptyAppOverrides();
+    await tester.pumpWidget(
+      ProviderScope(overrides: overrides, child: const OverdriveCompanionApp()),
+    );
     await tester.pumpAndSettle();
-    expect(find.text('כניסה לדמו'), findsOneWidget);
+    expect(find.text('התחברות'), findsOneWidget);
+    expect(find.text('בדיקת חיבור'), findsOneWidget);
+    expect(find.text('סוג חיבור'), findsOneWidget);
   });
 
-  testWidgets('enter demo shows home tab', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(390, 844));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(const ProviderScope(child: OverdriveCompanionApp()));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('כניסה לדמו'));
-    await tester.pumpAndSettle();
-    expect(find.text('בית'), findsWidgets);
-    expect(find.textContaining('BYD Atto'), findsWidgets);
-  });
 }

@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../design/od_design.dart';
 import '../../icons/od_icon.dart';
 import '../../illustrations/od_illustrations.dart';
-import '../../state/demo_app_controller.dart';
+import '../../models/companion_models.dart';
+import '../../state/companion_app_controller.dart';
 import '../widgets/od_camera_hotspots.dart';
 import '../widgets/od_widgets.dart';
 
@@ -46,8 +47,8 @@ class _CameraStage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.watch(demoAppControllerProvider);
-    final label = ctrl.camModeAll ? 'כל המצלמות' : DemoAppController.cams[ctrl.camSel];
+    final ctrl = ref.watch(companionAppControllerProvider);
+    final label = ctrl.camModeAll ? 'כל המצלמות' : CompanionAppController.cams[ctrl.camSel];
     return ColoredBox(
       color: const Color(0xFF0E2238),
       child: Stack(
@@ -57,11 +58,7 @@ class _CameraStage extends ConsumerWidget {
           Center(
             child: AspectRatio(
               aspectRatio: 16 / 9,
-              child: OdSceneView(
-                label: label,
-                height: double.infinity,
-                overlay: OdSceneOverlay.liveTopEnd,
-              ),
+              child: _StreamBody(streamState: ctrl.streamState, error: ctrl.streamErrorHebrew),
             ),
           ),
           Positioned(
@@ -80,7 +77,7 @@ class _CameraStage extends ConsumerWidget {
                     border: Border.all(color: OdColors.line),
                     borderRadius: BorderRadius.circular(99),
                   ),
-                  child: Text('בינוני · דמו', style: odMuted(11).copyWith(fontWeight: FontWeight.w600, color: OdColors.ink)),
+                  child: Text('איכות שידור', style: odMuted(11).copyWith(fontWeight: FontWeight.w600, color: OdColors.ink)),
                 ),
                 const SizedBox(width: 6),
                 _TopIconBtn(icon: OdIconName.settings, semantic: 'העדפות'),
@@ -128,6 +125,37 @@ class _TopIconBtn extends StatelessWidget {
             width: 36,
             height: 36,
             child: Center(child: OdIcon(icon, size: 17, color: OdColors.ink)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StreamBody extends StatelessWidget {
+  const _StreamBody({required this.streamState, this.error});
+
+  final DataLoadState streamState;
+  final String? error;
+
+  @override
+  Widget build(BuildContext context) {
+    final message = switch (streamState) {
+      DataLoadState.loading || DataLoadState.idle => 'טוען סטטוס שידור מהשרת…',
+      DataLoadState.ready => 'שידור פעיל. צפייה בזמן אמת טרם מוטמעת בגרסה זו.',
+      DataLoadState.empty => error ?? 'אין שידור חי מהמצלמות כרגע.',
+      DataLoadState.error => error ?? 'לא ניתן לטעון שידור.',
+      DataLoadState.offline => error ?? 'אין חיבור לשרת.',
+    };
+    return ColoredBox(
+      color: const Color(0xFF0E2238),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: odBody(14, FontWeight.w600, Colors.white),
           ),
         ),
       ),
@@ -188,11 +216,12 @@ class _CameraSelectorCard extends StatelessWidget {
   }
 }
 
-class _LocationCard extends StatelessWidget {
+class _LocationCard extends ConsumerWidget {
   const _LocationCard();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final refresh = ref.watch(companionAppControllerProvider).refreshLabel;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -218,7 +247,7 @@ class _LocationCard extends StatelessWidget {
                       decoration: const BoxDecoration(color: Color(0xFF2D9F6F), shape: BoxShape.circle),
                     ),
                     const SizedBox(width: 5),
-                    Text('לפני 2 דק׳ · דמו', style: odMuted(10)),
+                    Text(refresh, style: odMuted(10)),
                   ],
                 ),
               ],

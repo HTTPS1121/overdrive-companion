@@ -4,22 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../design/od_design.dart';
 import '../../design/od_fonts.dart';
 import '../../illustrations/od_illustrations.dart';
-import '../../state/demo_app_controller.dart';
+import '../../state/companion_app_controller.dart';
 
 /// Car diagram + hotspots from `overdrive-chosen.html` (60×126 car, 32px hotspots).
 class OdCameraSelectorDiagram extends ConsumerWidget {
   const OdCameraSelectorDiagram({super.key});
 
-  static const _carW = 60.0;
-  static const _carH = 126.0;
+  static const _carW = 81.0;
+  static const _carH = 152.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.watch(demoAppControllerProvider);
+    final ctrl = ref.watch(companionAppControllerProvider);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final gutters = 30.0;
-        final scale = ((constraints.maxHeight - gutters) / (_carH + 12)).clamp(1.15, 2.6);
+        const scale = 1.0;
         final carW = _carW * scale;
         final carH = _carH * scale;
         final padX = 32 * scale;
@@ -99,7 +98,7 @@ class OdCameraSelectorDiagram extends ConsumerWidget {
 
   Widget _hotspot(
     WidgetRef ref,
-    DemoAppController ctrl,
+    CompanionAppController ctrl,
     int id,
     String label,
     double x,
@@ -112,7 +111,7 @@ class OdCameraSelectorDiagram extends ConsumerWidget {
       child: _HotspotDot(
         label: label,
         active: active,
-        onTap: () => ref.read(demoAppControllerProvider).selectOdCamHotspot(id),
+        onTap: () => ref.read(companionAppControllerProvider).selectOdCamHotspot(id),
       ),
     );
   }

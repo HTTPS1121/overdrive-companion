@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../demo/demo_models.dart';
+import '../../models/companion_models.dart';
 import '../../design/od_design.dart';
 
 /// HTML `.filter-tab.active::before` — chevron glyph before label (‹), not a checkmark.

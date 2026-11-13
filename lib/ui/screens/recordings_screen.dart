@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../demo/demo_models.dart';
+import '../../models/companion_models.dart';
 import '../../design/od_design.dart';
 import '../../icons/od_icon.dart';
 import '../../illustrations/od_illustrations.dart';
-import '../../state/demo_app_controller.dart';
+import '../../state/companion_app_controller.dart';
 import '../widgets/od_widgets.dart';
 import '../widgets/recordings_filters.dart';
 
@@ -14,7 +14,7 @@ class RecordingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.watch(demoAppControllerProvider);
+    final ctrl = ref.watch(companionAppControllerProvider);
     final list = ctrl.filteredRecordings();
     return OdTabScroll(
       children: [
@@ -39,29 +39,33 @@ class RecordingsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        if (list.isEmpty)
+        if (ctrl.recordingsState == DataLoadState.error)
           Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'אין הקלטות שעונות לסינון הנוכחי · נתוני דמו.',
+              ctrl.recordingsErrorHebrew ?? 'לא ניתן לטעון הקלטות.',
+              textAlign: TextAlign.center,
+              style: odBody(13, FontWeight.w600, const Color(0xFF9B1C1C)),
+            ),
+          )
+        else if (list.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              ctrl.recordingsState == DataLoadState.loading
+                  ? 'טוען הקלטות מהשרת…'
+                  : 'אין הקלטות שעונות לסינון הנוכחי.',
               textAlign: TextAlign.center,
               style: odMuted(13),
             ),
           )
         else
           ..._recordingSections(list),
-        Padding(
-          padding: const EdgeInsets.all(4),
-          child: Text(
-            'סינון, מיקום וסיווג — נתוני המחשה. הורדה ונגינה אמיתית לא מחוברות.',
-            style: odMuted(12).copyWith(height: 1.7),
-          ),
-        ),
       ],
     );
   }
 
-  List<Widget> _recordingSections(List<DemoRecording> list) {
+  List<Widget> _recordingSections(List<Recording> list) {
     final out = <Widget>[];
     String? day;
     for (final r in list) {
@@ -92,7 +96,7 @@ class RecordingsScreen extends ConsumerWidget {
 class _EventsTopBar extends StatelessWidget {
   const _EventsTopBar({required this.ctrl});
 
-  final DemoAppController ctrl;
+  final CompanionAppController ctrl;
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +217,7 @@ class _OemDvrChip extends StatelessWidget {
 class _TypeTabs extends ConsumerWidget {
   const _TypeTabs({required this.ctrl});
 
-  final DemoAppController ctrl;
+  final CompanionAppController ctrl;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -239,7 +243,7 @@ class _TypeTabs extends ConsumerWidget {
                   OdRecordingTypeTab(
                     label: t.$2,
                     active: ctrl.recFilters.type == t.$1,
-                    onTap: () => ref.read(demoAppControllerProvider).setRecFilter('type', t.$1),
+                    onTap: () => ref.read(companionAppControllerProvider).setRecFilter('type', t.$1),
                   ),
               ],
             ),
@@ -253,12 +257,12 @@ class _TypeTabs extends ConsumerWidget {
 class _FilterRows extends ConsumerWidget {
   const _FilterRows({required this.ctrl});
 
-  final DemoAppController ctrl;
+  final CompanionAppController ctrl;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final f = ctrl.recFilters;
-    final places = ref.watch(demoRepoProvider).placeFilters;
+    final places = ref.watch(vehicleRepoProvider).placeFilters;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -347,7 +351,7 @@ class _FilterRows extends ConsumerWidget {
                             ? 'critical'
                             : null)
                     : null,
-                onTap: () => ref.read(demoAppControllerProvider).setRecFilter(key, o.$1),
+                onTap: () => ref.read(companionAppControllerProvider).setRecFilter(key, o.$1),
               ),
           ],
         ),
@@ -359,14 +363,14 @@ class _FilterRows extends ConsumerWidget {
 class _RecordingCard extends ConsumerWidget {
   const _RecordingCard({super.key, required this.recording});
 
-  final DemoRecording recording;
+  final Recording recording;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => ref.read(demoAppControllerProvider).openRecordingPlayer(recording.id),
+        onTap: () => ref.read(companionAppControllerProvider).openRecordingPlayer(recording.id),
         borderRadius: BorderRadius.circular(18),
         child: Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -386,7 +390,7 @@ class _RecordingCard extends ConsumerWidget {
               fit: StackFit.expand,
               children: [
                 const OdSceneView(
-                  label: 'תצוגה מדומה',
+                  label: 'נגן',
                   overlay: OdSceneOverlay.thumbnailTopEnd,
                 ),
                 Center(

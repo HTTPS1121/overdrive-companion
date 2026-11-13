@@ -3,18 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../design/od_design.dart';
 import '../../illustrations/od_illustrations.dart';
-import '../../state/demo_app_controller.dart';
+import '../../state/companion_app_controller.dart';
 
 class RecordingPlayerModal extends ConsumerWidget {
   const RecordingPlayerModal({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.watch(demoAppControllerProvider);
+    final ctrl = ref.watch(companionAppControllerProvider);
     final id = ctrl.recPlayId;
     if (id == null) return const SizedBox.shrink();
-    final r = ref.read(demoRepoProvider).recordings.firstWhere((x) => x.id == id);
-    final cam = DemoAppController.cams[ctrl.recPlayQuad];
+    final r = ref.read(vehicleRepoProvider).recordings.firstWhere((x) => x.id == id);
+    final cam = CompanionAppController.cams[ctrl.recPlayQuad];
     return Positioned.fill(
       child: Material(
         color: const Color(0xC70C254A),
@@ -44,7 +44,7 @@ class RecordingPlayerModal extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
-                          onPressed: () => ref.read(demoAppControllerProvider).closeRecordingPlayer(),
+                          onPressed: () => ref.read(companionAppControllerProvider).closeRecordingPlayer(),
                           icon: const Icon(Icons.close, color: Colors.white),
                         ),
                       ],
@@ -73,18 +73,18 @@ class RecordingPlayerModal extends ConsumerWidget {
                           ),
                           child: Row(
                             children: [
-                              for (var i = 0; i < DemoAppController.cams.length; i++)
+                              for (var i = 0; i < CompanionAppController.cams.length; i++)
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 2),
                                   child: Material(
                                     color: ctrl.recPlayQuad == i ? OdColors.blue : const Color(0x1FFFFFFF),
                                     borderRadius: BorderRadius.circular(8),
                                     child: InkWell(
-                                      onTap: () => ref.read(demoAppControllerProvider).setRecPlayQuad(i),
+                                      onTap: () => ref.read(companionAppControllerProvider).setRecPlayQuad(i),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                                         child: Text(
-                                          DemoAppController.cams[i].split(' ').last,
+                                          CompanionAppController.cams[i].split(' ').last,
                                           style: const TextStyle(color: Colors.white, fontSize: 10),
                                         ),
                                       ),

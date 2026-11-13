@@ -2,20 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'demo/demo_config.dart';
+import 'data/secure_settings_store.dart';
 import 'design/od_design.dart';
+import 'state/companion_app_controller.dart';
 import 'ui/screens/main_shell.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  assert(kCompanionUsesDemoRepository);
+  final settingsStore = await SecureSettingsStore.open();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
     ),
   );
-  runApp(const ProviderScope(child: OverdriveCompanionApp()));
+  runApp(
+    ProviderScope(
+      overrides: [
+        secureSettingsStoreProvider.overrideWithValue(settingsStore),
+      ],
+      child: const OverdriveCompanionApp(),
+    ),
+  );
 }
 
 class OverdriveCompanionApp extends StatelessWidget {
