@@ -1,0 +1,25 @@
+{
+  "name": "overdrive-companion",
+  "version": "1.0.0",
+  "description": "Flutter Android companion for **Overdrive** (BYD Atto 3 and other BYD models). Talks to the **Overdrive HTTP server on the car** (default port **8080**) over LAN or a tunnel (Zrok, Cloudflare, Tailscale, WireGuard). This is **not** the head-unit app and **not** a WebView wrapper.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HTTPS1121/overdrive-companion.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HTTPS1121/overdrive-companion/issues"
+  },
+  "homepage": "https://github.com/HTTPS1121/overdrive-companion#readme"
+}

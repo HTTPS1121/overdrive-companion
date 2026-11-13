@@ -1,0 +1,10 @@
+name: overdrive_server
+description: Overdrive tunnel auth and HTTP API client (isolated; not wired to demo UI).
+publish_to: "none"
+version: 1.0.0
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  http: ^1.2.2

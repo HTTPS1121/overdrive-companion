@@ -1,0 +1,479 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../data/hebrew_errors.dart';
+import '../../design/od_design.dart';
+import '../../models/companion_models.dart';
+import '../../icons/od_icon.dart';
+import '../../illustrations/od_illustrations.dart';
+import '../../state/companion_app_controller.dart';
+import '../sheets/action_sheets.dart';
+import '../widgets/od_widgets.dart';
+
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ctrl = ref.watch(companionAppControllerProvider);
+    return OdTabScroll(
+      children: [
+        if (ctrl.vehicleStateStale)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: OdInlineAlert(
+              message: ctrl.vehicleOfflineHebrew ?? 'אין חיבור לשרת הרכב.',
+              subtitle: ctrl.refreshLabel,
+            ),
+          ),
+        Center(
+          child: Column(
+            children: [
+              _CarChip(name: ctrl.carName, trim: ctrl.carTrim),
+              const OdCarSideView(height: 120),
+              const SizedBox(height: 10),
+              Text(ctrl.parkLine(), style: odMuted(14)),
+            ],
+          ),
+        ),
+        _RangeCard(
+          range: ctrl.rangeKm,
+          battery: ctrl.batteryPercent,
+          updated: ctrl.refreshLabel,
+          chargingLine: ctrl.vehicleStatus.chargingLine,
+          chargeCapLine: ctrl.vehicleStatus.chargeCapLine,
+        ),
+        GridView.count(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: 1.05,
+          children: [
+            for (final a in kControlActions)
+              _ControlTile(
+                tapKey: a.$1 == 'lock' ? const ValueKey('control_lock') : null,
+                icon: _iconFor(a.$1),
+                label: a.$2,
+                onTap: () => showConfirmAction(context, ref, a.$1, a.$2),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        OdCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Text('מצב הרכב', style: odH2()),
+                  const Spacer(),
+                  Text(ctrl.refreshLabel, style: odMuted(11)),
+                ],
+              ),
+              const SizedBox(height: 14),
+              _VehicleGrid(status: ctrl.vehicleStatus),
+            ],
+          ),
+        ),
+        _TodayTripsSection(ctrl: ctrl),
+      ],
+    );
+  }
+
+  OdIconName _iconFor(String id) => switch (id) {
+        'lock' => OdIconName.lock,
+        'unlock' => OdIconName.unlock,
+        'power' => OdIconName.power,
+        'off' => OdIconName.off,
+        'flash' => OdIconName.flash,
+        'pin' => OdIconName.pin,
+        'trunk' => OdIconName.trunk,
+        'down' => OdIconName.down,
+        _ => OdIconName.settings,
+      };
+}
+
+class _CarChip extends StatelessWidget {
+  const _CarChip({required this.name, required this.trim});
+
+  final String name;
+  final String trim;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: OdColors.line),
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: const BoxDecoration(color: OdColors.dotGreen, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 8),
+          OdLtrText(name, style: odNum(13, weight: FontWeight.w700)),
+          Text(' · $trim', style: odBody(13)),
+        ],
+      ),
+    );
+  }
+}
+
+class _TodayTripsSection extends StatelessWidget {
+  const _TodayTripsSection({required this.ctrl});
+
+  final CompanionAppController ctrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final today = ctrl.todayTrips;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(2, 8, 2, 12),
+          child: Row(
+            children: [
+              Text('היום בתנועה', style: odH2()),
+              const Spacer(),
+              Text('מהשרת', style: odMuted(12)),
+            ],
+          ),
+        ),
+        OdCard(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: ctrl.tripsState == DataLoadState.loading || ctrl.tripsState == DataLoadState.idle
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text('טוען נסיעות מהשרת…', textAlign: TextAlign.center, style: odMuted(13)),
+                )
+              : Column(
+                  children: [
+                    if (today.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Text(hebrewTripsTodayEmpty(), textAlign: TextAlign.center, style: odMuted(13)),
+                      )
+                    else
+                      for (final trip in today)
+                        _ListRow(
+                          title: 'נסיעה #${trip.id}',
+                          subtitle: trip.subtitle,
+                          icon: OdIconName.trip,
+                        ),
+                    _ListRow(
+                      title: 'אירועי חניה',
+                      subtitle: hebrewParkingEventsEmpty(),
+                      icon: OdIconName.shield,
+                    ),
+                  ],
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RangeCard extends StatelessWidget {
+  const _RangeCard({
+    required this.range,
+    required this.battery,
+    required this.updated,
+    this.chargingLine,
+    this.chargeCapLine,
+  });
+
+  final int range;
+  final int battery;
+  final String updated;
+  final String? chargingLine;
+  final String? chargeCapLine;
+
+  @override
+  Widget build(BuildContext context) {
+    return OdCard(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('טווח משוער', style: odMuted(12)),
+                    const SizedBox(height: 2),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        OdLtrText(
+                          '$range',
+                          style: odNum(54, weight: FontWeight.w400).copyWith(letterSpacing: -3, height: 0.95),
+                        ),
+                        const SizedBox(width: 6),
+                        Text('ק״מ', style: odMuted(16)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsetsDirectional.only(start: 14),
+                decoration: const BoxDecoration(
+                  border: BorderDirectional(start: BorderSide(color: OdColors.line)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('סוללה', style: odMuted(12)),
+                    const SizedBox(height: 6),
+                    OdLtrText('$battery%', style: odNum(28, weight: FontWeight.w600, color: OdColors.blue)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: SizedBox(
+              height: 6,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  const ColoredBox(color: OdColors.line),
+                  FractionallySizedBox(
+                    alignment: AlignmentDirectional.centerStart,
+                    widthFactor: (battery / 100).clamp(0.0, 1.0),
+                    child: const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF8EC0F0), Color(0xFF2C68C2)],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 13),
+          const Divider(height: 1, color: OdColors.line),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    const OdIcon(OdIconName.battery, size: 17, color: OdColors.muted),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        chargingLine ?? hebrewNoServerValue(),
+                        style: odMuted(11),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  chargeCapLine ?? '',
+                  style: odMuted(11),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Expanded(child: Text(updated, style: odMuted(11), textAlign: TextAlign.end)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ControlTile extends StatelessWidget {
+  const _ControlTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.tapKey,
+  });
+
+  final OdIconName icon;
+  final String label;
+  final VoidCallback onTap;
+  final Key? tapKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      key: tapKey,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(OdRadii.control),
+        side: const BorderSide(color: OdColors.line),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(OdRadii.control),
+        onTap: onTap,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            OdIcon(icon, color: OdColors.blue, size: 22),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: odBody(11, FontWeight.w400).copyWith(height: 1.05),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VehicleGrid extends StatelessWidget {
+  const _VehicleGrid({required this.status});
+
+  final VehicleStatusSnapshot status;
+
+  String _val(String? v) => v ?? hebrewNoServerValue();
+
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      (OdIconName.lock, 'דלתות', status.doorsLine),
+      (OdIconName.window, 'חלונות', _val(status.windowsLine)),
+      (OdIconName.trip, 'הילוך', _val(status.driveLine)),
+      (OdIconName.climate, 'אקלים', _val(status.climateLine)),
+      (OdIconName.tire, 'צמיגים', _val(status.tyresLine)),
+      (OdIconName.shield, 'מעקב חניה', _val(status.sentryLine)),
+    ];
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: OdColors.line),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisExtent: 96,
+        ),
+        itemCount: items.length,
+        itemBuilder: (context, i) {
+          final it = items[i];
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: OdColors.line, width: 0.5),
+            ),
+            child: _vgCell(it.$1, it.$2, it.$3),
+          );
+        },
+      ),
+    );
+  }
+}
+
+Widget _vgCell(OdIconName icon, String label, String value) {
+  if (label.isEmpty) return const SizedBox.shrink();
+  return Padding(
+    padding: const EdgeInsets.all(10),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: OdColors.vgIconBg,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          alignment: Alignment.center,
+          child: OdIcon(icon, size: 19, color: OdColors.blue),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: odMuted(11).copyWith(height: 1.15)),
+              Text(
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'NotoSansHebrew',
+                  fontSize: 12,
+                  height: 1.15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _ListRow extends StatelessWidget {
+  const _ListRow({required this.title, required this.subtitle, required this.icon});
+
+  final String title;
+  final String subtitle;
+  final OdIconName icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: OdColors.vgIconBg,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            alignment: Alignment.center,
+            child: OdIcon(icon, color: OdColors.blue),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                Text(subtitle, style: odMuted(12)),
+              ],
+            ),
+          ),
+          const Text('‹', style: TextStyle(color: OdColors.blue, fontSize: 22)),
+        ],
+      ),
+    );
+  }
+}
