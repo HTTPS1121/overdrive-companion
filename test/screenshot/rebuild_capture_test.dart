@@ -50,28 +50,28 @@ void main() {
     await tester.tap(find.text('×').first);
     await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(find.text('מצלמות'));
+    await tester.tap(find.byKey(const ValueKey('nav_camera')));
     await tester.pump(const Duration(milliseconds: 500));
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('rebuild-v1/03_camera.png'),
     );
 
-    await tester.tap(find.text('הקלטות'));
+    await tester.tap(find.byKey(const ValueKey('nav_record')));
     await tester.pump(const Duration(milliseconds: 500));
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('rebuild-v1/04_recordings.png'),
     );
 
-    await tester.tap(find.text('נסיעות'));
+    await tester.tap(find.byKey(const ValueKey('nav_trip')));
     await tester.pump(const Duration(milliseconds: 500));
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('rebuild-v1/05_trip.png'),
     );
 
-    await tester.tap(find.text('עוד'));
+    await tester.tap(find.byKey(const ValueKey('nav_more')));
     await tester.pump(const Duration(milliseconds: 500));
     await expectLater(
       find.byType(MaterialApp),

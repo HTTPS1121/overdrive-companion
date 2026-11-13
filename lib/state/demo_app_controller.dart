@@ -47,6 +47,7 @@ class DemoAppController extends ChangeNotifier {
 
   final RecFilters recFilters = RecFilters();
   int? recPlayId;
+  int recPlayQuad = 0;
 
   SheetRequest? sheet;
   bool get sheetOpen => sheet != null;
@@ -84,6 +85,22 @@ class DemoAppController extends ChangeNotifier {
 
   void closeSheet() {
     sheet = null;
+    notifyListeners();
+  }
+
+  void openRecordingPlayer(int id) {
+    recPlayId = id;
+    recPlayQuad = 0;
+    notifyListeners();
+  }
+
+  void closeRecordingPlayer() {
+    recPlayId = null;
+    notifyListeners();
+  }
+
+  void setRecPlayQuad(int index) {
+    recPlayQuad = index;
     notifyListeners();
   }
 

@@ -42,16 +42,16 @@ void main() {
     await tester.tap(find.text('×').first);
     await settle(tester);
 
-    await tester.tap(find.text('מצלמות'));
+    await tester.tap(find.byKey(const ValueKey('nav_camera')));
     await snap(tester, '03_camera');
 
-    await tester.tap(find.text('הקלטות'));
+    await tester.tap(find.byKey(const ValueKey('nav_record')));
     await snap(tester, '04_recordings');
 
-    await tester.tap(find.text('נסיעות'));
+    await tester.tap(find.byKey(const ValueKey('nav_trip')));
     await snap(tester, '05_trip');
 
-    await tester.tap(find.text('עוד'));
+    await tester.tap(find.byKey(const ValueKey('nav_more')));
     await snap(tester, '06_more');
   });
 }

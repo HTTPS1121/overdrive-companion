@@ -34,7 +34,7 @@ class HomeScreen extends ConsumerWidget {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
-          childAspectRatio: 0.85,
+          childAspectRatio: 0.72,
           children: [
             for (final a in kControlActions)
               _ControlTile(
@@ -169,12 +169,12 @@ class _RangeCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('טווח משוער', style: odMuted(12)),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 2),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       textBaseline: TextBaseline.alphabetic,
                       children: [
-                        Text('$range', style: odNum(54, weight: FontWeight.w400).copyWith(letterSpacing: -3, height: 0.95)),
+                        Text('$range', style: odNum(48, weight: FontWeight.w400).copyWith(letterSpacing: -2, height: 0.9)),
                         const SizedBox(width: 6),
                         Text('ק״מ', style: odMuted(16).copyWith(fontWeight: FontWeight.w500)),
                       ],
@@ -252,9 +252,14 @@ class _ControlTile extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            OdIcon(icon, color: OdColors.blue),
-            const SizedBox(height: 8),
-            Text(label, style: const TextStyle(fontSize: 12)),
+            OdIcon(icon, color: OdColors.blue, size: 22),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontFamily: 'NotoSansHebrew', fontSize: 11, height: 1.05),
+            ),
           ],
         ),
       ),
@@ -288,7 +293,7 @@ class _VehicleGrid extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisExtent: 88,
+          mainAxisExtent: 96,
         ),
         itemCount: items.length,
         itemBuilder: (context, i) {
@@ -328,8 +333,18 @@ Widget _vgCell(OdIconName icon, String label, String value) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: odMuted(11)),
-              Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              Text(label, style: odMuted(11).copyWith(height: 1.15)),
+              Text(
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'NotoSansHebrew',
+                  fontSize: 12,
+                  height: 1.15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ),

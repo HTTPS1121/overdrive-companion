@@ -66,7 +66,7 @@ class RecordingsScreen extends ConsumerWidget {
           ),
         );
       }
-      out.add(_RecordingCard(recording: r));
+      out.add(_RecordingCard(recording: r, key: ValueKey('rec_${r.id}')));
     }
     return out;
   }
@@ -124,8 +124,31 @@ class _EventsTopBar extends StatelessWidget {
         _PillButton(
           child: const Text('מצלמת הדרך של היצרן', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: OdColors.blue)),
         ),
+        _PillButton(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const OdIcon(OdIconName.settings, size: 16, color: OdColors.blue),
+              const SizedBox(width: 6),
+              Text(
+                _filterPillLabel(ctrl.recFilters),
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
       ],
     );
+  }
+
+  static String _filterPillLabel(RecFilters f) {
+    var n = 0;
+    if (f.cls.isNotEmpty) n++;
+    if (f.sev.isNotEmpty) n++;
+    if (f.prox.isNotEmpty) n++;
+    if (f.stor.isNotEmpty) n++;
+    if (f.place.isNotEmpty) n++;
+    return n == 0 ? 'סינון' : 'סינון · $n פעילים';
   }
 }
 
@@ -179,13 +202,14 @@ class _TypeTabs extends ConsumerWidget {
   }
 }
 
-class _FilterRows extends StatelessWidget {
+class _FilterRows extends ConsumerWidget {
   const _FilterRows({required this.ctrl});
 
   final DemoAppController ctrl;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final f = ctrl.recFilters;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -193,12 +217,94 @@ class _FilterRows extends StatelessWidget {
         border: Border.all(color: OdColors.cardBorder),
         boxShadow: const [OdShadows.card],
       ),
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: const Text(
-        'מסנני זיהוי · חומרה · מרחק · אחסון · מקום (דמו)',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 11, color: OdColors.muted),
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _chipRow(ref, 'זיהוי', 'cls', [
+            ('', 'הכל'),
+            ('person', 'אדם'),
+            ('vehicle', 'רכב'),
+          ], f.cls),
+          const SizedBox(height: 8),
+          _chipRow(ref, 'חומרה', 'sev', [
+            ('', 'הכל'),
+            ('ALERT', 'התרעה'),
+            ('NOTICE', 'לידיעה'),
+          ], f.sev),
+          const SizedBox(height: 8),
+          _chipRow(ref, 'מרחק', 'prox', [
+            ('', 'הכל'),
+            ('VERY_CLOSE', 'קרוב מאוד'),
+            ('CLOSE', 'קרוב'),
+            ('MID', 'בינוני'),
+            ('FAR', 'רחוק'),
+          ], f.prox),
+          const SizedBox(height: 8),
+          _chipRow(ref, 'אחסון', 'stor', [
+            ('', 'הכל'),
+            ('INTERNAL', 'פנימי'),
+            ('USB', 'USB'),
+            ('SD_CARD', 'SD'),
+          ], f.stor),
+          const SizedBox(height: 8),
+          _chipRow(ref, 'מקום', 'place', [
+            ('', 'הכל'),
+            ('קרית יערים', 'קרית יערים'),
+            ('פרדס כץ', 'פרדס כץ'),
+            ('נוה שמיר', 'נוה שמיר'),
+            ('מרכז העיר', 'מרכז העיר'),
+          ], f.place),
+        ],
       ),
+    );
+  }
+
+  Widget _chipRow(
+    WidgetRef ref,
+    String label,
+    String key,
+    List<(String, String)> options,
+    String current,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: odMuted(11).copyWith(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (final o in options)
+                Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: GestureDetector(
+                    onTap: () => ref.read(demoAppControllerProvider).setRecFilter(key, o.$1),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: current == o.$1 ? OdColors.navActiveBg : const Color(0xFFE8EDF4),
+                        borderRadius: BorderRadius.circular(99),
+                        border: Border.all(
+                          color: current == o.$1 ? const Color(0xFFB8CCEF) : OdColors.line,
+                        ),
+                      ),
+                      child: Text(
+                        o.$2,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: current == o.$1 ? OdColors.navActiveFg : OdColors.muted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -222,14 +328,19 @@ class _PillButton extends StatelessWidget {
   }
 }
 
-class _RecordingCard extends StatelessWidget {
-  const _RecordingCard({required this.recording});
+class _RecordingCard extends ConsumerWidget {
+  const _RecordingCard({super.key, required this.recording});
 
   final DemoRecording recording;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => ref.read(demoAppControllerProvider).openRecordingPlayer(recording.id),
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -334,6 +445,8 @@ class _RecordingCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+        ),
       ),
     );
   }

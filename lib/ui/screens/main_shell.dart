@@ -5,6 +5,7 @@ import '../../demo/demo_models.dart';
 import '../../design/od_design.dart';
 import '../../state/demo_app_controller.dart';
 import '../widgets/od_widgets.dart';
+import '../widgets/recording_player_modal.dart';
 import 'camera_screen.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
@@ -39,6 +40,7 @@ class MainShell extends ConsumerWidget {
             ),
           ),
           if (!ctrl.loginVisible) const OdSheetOverlay(),
+          if (!ctrl.loginVisible && ctrl.recPlayId != null) const RecordingPlayerModal(),
         ],
         ),
       ),

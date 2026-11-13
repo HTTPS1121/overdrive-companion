@@ -77,7 +77,10 @@ ThemeData buildOdTheme() {
   );
 }
 
+const _odFontFamily = 'NotoSansHebrew';
+
 TextStyle odH1([double size = 29]) => TextStyle(
+      fontFamily: _odFontFamily,
       fontSize: size,
       height: 1.25,
       letterSpacing: -0.7,
@@ -86,18 +89,21 @@ TextStyle odH1([double size = 29]) => TextStyle(
     );
 
 TextStyle odH2() => const TextStyle(
+      fontFamily: _odFontFamily,
       fontSize: 19,
       fontWeight: FontWeight.w700,
       color: OdColors.ink,
     );
 
 TextStyle odMuted([double size = 14]) => TextStyle(
+      fontFamily: _odFontFamily,
       fontSize: size,
       height: 1.5,
       color: OdColors.muted,
     );
 
 TextStyle odEyebrow() => const TextStyle(
+      fontFamily: _odFontFamily,
       fontSize: 12,
       fontWeight: FontWeight.w700,
       letterSpacing: 0.7,
@@ -105,6 +111,7 @@ TextStyle odEyebrow() => const TextStyle(
     );
 
 TextStyle odBrand() => const TextStyle(
+      fontFamily: _odFontFamily,
       fontSize: 16,
       fontWeight: FontWeight.w700,
       letterSpacing: 1,
@@ -113,6 +120,7 @@ TextStyle odBrand() => const TextStyle(
 
 TextStyle odNum(double size, {FontWeight weight = FontWeight.w400, Color? color}) =>
     TextStyle(
+      fontFamily: _odFontFamily,
       fontSize: size,
       fontWeight: weight,
       color: color ?? OdColors.ink,

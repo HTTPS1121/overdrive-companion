@@ -7,6 +7,7 @@ import '../../design/od_design.dart';
 import '../../demo/demo_models.dart';
 import '../../icons/od_icon.dart';
 import '../../state/demo_app_controller.dart';
+import '../sheets/demo_copy_sheets.dart';
 
 class OdIconButton extends StatelessWidget {
   const OdIconButton({
@@ -58,7 +59,7 @@ class OdDemoBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Container(
@@ -88,47 +89,53 @@ class OdTopBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.read(demoAppControllerProvider);
+    final ctrl = ref.watch(demoAppControllerProvider);
+    final subtitle = switch (ctrl.screen) {
+      OdScreen.home => 'שליטה ובית',
+      OdScreen.camera => 'מצלמות הרכב',
+      OdScreen.record => 'אירועים והקלטות',
+      OdScreen.trip => 'נסיעות ואנרגיה',
+      OdScreen.more => 'יכולות ומידע',
+    };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
+      padding: const EdgeInsets.fromLTRB(0, 14, 0, 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           OdIconButton(
             semanticKey: const ValueKey('btn_profile'),
             label: 'פרופיל',
             icon: const OdIcon(OdIconName.user, color: OdColors.ink),
-            onPressed: () => ctrl.openSheet('המרחב שלך', (_) => const _ProfileSheet()),
+            onPressed: () => openProfileSheet(ref),
           ),
           Expanded(
-            child: Center(
-              child: Text(
-                'OVERDRIVE',
-                style: odBrand(),
-                textDirection: TextDirection.ltr,
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'OVERDRIVE',
+                  style: odBrand(),
+                  textDirection: TextDirection.ltr,
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  subtitle,
+                  style: odMuted(10).copyWith(fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
           OdIconButton(
             semanticKey: const ValueKey('btn_menu'),
             label: 'תפריט מסך',
             icon: const OdIcon(OdIconName.menu, color: OdColors.ink),
-            onPressed: () => ctrl.openSheet(
-              'אפשרויות · ${_screenLabel(ctrl.screen)}',
-              (_) => const _ContextMenuSheet(),
-            ),
+            onPressed: () => openContextMenuSheet(ref, ctrl.screen),
           ),
         ],
       ),
     );
   }
-
-  String _screenLabel(OdScreen s) => switch (s) {
-        OdScreen.home => 'בית',
-        OdScreen.camera => 'מצלמות',
-        OdScreen.record => 'הקלטות',
-        OdScreen.trip => 'נסיעות',
-        OdScreen.more => 'עוד',
-      };
 }
 
 class OdBottomNav extends ConsumerWidget {
@@ -171,7 +178,7 @@ class OdBottomNav extends ConsumerWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
               child: Material(
-                color: const Color(0xE0FFFFFF),
+                color: const Color(0xE0FFFFFF).withValues(alpha: 0.92),
                 elevation: 0,
                 child: Container(
                   decoration: BoxDecoration(
@@ -185,6 +192,7 @@ class OdBottomNav extends ConsumerWidget {
                       for (final t in tabs)
                         Expanded(
                           child: _NavItem(
+                            key: ValueKey('nav_${t.$2.name}'),
                             active: ctrl.screen == t.$2,
                             icon: t.$1,
                             label: t.$3,
@@ -207,6 +215,7 @@ class OdBottomNav extends ConsumerWidget {
 
 class _NavItem extends StatelessWidget {
   const _NavItem({
+    super.key,
     required this.active,
     required this.icon,
     required this.label,
@@ -226,21 +235,26 @@ class _NavItem extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(OdRadii.navItem),
         onTap: onTap,
-        child: SizedBox(
-          height: 56,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               OdIcon(
                 icon,
-                size: 21,
+                size: 19,
                 color: active ? OdColors.navActiveFg : OdColors.navInactive,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontFamily: 'NotoSansHebrew',
+                  fontSize: 10,
+                  height: 1.05,
                   fontWeight: active ? FontWeight.w700 : FontWeight.w400,
                   color: active ? OdColors.navActiveFg : OdColors.navInactive,
                 ),
@@ -390,56 +404,6 @@ class OdCard extends StatelessWidget {
         boxShadow: const [OdShadows.card],
       ),
       child: child,
-    );
-  }
-}
-
-class _ProfileSheet extends ConsumerWidget {
-  const _ProfileSheet();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.read(demoAppControllerProvider);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        OdCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  const Expanded(
-                    child: Text('זלמן · פרופיל דוגמה', style: TextStyle(fontWeight: FontWeight.w700)),
-                  ),
-                  const OdIcon(OdIconName.user, color: OdColors.blue),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text('אין חשבון מחובר. נתוני הדוגמה אינם נשמרים.', style: odMuted()),
-            ],
-          ),
-        ),
-        OdPrimaryButton(
-          label: 'חזרה למסך הכניסה',
-          onPressed: () {
-            ctrl.closeSheet();
-            ctrl.exitToLogin();
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _ContextMenuSheet extends StatelessWidget {
-  const _ContextMenuSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      'תפריט מסך · כל הבחירות מקומיות ולא מפעילות רכב.',
-      style: odMuted(),
     );
   }
 }
