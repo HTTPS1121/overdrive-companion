@@ -6,6 +6,7 @@ import '../../models/companion_models.dart';
 import '../../design/od_design.dart';
 import '../../icons/od_icon.dart';
 import '../../state/companion_app_controller.dart';
+import '../feedback/od_feedback.dart';
 import '../widgets/od_rtl_scroll_row.dart';
 import '../widgets/od_widgets.dart';
 import '../widgets/recording_thumb.dart';
@@ -112,16 +113,11 @@ class _EventsTopBar extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (showCalendar) ...[
-              _CalendarToggle(count: stats.totalTodayCount!, onTap: () => _showUnsupported(context)),
-              const SizedBox(width: 8),
-            ],
-            Expanded(child: _TypeTabs(ctrl: ctrl)),
-          ],
-        ),
+        if (showCalendar) ...[
+          _CalendarToggle(count: stats.totalTodayCount!, onTap: () => _showUnsupported(context, ref)),
+          const SizedBox(height: 8),
+        ],
+        _TypeTabs(ctrl: ctrl),
         if (showStorage || showOem) ...[
           const SizedBox(height: 8),
           Row(
@@ -136,10 +132,8 @@ class _EventsTopBar extends ConsumerWidget {
     );
   }
 
-  void _showUnsupported(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(hebrewFeatureNotOnServer())),
-    );
+  void _showUnsupported(BuildContext context, WidgetRef ref) {
+    showOdFeedback(ref, hebrewFeatureNotOnServer());
   }
 }
 

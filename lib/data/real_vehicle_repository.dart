@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:overdrive_server/overdrive_server.dart';
 
+import 'package:flutter/foundation.dart';
+
 import '../models/companion_models.dart';
 import 'hebrew_errors.dart';
 import 'network_errors.dart';
@@ -517,6 +519,11 @@ class _ActionSpec {
 String? _optionalStr(Object? raw) {
   final s = raw?.toString().trim() ?? '';
   return s.isEmpty ? null : s;
+}
+
+@visibleForTesting
+void debugSetRecordingStats(RealVehicleRepository repo, RecordingStatsSnapshot stats) {
+  repo._recordingStats = stats;
 }
 
 /// Test-only: hydrate from bundled fixture JSON string.

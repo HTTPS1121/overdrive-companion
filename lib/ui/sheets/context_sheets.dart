@@ -10,6 +10,7 @@ import '../../design/od_design.dart';
 import '../../icons/od_icon.dart';
 import '../../models/companion_models.dart';
 import '../../state/companion_app_controller.dart';
+import '../feedback/od_feedback.dart';
 import '../screens/login_screen.dart';
 import '../widgets/od_widgets.dart';
 
@@ -42,9 +43,7 @@ void openMoreItem(BuildContext context, WidgetRef ref, MoreGroupItem item, Strin
         );
     return;
   }
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(hebrewFeatureNotOnServer())),
-  );
+  showOdFeedback(ref, hebrewFeatureNotOnServer());
 }
 
 void showServerControlConfirm(WidgetRef ref, String label, ControlKind kind) {

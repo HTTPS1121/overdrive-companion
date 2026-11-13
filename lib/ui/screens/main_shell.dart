@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/companion_models.dart';
 import '../../design/od_design.dart';
 import '../../state/companion_app_controller.dart';
+import '../feedback/od_feedback.dart';
 import '../widgets/od_widgets.dart';
 import '../widgets/recording_player_modal.dart';
 import 'camera_screen.dart';
@@ -19,35 +20,33 @@ class MainShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctrl = ref.watch(companionAppControllerProvider);
-    return Material(
-      color: Colors.transparent,
-      child: DefaultTextStyle.merge(
+    return Scaffold(
+      backgroundColor: OdColors.pageChrome,
+      body: DefaultTextStyle.merge(
         style: const TextStyle(decoration: TextDecoration.none),
         child: Directionality(
-      textDirection: TextDirection.rtl,
-      child: RepaintBoundary(
-        key: const ValueKey('screenshot_root'),
-        child: Stack(
-        children: [
-          ColoredBox(
-            color: OdColors.pageChrome,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 460),
-                child: ColoredBox(
-                  color: OdColors.bg,
-                  child: ctrl.loginVisible
-                      ? const LoginScreen()
-                      : _AppBody(screen: ctrl.screen),
+          textDirection: TextDirection.rtl,
+          child: RepaintBoundary(
+            key: const ValueKey('screenshot_root'),
+            child: Stack(
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 460),
+                    child: ColoredBox(
+                      color: OdColors.bg,
+                      child: ctrl.loginVisible
+                          ? const LoginScreen()
+                          : _AppBody(screen: ctrl.screen),
+                    ),
+                  ),
                 ),
-              ),
+                if (!ctrl.loginVisible) const OdFeedbackToast(),
+                if (!ctrl.loginVisible) const OdSheetOverlay(),
+                if (!ctrl.loginVisible && ctrl.recPlayId != null) const RecordingPlayerModal(),
+              ],
             ),
           ),
-          if (!ctrl.loginVisible) const OdSheetOverlay(),
-          if (!ctrl.loginVisible && ctrl.recPlayId != null) const RecordingPlayerModal(),
-        ],
-        ),
-      ),
         ),
       ),
     );

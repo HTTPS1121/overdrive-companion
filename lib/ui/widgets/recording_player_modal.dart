@@ -4,6 +4,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../data/hebrew_errors.dart';
 import '../../design/od_design.dart';
+import '../feedback/od_feedback.dart';
 import '../../state/companion_app_controller.dart';
 
 class RecordingPlayerModal extends ConsumerStatefulWidget {
@@ -263,11 +264,7 @@ class _RecordingPlayerModalState extends ConsumerState<RecordingPlayerModal> {
                       children: [
                         Expanded(child: OdLtrText('${r.day} · ${r.time} · ${r.size}', style: odMuted(12))),
                         TextButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(hebrewFeatureNotOnServer())),
-                            );
-                          },
+                          onPressed: () => showOdFeedback(ref, hebrewFeatureNotOnServer()),
                           style: TextButton.styleFrom(backgroundColor: OdColors.navActiveBg),
                           child: const Text('הורדה', style: TextStyle(color: OdColors.navActiveFg)),
                         ),

@@ -3,8 +3,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:overdrive_companion/data/real_vehicle_repository.dart';
+import 'package:overdrive_companion/models/companion_models.dart';
 import 'package:overdrive_companion/data/secure_settings_store.dart';
 import 'package:overdrive_companion/state/companion_app_controller.dart';
+import 'package:overdrive_companion/ui/feedback/od_feedback.dart';
 import 'package:overdrive_companion/ui/screens/recordings_screen.dart';
 import 'package:overdrive_server/overdrive_server.dart';
 
@@ -19,6 +21,16 @@ void main() {
     final store = await SecureSettingsStore.open();
     final client = OverdriveApiClient(baseUrl: 'http://127.0.0.1:9');
     final repo = RealVehicleRepository(client);
+    debugSetRecordingStats(
+      repo,
+      const RecordingStatsSnapshot(
+        available: true,
+        totalSizeFormatted: '6.1 GB',
+        usageFraction: 0.24,
+        totalTodayCount: 1,
+        oemDvrLabel: 'מצלמת הדרך של היצרן',
+      ),
+    );
     final ctrl = CompanionAppController(repo, store, client, skipBootstrap: true);
     ctrl.debugEnterSignedIn();
 
@@ -26,17 +38,20 @@ void main() {
       ProviderScope(
         overrides: [
           secureSettingsStoreProvider.overrideWithValue(store),
+          vehicleRepoProvider.overrideWith((ref) => repo),
           companionAppControllerProvider.overrideWith((ref) => ctrl),
         ],
-        child: const MaterialApp(
-          home: Directionality(
+        child: MaterialApp(
+          scaffoldMessengerKey: odRootScaffoldMessengerKey,
+          home: const Directionality(
             textDirection: TextDirection.rtl,
             child: RecordingsScreen(),
           ),
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
     const replayLabel = 'הילוכים חוזרים';
     expect(find.text(replayLabel), findsOneWidget);

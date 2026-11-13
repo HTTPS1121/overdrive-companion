@@ -1,4 +1,4 @@
-# PARITY_GAPS — 3.1.3+41 vs overdrive-chosen.html + Overdrive-release
+# PARITY_GAPS — 3.1.4+42 vs overdrive-chosen.html + Overdrive-release
 
 Reference HTML: `overdrive-chosen.html` (design tokens).
 
@@ -10,6 +10,8 @@ Reference HTML: `overdrive-chosen.html` (design tokens).
 - **More:** vehicle comfort controls (climate/windows) via server POST + confirm sheet; other rows → `לא נתמך עדיין בשרת`
 - **Player:** multi-angle switch only when server sends multiple cameras; download → unsupported message
 - Hardcoded demo metrics removed from `lib/ui` (31.2 GB, 90% charge cap, tyre PSI placeholders, etc.)
+- **Feedback:** root `Scaffold` + `scaffoldMessengerKey` + `OdFeedbackToast` for unsupported/actions (`לא נתמך עדיין בשרת` visible)
+- Recordings: today stats chip on its own row above type tabs (no chip width squeeze)
 
 ## Remaining
 

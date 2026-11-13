@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/secure_settings_store.dart';
 import 'design/od_design.dart';
 import 'state/companion_app_controller.dart';
+import 'ui/feedback/od_feedback.dart';
 import 'ui/screens/main_shell.dart';
 
 Future<void> main() async {
@@ -33,6 +34,7 @@ class OverdriveCompanionApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: odRootScaffoldMessengerKey,
       title: 'OverDrive',
       theme: buildOdTheme(),
       locale: const Locale('he'),

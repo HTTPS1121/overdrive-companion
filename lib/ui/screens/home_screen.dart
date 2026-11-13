@@ -156,27 +156,27 @@ class _TodayTripsSection extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text('טוען נסיעות מהשרת…', textAlign: TextAlign.center, style: odMuted(13)),
                 )
-              : today.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Text(hebrewTripsTodayEmpty(), textAlign: TextAlign.center, style: odMuted(13)),
-                    )
-                  : Column(
-                      children: [
-                        for (final trip in today)
-                          _ListRow(
-                            title: 'נסיעה #${trip.id}',
-                            subtitle: trip.subtitle,
-                            icon: OdIconName.trip,
-                          ),
-                        if (ctrl.vehicleStatus.sentryLine == null)
-                          _ListRow(
-                            title: 'אירועי חניה',
-                            subtitle: hebrewParkingEventsEmpty(),
-                            icon: OdIconName.shield,
-                          ),
-                      ],
+              : Column(
+                  children: [
+                    if (today.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Text(hebrewTripsTodayEmpty(), textAlign: TextAlign.center, style: odMuted(13)),
+                      )
+                    else
+                      for (final trip in today)
+                        _ListRow(
+                          title: 'נסיעה #${trip.id}',
+                          subtitle: trip.subtitle,
+                          icon: OdIconName.trip,
+                        ),
+                    _ListRow(
+                      title: 'אירועי חניה',
+                      subtitle: hebrewParkingEventsEmpty(),
+                      icon: OdIconName.shield,
                     ),
+                  ],
+                ),
         ),
       ],
     );

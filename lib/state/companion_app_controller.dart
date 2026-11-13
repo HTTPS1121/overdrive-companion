@@ -94,6 +94,9 @@ class CompanionAppController extends ChangeNotifier {
   SheetRequest? sheet;
   bool get sheetOpen => sheet != null;
 
+  String? feedbackToastHebrew;
+  Timer? _feedbackToastTimer;
+
   static const cams = ['חזית', 'אחור', 'צד שמאל', 'צד ימין'];
 
   ConnectionDraft get savedConnectionDraft => ConnectionDraft(
@@ -304,6 +307,24 @@ class CompanionAppController extends ChangeNotifier {
   void closeSheet() {
     sheet = null;
     notifyListeners();
+  }
+
+  void showFeedback(String message) {
+    _feedbackToastTimer?.cancel();
+    feedbackToastHebrew = message;
+    notifyListeners();
+    _feedbackToastTimer = Timer(const Duration(seconds: 4), () {
+      if (feedbackToastHebrew == message) {
+        feedbackToastHebrew = null;
+        notifyListeners();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _feedbackToastTimer?.cancel();
+    super.dispose();
   }
 
   void openRecordingPlayer(int id) {
