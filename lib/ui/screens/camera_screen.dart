@@ -15,7 +15,6 @@ class CameraScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ctrl = ref.watch(demoAppControllerProvider);
     final label = ctrl.camModeAll ? 'כל המצלמות' : DemoAppController.cams[ctrl.camSel];
-    final bottom = OdChrome.bottomInset(context);
     return ColoredBox(
       color: OdColors.bg,
       child: Column(
@@ -25,17 +24,24 @@ class CameraScreen extends ConsumerWidget {
             child: OdTopBar(),
           ),
           Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: bottom),
-              child: Column(
-                children: [
-                  Expanded(child: _CameraStage(label: label, ctrl: ctrl)),
-                  const SizedBox(
-                    height: 220,
-                    child: _LiveUtilityRail(),
-                  ),
-                ],
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final w = MediaQuery.sizeOf(context).width;
+                final idealStage = w * 9 / 16;
+                final stageH = idealStage.clamp(180.0, constraints.maxHeight - 220);
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: stageH,
+                      child: _CameraStage(label: label, ctrl: ctrl),
+                    ),
+                    const SizedBox(
+                      height: 220,
+                      child: _LiveUtilityRail(),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
@@ -57,25 +63,13 @@ class _CameraStage extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              var w = constraints.maxWidth;
-              var h = constraints.maxHeight - 56;
-              if (h < 40) h = constraints.maxHeight;
-              var sceneH = w * 9 / 16;
-              var sceneW = w;
-              if (sceneH > h) {
-                sceneH = h;
-                sceneW = sceneH * 16 / 9;
-              }
-              return Center(
-                child: SizedBox(
-                  width: sceneW,
-                  height: sceneH,
-                  child: OdSceneView(label: label, height: sceneH, dark: false),
-                ),
-              );
-            },
+          Positioned.fill(
+            child: OdSceneView(
+              label: label,
+              height: double.infinity,
+              backdrop: const Color(0xFF123D5A),
+              overlay: OdSceneOverlay.liveTopStart,
+            ),
           ),
           Positioned(
             top: 10,
@@ -159,7 +153,7 @@ class _LiveUtilityRail extends StatelessWidget {
         color: OdColors.bg,
         border: Border(top: BorderSide(color: OdColors.line)),
       ),
-      padding: const EdgeInsets.fromLTRB(8, 4, 8, 6),
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
       child: const Row(
         children: [
           Expanded(flex: 58, child: _CameraSelectorCard()),

@@ -4,40 +4,121 @@ const kMoreGroups = <MoreGroup>[
   MoreGroup('רכב ואנרגיה', 'battery', [
     MoreGroupItem(
       title: 'בקרות הרכב',
-      subtitle: 'מיזוג, מושבים, חלונות, תא מטען ותאורה',
+      subtitle:
+          'מיזוג, מושבים, חלונות, תא מטען ותאורה. מצבי נהיגה, מגבלת טעינה, נעילת ילדים ולחצי צמיגים מוצעים לפי תמיכת הרכב.',
     ),
     MoreGroupItem(
       title: 'מערכות סיוע ADAS',
-      subtitle: 'ניטור שטח מת, תמרורים, נתיב',
+      subtitle:
+          'ניטור שטח מת, תמרורים, נתיב, תנועה חוצה והתראה קדמית. הגדרות בטיחות אינן בקרות מהירות. בלימת חירום: חימוש מחדש בלבד, אין אפשרות כיבוי בדמו.',
     ),
-    MoreGroupItem(title: 'טעינה', subtitle: 'מפגשי AC/DC, זמן, אנרגיה'),
-    MoreGroupItem(title: 'בריאות סוללה', subtitle: 'היסטוריית אחוזי סוללה ומתח 12V'),
+    MoreGroupItem(
+      title: 'טעינה',
+      subtitle:
+          'מפגשי AC/DC, זמן, אנרגיה, עלות וטווח שנוסף. דוגמה: 18.4 קוט״ש במשך 2:40 שעות. התראה על סיום טעינה תלויה ביכולת החיבור.',
+    ),
+    MoreGroupItem(
+      title: 'בריאות סוללה',
+      subtitle:
+          'היסטוריית אחוזי סוללה ומתח 12V, טווחי 24 שעות / 3 ימים / שבוע. SOH הוא אומדן בלבד ולא בדיקת תקינות. איפוס כיול אינו פעיל בדמו.',
+    ),
   ]),
   MoreGroup('הקלטה והגנה', 'shield', [
-    MoreGroupItem(title: 'הקלטה בנסיעה', subtitle: 'רציפה, מצב נסיעה או Proximity Guard'),
-    MoreGroupItem(title: 'חיישני קרבה', subtitle: 'שמונה חיישנים, טריגר צהוב או אדום'),
-    MoreGroupItem(title: 'שמירה בחניה', subtitle: 'דריכה בנעילה ושחרור בפתיחה'),
-    MoreGroupItem(title: 'הרתעה', subtitle: 'שקט / הבהוב / צופר ואורות'),
-    MoreGroupItem(title: 'תצורת מצלמות', subtitle: 'שיוך מקורות, תיקון עין דג'),
-    MoreGroupItem(title: 'אחסון', subtitle: 'רכב או USB, מדיניות שמירה'),
+    MoreGroupItem(
+      title: 'הקלטה בנסיעה',
+      subtitle: 'רציפה, מצב נסיעה או Proximity Guard; פריסת מצלמות, איכות, רזולוציה וקצב פריימים.',
+    ),
+    MoreGroupItem(
+      title: 'חיישני קרבה',
+      subtitle:
+          'שמונה חיישנים, טריגר צהוב או אדום וזמן הקלטה לפני ואחרי האירוע. דוגמה: 5 שניות לפני ו־20 אחרי.',
+    ),
+    MoreGroupItem(
+      title: 'שמירה בחניה',
+      subtitle:
+          'דריכה בנעילה ושחרור בפתיחה, זיהוי תנועה ואובייקטים, חומרה, אזורי זיהוי, לוחות זמנים ומצב צריכת חשמל נמוכה.',
+    ),
+    MoreGroupItem(
+      title: 'הרתעה',
+      subtitle:
+          'שקט / הבהוב / צופר ואורות, ותוכן התראה על מסך הרכב. חלק מהיכולות תלויות בענן; אין הפעלה בדמו.',
+    ),
+    MoreGroupItem(
+      title: 'תצורת מצלמות',
+      subtitle:
+          'שיוך מקורות, תיקון עין דג, זום ואיכות נפרדת לחניה ולנהיגה. מיקרופון תא הנוסעים כבוי כברירת מחדל.',
+    ),
+    MoreGroupItem(
+      title: 'אחסון',
+      subtitle:
+          'רכב או USB, מדיניות שמירה ומחיקה מחזורית, מגבלות ונפילה לאחסון חלופי. סנכרון אוטומטי לטלפון לא אומת.',
+    ),
   ]),
   MoreGroup('דרך ותובנות', 'trip', [
-    MoreGroupItem(title: 'RoadSense', subtitle: 'מפגעי דרך, בורות ופסי האטה'),
-    MoreGroupItem(title: 'ניווט ומקומות', subtitle: 'חיפוש, בית, עבודה ומועדפים'),
-    MoreGroupItem(title: 'גיבוי וייצוא', subtitle: 'גיבוי הגדרות ונסיעות'),
+    MoreGroupItem(
+      title: 'RoadSense',
+      subtitle:
+          'מפגעי דרך, בורות ופסי האטה לפי מיקום, רגישות, חומרה ומרחק התראה. מפת שיתוף היא opt-in; נתוני הדוגמה מקומיים.',
+    ),
+    MoreGroupItem(
+      title: 'ניווט ומקומות',
+      subtitle: 'חיפוש, בית, עבודה ומועדפים; ניווט ומפה בלוח המחוונים. שליחת יעד מהטלפון טרם אומתה.',
+    ),
+    MoreGroupItem(
+      title: 'גיבוי וייצוא',
+      subtitle:
+          'גיבוי הגדרות, נסיעות והיסטוריית הרכב בקובץ יחיד; פורמט ייבוא ותמיכת הטלפון טרם אומתו. אין גישה לקבצים בדמו.',
+    ),
   ]),
   MoreGroup('אוטומציות ומסך הרכב', 'wave', [
-    MoreGroupItem(title: 'כללים וטריגרים', subtitle: 'תנאים מקוננים AND/OR'),
-    MoreGroupItem(title: 'קהילת אוטומציות', subtitle: 'עיון בהצעות לכללים'),
-    MoreGroupItem(title: 'מיפוי מקשי חומרה', subtitle: 'לחיצה יחידה, כפולה או ארוכה'),
-    MoreGroupItem(title: 'מסכים ומדיה', subtitle: 'שכבות מצלמה בשטח מת'),
+    MoreGroupItem(
+      title: 'כללים וטריגרים',
+      subtitle:
+          'תנאים מקוננים AND/OR, אם/אחרת, לולאות, השהיות ומשתנים. אותות הרכב כוללים מהירות, הילוך, דלתות, חגורות, צמיגים, סוללה, זמן ואירוע מצלמה. דוגמה: בנעילה → דריכת שמירה.',
+    ),
+    MoreGroupItem(
+      title: 'קהילת אוטומציות',
+      subtitle: 'עיון בהצעות לכללים, הוספה ודירוג מתועדים במוצר. כאן מוצגת דוגמה בלבד; אין הוספה או פרסום.',
+    ),
+    MoreGroupItem(
+      title: 'מיפוי מקשי חומרה',
+      subtitle:
+          'לחיצה יחידה, כפולה או ארוכה בהגה ובלוח, תזמון ושרשור פעולות. פקודות shell והפעלת יישומים אינן פעילות.',
+    ),
+    MoreGroupItem(
+      title: 'מסכים ומדיה',
+      subtitle:
+          'שכבות מצלמה בשטח מת, סטטוס צף, תצוגת HUD, בהירות ומדיה. אלה הגדרות בצד הרכב, לא הבטחה לשיקוף טלפון.',
+    ),
   ]),
   MoreGroup('חיבור, פרטיות וניהול', 'link', [
-    MoreGroupItem(title: 'גישה מרחוק', subtitle: 'LAN, Cloudflare Tunnel, Zrok'),
-    MoreGroupItem(title: 'התראות', subtitle: 'PWA push וטלגרם'),
-    MoreGroupItem(title: 'Home Assistant / MQTT', subtitle: 'גילוי טלמטריה, TLS'),
-    MoreGroupItem(title: 'BYD Cloud', subtitle: 'מצב חיבור, אזור והגדרה'),
-    MoreGroupItem(title: 'אבחון וכלי מפתחים', subtitle: 'CPU, זיכרון, מתח, רשת'),
-    MoreGroupItem(title: 'הגדרות ופרטיות', subtitle: 'שפה, מראה, PIN מקומי'),
+    MoreGroupItem(
+      title: 'גישה מרחוק',
+      subtitle:
+          'LAN, Cloudflare Tunnel, Zrok או Tailscale מתועדים. החיבור בדמו מנותק. תמיכת API מקורי ויכולות הפעלה מרחוק מהטלפון לא אומתו.',
+    ),
+    MoreGroupItem(
+      title: 'התראות',
+      subtitle:
+          'PWA push וטלגרם, אירועי מצלמה, תנועה וסוללה נמוכה; סינון חומרה ויומן התראות. אין הרשאות או הרשמה בדמו.',
+    ),
+    MoreGroupItem(
+      title: 'Home Assistant / MQTT',
+      subtitle:
+          'גילוי טלמטריה, מיקום, TLS ועד חמישה ברוקרים. בקרה בכתיבה opt-in וכבויה כברירת מחדל. לא מחוברים ברוקרים.',
+    ),
+    MoreGroupItem(
+      title: 'BYD Cloud',
+      subtitle: 'מצב חיבור, אזור והגדרה. חלק מהפקודות או מסלולי הגיבוי תלויים בענן. אין איסוף פרטי חשבון.',
+    ),
+    MoreGroupItem(
+      title: 'אבחון וכלי מפתחים',
+      subtitle: 'CPU, זיכרון, מתח, רשת, מצלמות ויומנים. ADB, מסוף והעלאת אבחון אינם פעילים כאן.',
+    ),
+    MoreGroupItem(
+      title: 'הגדרות ופרטיות',
+      subtitle:
+          'שפה, מראה, PIN מקומי, אימות מרחוק, צבע הרכב וערוץ עדכונים. אין הגדרת PIN או שמירת מידע בדמו. עקיפת חסימות SIM אינה חלק מבקרות הדמו.',
+    ),
   ]),
 ];

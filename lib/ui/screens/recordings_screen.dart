@@ -7,6 +7,7 @@ import '../../icons/od_icon.dart';
 import '../../illustrations/od_illustrations.dart';
 import '../../state/demo_app_controller.dart';
 import '../widgets/od_widgets.dart';
+import '../widgets/recordings_filters.dart';
 
 class RecordingsScreen extends ConsumerWidget {
   const RecordingsScreen({super.key});
@@ -229,30 +230,21 @@ class _TypeTabs extends ConsumerWidget {
         color: const Color(0xFFDFE6F0),
         borderRadius: BorderRadius.circular(99),
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-        children: [
-          for (final t in tabs)
-            GestureDetector(
-              onTap: () => ref.read(demoAppControllerProvider).setRecFilter('type', t.$1),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: ctrl.recFilters.type == t.$1 ? OdColors.navActiveBg : Colors.transparent,
-                  borderRadius: BorderRadius.circular(99),
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: true),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          child: Row(
+            children: [
+              for (final t in tabs)
+                OdRecordingTypeTab(
+                  label: t.$2,
+                  active: ctrl.recFilters.type == t.$1,
+                  onTap: () => ref.read(demoAppControllerProvider).setRecFilter('type', t.$1),
                 ),
-                child: Text(
-                  t.$2,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: ctrl.recFilters.type == t.$1 ? OdColors.navActiveFg : OdColors.muted,
-                  ),
-                ),
-              ),
-            ),
-        ],
+            ],
+          ),
         ),
       ),
     );
@@ -279,7 +271,7 @@ class _FilterRows extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _chipRow(ref, 'מה זוהה:', 'cls', [
+          _chipRow(context, ref, 'מה זוהה:', 'cls', [
             ('', 'הכל'),
             ('person', 'אדם'),
             ('vehicle', 'רכב'),
@@ -287,14 +279,14 @@ class _FilterRows extends ConsumerWidget {
             ('animal', 'בעל חיים'),
           ], f.cls),
           const Divider(height: 1, color: OdColors.line),
-          _chipRow(ref, 'רמת חומרה:', 'sev', [
+          _chipRow(context, ref, 'רמת חומרה:', 'sev', [
             ('', 'הכל'),
             ('NOTICE', 'לידיעה'),
             ('ALERT', 'התרעה'),
             ('CRITICAL', 'קריטי'),
           ], f.sev),
           const Divider(height: 1, color: OdColors.line),
-          _chipRow(ref, 'מרחק:', 'prox', [
+          _chipRow(context, ref, 'מרחק:', 'prox', [
             ('', 'הכל'),
             ('VERY_CLOSE', 'קרוב מאוד'),
             ('CLOSE', 'קרוב'),
@@ -302,7 +294,7 @@ class _FilterRows extends ConsumerWidget {
             ('FAR', 'רחוק'),
           ], f.prox),
           const Divider(height: 1, color: OdColors.line),
-          _chipRow(ref, 'אחסון:', 'stor', [
+          _chipRow(context, ref, 'אחסון:', 'stor', [
             ('', 'הכל'),
             ('INTERNAL', 'זיכרון פנימי'),
             ('SD_CARD', 'כרטיס SD'),
@@ -310,6 +302,7 @@ class _FilterRows extends ConsumerWidget {
           ], f.stor),
           const Divider(height: 1, color: OdColors.line),
           _chipRow(
+            context,
             ref,
             'מקום:',
             'place',
@@ -325,47 +318,40 @@ class _FilterRows extends ConsumerWidget {
   }
 
   Widget _chipRow(
+    BuildContext context,
     WidgetRef ref,
     String label,
     String key,
     List<(String, String)> options,
     String current,
   ) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(10, 6, 10, 0),
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 10),
-            child: Text(label, style: odMuted(11).copyWith(fontWeight: FontWeight.w600)),
-          ),
-          for (final o in options)
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: true),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsetsDirectional.fromSTEB(10, 6, 10, 0),
+        clipBehavior: Clip.none,
+        child: Row(
+          children: [
             Padding(
-              padding: const EdgeInsetsDirectional.only(end: 6),
-              child: GestureDetector(
-                    onTap: () => ref.read(demoAppControllerProvider).setRecFilter(key, o.$1),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: current == o.$1 ? OdColors.navActiveBg : const Color(0xFFE8EDF4),
-                        borderRadius: BorderRadius.circular(99),
-                        border: Border.all(
-                          color: current == o.$1 ? const Color(0xFFB8CCEF) : OdColors.line,
-                        ),
-                      ),
-                      child: Text(
-                        o.$2,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: current == o.$1 ? OdColors.navActiveFg : OdColors.muted,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-        ],
+              padding: const EdgeInsetsDirectional.only(end: 10),
+              child: Text(label, style: odMuted(11).copyWith(fontWeight: FontWeight.w600)),
+            ),
+            for (final o in options)
+              OdRecordingFilterChip(
+                label: o.$2,
+                active: current == o.$1,
+                severityTone: key == 'sev' && current == o.$1
+                    ? (o.$1 == 'ALERT'
+                        ? 'alert'
+                        : o.$1 == 'CRITICAL'
+                            ? 'critical'
+                            : null)
+                    : null,
+                onTap: () => ref.read(demoAppControllerProvider).setRecFilter(key, o.$1),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -400,7 +386,10 @@ class _RecordingCard extends ConsumerWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                const OdSceneView(label: 'תצוגה מדומה', thumbnailOverlay: true),
+                const OdSceneView(
+                  label: 'תצוגה מדומה',
+                  overlay: OdSceneOverlay.thumbnailTopEnd,
+                ),
                 Center(
                   child: Container(
                     width: 44,
@@ -424,7 +413,7 @@ class _RecordingCard extends ConsumerWidget {
                       color: const Color(0x9E000000),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(recording.typeLabel, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+                    child: OdClipTypeBadge(type: recording.type, label: recording.typeLabel),
                   ),
                 ),
                 Positioned(

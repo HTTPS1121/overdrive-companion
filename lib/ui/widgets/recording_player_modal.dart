@@ -55,7 +55,12 @@ class RecordingPlayerModal extends ConsumerWidget {
                       SizedBox(
                         height: 200,
                         width: double.infinity,
-                        child: OdSceneView(label: cam, height: 200),
+                        child: OdSceneView(
+                          label: cam,
+                          height: 200,
+                          backdrop: const Color(0xFF123D5A),
+                          overlay: OdSceneOverlay.standardTopEnd,
+                        ),
                       ),
                       Positioned(
                         bottom: 10,

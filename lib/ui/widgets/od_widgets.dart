@@ -62,7 +62,7 @@ class OdChrome {
   static const double _demoChipHeight = 24;
   static const double _demoChipGap = 6;
   static const double _navBarHeight = 62;
-  static const double _contentMargin = 16;
+  static const double _contentMargin = 28;
 
   static double bottomInset(BuildContext context) {
     final safe = MediaQuery.paddingOf(context).bottom;
