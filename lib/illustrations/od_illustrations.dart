@@ -107,10 +107,10 @@ class OdSceneView extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               const CustomPaint(painter: _ScenePainter()),
-              if (overlay == OdSceneOverlay.liveTopStart)
+              if (overlay == OdSceneOverlay.liveTopEnd)
                 Positioned(
                   top: 10,
-                  left: 10,
+                  right: 10,
                   child: _SceneBadge(label: '$label · הדמיה', showLiveDot: true),
                 )
               else if (overlay == OdSceneOverlay.standardTopEnd || overlay == OdSceneOverlay.thumbnailTopEnd)
@@ -127,7 +127,7 @@ class OdSceneView extends StatelessWidget {
   }
 }
 
-enum OdSceneOverlay { none, standardTopEnd, thumbnailTopEnd, liveTopStart }
+enum OdSceneOverlay { none, standardTopEnd, thumbnailTopEnd, liveTopEnd }
 
 class _SceneBadge extends StatelessWidget {
   const _SceneBadge({required this.label, this.showLiveDot = false});
@@ -346,6 +346,11 @@ class _CarTopPainter extends CustomPainter {
         ..color = const Color(0xFF5F7F9C)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
+    );
+    canvas.drawRect(const Rect.fromLTWH(18, 34, 24, 20), Paint()..color = const Color(0xFF21476D));
+    canvas.drawRect(
+      const Rect.fromLTWH(18, 78, 24, 18),
+      Paint()..color = const Color(0xFF21476D).withValues(alpha: 0.85),
     );
     for (final o in [const Offset(12, 42), const Offset(48, 42), const Offset(12, 88), const Offset(48, 88)]) {
       canvas.drawCircle(o, 5, Paint()..color = const Color(0xFF203D5A));

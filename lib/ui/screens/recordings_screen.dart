@@ -224,26 +224,25 @@ class _TypeTabs extends ConsumerWidget {
       ('proximity', 'קרבה'),
       ('replay', 'הילוכים חוזרים'),
     ];
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: const Color(0xFFDFE6F0),
-        borderRadius: BorderRadius.circular(99),
-      ),
-      child: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: true),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          child: Row(
-            children: [
-              for (final t in tabs)
-                OdRecordingTypeTab(
-                  label: t.$2,
-                  active: ctrl.recFilters.type == t.$1,
-                  onTap: () => ref.read(demoAppControllerProvider).setRecFilter('type', t.$1),
-                ),
-            ],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(99),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(color: Color(0xFFDFE6F0)),
+        child: Padding(
+          padding: const EdgeInsets.all(3),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.hardEdge,
+            child: Row(
+              children: [
+                for (final t in tabs)
+                  OdRecordingTypeTab(
+                    label: t.$2,
+                    active: ctrl.recFilters.type == t.$1,
+                    onTap: () => ref.read(demoAppControllerProvider).setRecFilter('type', t.$1),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

@@ -13,8 +13,6 @@ class CameraScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.watch(demoAppControllerProvider);
-    final label = ctrl.camModeAll ? 'כל המצלמות' : DemoAppController.cams[ctrl.camSel];
     return ColoredBox(
       color: OdColors.bg,
       child: Column(
@@ -24,24 +22,17 @@ class CameraScreen extends ConsumerWidget {
             child: OdTopBar(),
           ),
           Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final w = MediaQuery.sizeOf(context).width;
-                final idealStage = w * 9 / 16;
-                final stageH = idealStage.clamp(180.0, constraints.maxHeight - 220);
-                return Column(
-                  children: [
-                    SizedBox(
-                      height: stageH,
-                      child: _CameraStage(label: label, ctrl: ctrl),
-                    ),
-                    const SizedBox(
-                      height: 220,
-                      child: _LiveUtilityRail(),
-                    ),
-                  ],
-                );
-              },
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 205,
+                  child: _CameraStage(),
+                ),
+                const SizedBox(
+                  height: 220,
+                  child: _LiveUtilityRail(),
+                ),
+              ],
             ),
           ),
         ],
@@ -50,25 +41,27 @@ class CameraScreen extends ConsumerWidget {
   }
 }
 
-class _CameraStage extends StatelessWidget {
-  const _CameraStage({required this.label, required this.ctrl});
-
-  final String label;
-  final DemoAppController ctrl;
+class _CameraStage extends ConsumerWidget {
+  const _CameraStage();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ctrl = ref.watch(demoAppControllerProvider);
+    final label = ctrl.camModeAll ? 'כל המצלמות' : DemoAppController.cams[ctrl.camSel];
     return ColoredBox(
       color: const Color(0xFF0E2238),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Positioned.fill(
-            child: OdSceneView(
-              label: label,
-              height: double.infinity,
-              backdrop: const Color(0xFF123D5A),
-              overlay: OdSceneOverlay.liveTopStart,
+          const ColoredBox(color: Color(0xFF123D5A)),
+          Center(
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: OdSceneView(
+                label: label,
+                height: double.infinity,
+                overlay: OdSceneOverlay.liveTopEnd,
+              ),
             ),
           ),
           Positioned(
@@ -77,7 +70,6 @@ class _CameraStage extends StatelessWidget {
             right: 14,
             child: Row(
               children: [
-                const _ConnDot(),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -185,10 +177,9 @@ class _CameraSelectorCard extends StatelessWidget {
             child: Text('מצלמות', style: odBody(12, FontWeight.w600)),
           ),
           const Expanded(
-            child: ClipRect(
-              child: Center(
-                child: OdCameraSelectorDiagram(),
-              ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(4, 0, 4, 8),
+              child: OdCameraSelectorDiagram(),
             ),
           ),
         ],

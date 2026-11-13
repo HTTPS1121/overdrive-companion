@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../demo/demo_models.dart';
 import '../../design/od_design.dart';
 
-/// HTML `.filter-tab.active::before` / `.filter-chip.active::before` chevron.
+/// HTML `.filter-tab.active::before` — chevron glyph before label (‹), not a checkmark.
 class OdFilterActiveChevron extends StatelessWidget {
   const OdFilterActiveChevron({super.key, required this.color});
 
@@ -13,18 +13,9 @@ class OdFilterActiveChevron extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsetsDirectional.only(end: 6),
-      child: Transform.rotate(
-        angle: -0.785398,
-        child: Container(
-          width: 8,
-          height: 4,
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: color, width: 2),
-              left: BorderSide(color: color, width: 2),
-            ),
-          ),
-        ),
+      child: Text(
+        '‹',
+        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: color, height: 1),
       ),
     );
   }

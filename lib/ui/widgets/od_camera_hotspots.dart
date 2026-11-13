@@ -6,45 +6,109 @@ import '../../design/od_fonts.dart';
 import '../../illustrations/od_illustrations.dart';
 import '../../state/demo_app_controller.dart';
 
-/// Car-diagram camera hotspots from `overdrive-chosen.html`.
+/// Car diagram + hotspots from `overdrive-chosen.html` (60×126 car, 32px hotspots).
 class OdCameraSelectorDiagram extends ConsumerWidget {
   const OdCameraSelectorDiagram({super.key});
+
+  static const _carW = 60.0;
+  static const _carH = 126.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctrl = ref.watch(demoAppControllerProvider);
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: SizedBox(
-        width: 108,
-        height: 142,
-        child: Stack(
-          clipBehavior: Clip.hardEdge,
-          alignment: Alignment.center,
-          children: [
-            const Positioned(
-              top: 16,
-              left: 22,
-              right: 22,
-              bottom: 16,
-              child: OdCarTopDown(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final gutters = 30.0;
+        final scale = ((constraints.maxHeight - gutters) / (_carH + 12)).clamp(1.15, 2.6);
+        final carW = _carW * scale;
+        final carH = _carH * scale;
+        final padX = 32 * scale;
+        final boxW = carW + padX * 2;
+        final boxH = carH + 12 * scale;
+        final left = padX;
+
+        return Center(
+          child: SizedBox(
+            width: boxW,
+            height: boxH,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  left: left,
+                  top: 6 * scale,
+                  width: carW,
+                  height: carH,
+                  child: const OdCarTopDown(),
+                ),
+                _hotspot(
+                  ref,
+                  ctrl,
+                  1,
+                  'חזית',
+                  left + carW / 2 - 16 * scale,
+                  0,
+                ),
+                _hotspot(
+                  ref,
+                  ctrl,
+                  3,
+                  'אחור',
+                  left + carW / 2 - 16 * scale,
+                  6 * scale + carH - 10 * scale,
+                ),
+                _hotspot(
+                  ref,
+                  ctrl,
+                  4,
+                  'שמאל',
+                  left - 16 * scale,
+                  6 * scale + carH / 2 - 16 * scale,
+                ),
+                _hotspot(
+                  ref,
+                  ctrl,
+                  2,
+                  'ימין',
+                  left + carW - 16 * scale,
+                  6 * scale + carH / 2 - 16 * scale,
+                ),
+                _hotspot(
+                  ref,
+                  ctrl,
+                  0,
+                  'הכל',
+                  left + carW / 2 - 16 * scale,
+                  6 * scale + carH / 2 - 16 * scale,
+                ),
+                _hotspot(
+                  ref,
+                  ctrl,
+                  6,
+                  'DVR',
+                  left + carW * 0.62 - 16 * scale,
+                  6 * scale + 18 * scale,
+                ),
+              ],
             ),
-            _spot(ref, ctrl, 1, 'חזית', const Alignment(0, -1.02)),
-            _spot(ref, ctrl, 3, 'אחור', const Alignment(0, 1.02)),
-            _spot(ref, ctrl, 4, 'שמאל', const Alignment(-1.05, 0)),
-            _spot(ref, ctrl, 2, 'ימין', const Alignment(1.05, 0)),
-            _spot(ref, ctrl, 0, 'הכל', const Alignment(0, 0.28)),
-            _spot(ref, ctrl, 6, 'DVR', const Alignment(0.38, -0.42)),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _spot(WidgetRef ref, DemoAppController ctrl, int id, String label, Alignment align) {
+  Widget _hotspot(
+    WidgetRef ref,
+    DemoAppController ctrl,
+    int id,
+    String label,
+    double x,
+    double y,
+  ) {
     final active = ctrl.odCamHotspotActive(id);
-    return Align(
-      alignment: align,
+    return Positioned(
+      left: x,
+      top: y,
       child: _HotspotDot(
         label: label,
         active: active,
@@ -74,29 +138,36 @@ class _HotspotDot extends StatelessWidget {
     );
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-            decoration: BoxDecoration(
-              color: active ? OdColors.blue : Colors.white,
-              border: Border.all(color: active ? OdColors.blue : OdColors.line),
-              borderRadius: BorderRadius.circular(99),
+      child: SizedBox(
+        width: 32,
+        height: 32,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              bottom: 26,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: active ? OdColors.blue : Colors.white,
+                  border: Border.all(color: active ? OdColors.blue : OdColors.line),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+                child: Text(label, style: labelStyle),
+              ),
             ),
-            child: Text(label, style: labelStyle),
-          ),
-          const SizedBox(height: 1),
-          Container(
-            width: 21,
-            height: 21,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: active ? const Color(0xFFE8F0FC) : Colors.white,
-              border: Border.all(color: active ? OdColors.blue : const Color(0xFFB8C8DC), width: 2),
+            Container(
+              width: 21,
+              height: 21,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: active ? const Color(0xFFE8F0FC) : Colors.white,
+                border: Border.all(color: active ? OdColors.blue : const Color(0xFFB8C8DC), width: 2),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
