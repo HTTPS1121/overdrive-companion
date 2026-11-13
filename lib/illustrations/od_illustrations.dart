@@ -59,10 +59,11 @@ class _CarSidePainter extends CustomPainter {
 
 /// Parking-lot scene placeholder (synthetic camera frame).
 class OdSceneView extends StatelessWidget {
-  const OdSceneView({super.key, this.label = 'חזית', this.height});
+  const OdSceneView({super.key, this.label = 'חזית', this.height, this.dark = false});
 
   final String label;
   final double? height;
+  final bool dark;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +75,7 @@ class OdSceneView extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            CustomPaint(painter: _ScenePainter()),
+            CustomPaint(painter: _ScenePainter(dark: dark)),
             Positioned(
               top: 10,
               right: 10,
@@ -86,7 +87,7 @@ class OdSceneView extends StatelessWidget {
                 ),
                 child: Text(
                   '$label · הדמיה',
-                  style: const TextStyle(color: Colors.white, fontSize: 11),
+                  style: odBody(11, FontWeight.w400, Colors.white),
                 ),
               ),
             ),
@@ -98,20 +99,30 @@ class OdSceneView extends StatelessWidget {
 }
 
 class _ScenePainter extends CustomPainter {
+  const _ScenePainter({this.dark = false});
+
+  final bool dark;
+
   @override
   void paint(Canvas canvas, Size size) {
     final sx = size.width / 320;
     final sy = size.height / 180;
     canvas.save();
     canvas.scale(sx, sy);
-    canvas.drawRect(const Rect.fromLTWH(0, 0, 320, 180), Paint()..color = const Color(0xFFC8D8E8));
-    canvas.drawRect(const Rect.fromLTWH(0, 76, 320, 104), Paint()..color = const Color(0xFF667B8F));
-    canvas.drawLine(const Offset(0, 70), const Offset(320, 70), Paint()..color = const Color(0xFF98AFC3)..strokeWidth = 3);
+    if (dark) {
+      canvas.drawRect(const Rect.fromLTWH(0, 0, 320, 180), Paint()..color = const Color(0xFF123D5A));
+      canvas.drawRect(const Rect.fromLTWH(0, 76, 320, 104), Paint()..color = const Color(0xFF4A6278));
+      canvas.drawLine(const Offset(0, 70), const Offset(320, 70), Paint()..color = const Color(0xFF7A92AA)..strokeWidth = 3);
+    } else {
+      canvas.drawRect(const Rect.fromLTWH(0, 0, 320, 180), Paint()..color = const Color(0xFFC8D8E8));
+      canvas.drawRect(const Rect.fromLTWH(0, 76, 320, 104), Paint()..color = const Color(0xFF667B8F));
+      canvas.drawLine(const Offset(0, 70), const Offset(320, 70), Paint()..color = const Color(0xFF98AFC3)..strokeWidth = 3);
+    }
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _ScenePainter oldDelegate) => oldDelegate.dark != dark;
 }
 
 class OdMapIllustration extends StatelessWidget {
@@ -132,7 +143,12 @@ class OdMapIllustration extends StatelessWidget {
             alignment: Alignment(0, 0.75),
             child: Text(
               'תרשים המחשה בלבד',
-              style: TextStyle(fontSize: 12, color: Color(0xFF476181)),
+              style: TextStyle(
+                fontFamily: 'NotoSansHebrew',
+                fontFamilyFallback: ['NotoSans', 'sans-serif'],
+                fontSize: 12,
+                color: Color(0xFF476181),
+              ),
             ),
           ),
         ),

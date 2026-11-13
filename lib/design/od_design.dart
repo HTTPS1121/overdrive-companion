@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'od_fonts.dart';
+
 /// Tokens from `overdrive-chosen.html` :root and typography.
 abstract final class OdColors {
   static const ink = Color(0xFF142F50);
@@ -54,11 +56,11 @@ class OdShadows {
 }
 
 ThemeData buildOdTheme() {
-  const font = 'NotoSansHebrew';
   final base = ThemeData(
     useMaterial3: false,
     brightness: Brightness.light,
-    fontFamily: font,
+    fontFamily: OdFonts.hebrew,
+    fontFamilyFallback: OdFonts.fallback,
     scaffoldBackgroundColor: OdColors.bg,
     colorScheme: const ColorScheme.light(
       primary: OdColors.blue,
@@ -77,52 +79,52 @@ ThemeData buildOdTheme() {
   );
 }
 
-const _odFontFamily = 'NotoSansHebrew';
-
-TextStyle odH1([double size = 29]) => TextStyle(
-      fontFamily: _odFontFamily,
-      fontSize: size,
-      height: 1.25,
-      letterSpacing: -0.7,
-      fontWeight: FontWeight.w700,
-      color: OdColors.ink,
-    );
-
-TextStyle odH2() => const TextStyle(
-      fontFamily: _odFontFamily,
-      fontSize: 19,
-      fontWeight: FontWeight.w700,
-      color: OdColors.ink,
-    );
-
-TextStyle odMuted([double size = 14]) => TextStyle(
-      fontFamily: _odFontFamily,
-      fontSize: size,
-      height: 1.5,
-      color: OdColors.muted,
-    );
-
-TextStyle odEyebrow() => const TextStyle(
-      fontFamily: _odFontFamily,
-      fontSize: 12,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 0.7,
-      color: OdColors.blue,
-    );
-
-TextStyle odBrand() => const TextStyle(
-      fontFamily: _odFontFamily,
-      fontSize: 16,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 1,
-      color: OdColors.ink,
-    );
-
-TextStyle odNum(double size, {FontWeight weight = FontWeight.w400, Color? color}) =>
+TextStyle _hebrew(double size, {FontWeight? weight, Color? color, double? height, double? letterSpacing}) =>
     TextStyle(
-      fontFamily: _odFontFamily,
+      fontFamily: OdFonts.hebrew,
+      fontFamilyFallback: OdFonts.fallback,
       fontSize: size,
       fontWeight: weight,
-      color: color ?? OdColors.ink,
-      fontFeatures: const [FontFeature.tabularFigures()],
+      color: color,
+      height: height,
+      letterSpacing: letterSpacing,
     );
+
+TextStyle _latin(double size, {FontWeight? weight, Color? color, double? height, double? letterSpacing}) =>
+    TextStyle(
+      fontFamily: OdFonts.latin,
+      fontFamilyFallback: const [OdFonts.hebrew, ...OdFonts.fallback],
+      fontSize: size,
+      fontWeight: weight,
+      color: color,
+      height: height,
+      letterSpacing: letterSpacing,
+    );
+
+TextStyle odH1([double size = 29]) => _hebrew(
+      size,
+      height: 1.25,
+      letterSpacing: -0.7,
+      weight: FontWeight.w700,
+      color: OdColors.ink,
+    );
+
+TextStyle odH2() => _hebrew(19, weight: FontWeight.w700, color: OdColors.ink);
+
+TextStyle odMuted([double size = 14]) => _hebrew(size, height: 1.5, color: OdColors.muted);
+
+TextStyle odEyebrow() =>
+    _hebrew(12, weight: FontWeight.w700, letterSpacing: 0.7, color: OdColors.blue);
+
+/// Latin wordmark (OVERDRIVE) — matches HTML system sans for Latin.
+TextStyle odBrand() => _latin(16, weight: FontWeight.w700, letterSpacing: 1, color: OdColors.ink);
+
+TextStyle odNum(double size, {FontWeight weight = FontWeight.w400, Color? color}) => _latin(
+      size,
+      weight: weight,
+      color: color ?? OdColors.ink,
+    ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+
+/// Body text that mixes Hebrew with Latin model names / digits.
+TextStyle odBody([double size = 14, FontWeight weight = FontWeight.w400, Color? color]) =>
+    _hebrew(size, weight: weight, color: color ?? OdColors.ink, height: 1.5);

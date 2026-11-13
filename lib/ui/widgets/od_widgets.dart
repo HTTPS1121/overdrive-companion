@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../design/od_design.dart';
+import '../../design/od_fonts.dart';
 import '../../demo/demo_models.dart';
 import '../../icons/od_icon.dart';
 import '../../state/demo_app_controller.dart';
@@ -252,7 +253,8 @@ class _NavItem extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontFamily: 'NotoSansHebrew',
+                  fontFamily: OdFonts.hebrew,
+                  fontFamilyFallback: OdFonts.fallback,
                   fontSize: 10,
                   height: 1.05,
                   fontWeight: active ? FontWeight.w700 : FontWeight.w400,

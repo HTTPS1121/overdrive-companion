@@ -55,15 +55,19 @@ class _AppBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPad = 112 + MediaQuery.paddingOf(context).bottom;
+    final bottomPad = (screen == OdScreen.camera ? 90 : 112) + MediaQuery.paddingOf(context).bottom;
     final showDemoOnCamera = screen != OdScreen.camera && screen != OdScreen.record;
+    final edgeToEdge = screen == OdScreen.camera;
     return Stack(
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPad),
+          padding: EdgeInsets.fromLTRB(edgeToEdge ? 0 : 16, 0, edgeToEdge ? 0 : 16, bottomPad),
           child: Column(
             children: [
-              const OdTopBar(),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: edgeToEdge ? 16 : 0),
+                child: const OdTopBar(),
+              ),
               if (showDemoOnCamera) const OdDemoBanner(),
               Expanded(child: _ScreenBody(screen: screen)),
             ],

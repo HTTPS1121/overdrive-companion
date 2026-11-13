@@ -104,6 +104,30 @@ class DemoAppController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Hotspot ids from HTML `data-od-cam` (1 front, 3 rear, 4 left, 2 right, 0 all, 6 DVR).
+  void selectOdCamHotspot(int id) {
+    if (id == 0) {
+      camModeAll = true;
+    } else if (id == 6) {
+      return;
+    } else {
+      const map = {1: 0, 2: 3, 3: 1, 4: 2};
+      final idx = map[id];
+      if (idx == null) return;
+      camModeAll = false;
+      camSel = idx;
+    }
+    notifyListeners();
+  }
+
+  bool odCamHotspotActive(int id) {
+    if (id == 0) return camModeAll;
+    const map = {1: 0, 2: 3, 3: 1, 4: 2};
+    final idx = map[id];
+    if (idx == null) return false;
+    return !camModeAll && camSel == idx;
+  }
+
   Future<void> confirmAction(String id) async {
     switch (id) {
       case 'lock':
