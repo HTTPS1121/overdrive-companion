@@ -1,7 +1,7 @@
 name: overdrive_companion
-description: Overdrive Companion — remote BYD vehicle control for the Overdrive HTTP server.
+description: Overdrive Companion — design rebuild v1 (demo data, Hebrew RTL).
 publish_to: "none"
-version: 2.8.5+29
+version: 3.0.0+30
 
 environment:
   sdk: ^3.13.0
@@ -13,32 +13,19 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
-  http: ^1.2.2
-  shared_preferences: ^2.3.3
-  flutter_secure_storage: ^9.2.4
-  dynamic_color: ^1.8.1
-  url_launcher: ^6.3.1
-  path_provider: ^2.1.5
-  video_player: ^2.9.2
-  web_socket_channel: ^3.0.2
-  record: ^6.0.0
-  permission_handler: ^11.3.1
-  intl: any
-  flutter_map: ^8.3.2
-  latlong2: ^0.10.1
+  path_drawing: ^1.0.1
+  overdrive_server:
+    path: packages/overdrive_server
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  shelf: ^1.4.2
-  shelf_router: ^1.1.4
-  test: ^1.25.0
-  shelf_web_socket: ^2.0.1
+  integration_test:
+    sdk: flutter
 
 flutter:
   uses-material-design: true
-  generate: true
   fonts:
     - family: NotoSansHebrew
       fonts:
@@ -48,18 +35,3 @@ flutter:
           weight: 500
         - asset: assets/fonts/NotoSansHebrew-Bold.ttf
           weight: 700
-    - family: NotoSans
-      fonts:
-        - asset: assets/fonts/NotoSans-Regular.ttf
-          weight: 400
-    - family: MaterialIcons
-      fonts:
-        - asset: assets/fonts/MaterialIcons-Regular.otf
-  assets:
-    - fixtures/vehicle_state_sample.json
-    - fixtures/auth_status.json
-    - fixtures/auth_token_success.json
-    - fixtures/command_lock_confirmed.json
-    - fixtures/command_lock_unconfirmed.json
-    - assets/images/byd-atto3-hero.png
-    - assets/images/byd-atto3-hero-cutout.png

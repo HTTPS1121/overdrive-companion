@@ -1,23 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'app.dart';
-import 'core/fonts/bundled_fonts.dart';
-import 'providers/app_providers.dart';
-import 'providers/settings_repository.dart';
+import 'demo/demo_config.dart';
+import 'design/od_design.dart';
+import 'ui/screens/main_shell.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await ensureBundledFontsLoaded();
-  final settingsRepo = await SettingsRepository.create();
-  final initialSettings = await settingsRepo.loadFull();
-
-  runApp(
-    ProviderScope(
-      overrides: [
-        settingsRepositoryProvider.overrideWithValue(settingsRepo),
-      ],
-      child: OverdriveApp(initialSettings: initialSettings),
+  assert(kCompanionUsesDemoRepository);
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
     ),
   );
+  runApp(const ProviderScope(child: OverdriveCompanionApp()));
+}
+
+class OverdriveCompanionApp extends StatelessWidget {
+  const OverdriveCompanionApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'OverDrive',
+      theme: buildOdTheme(),
+      locale: const Locale('he'),
+      builder: (context, child) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+      home: const MainShell(),
+    );
+  }
 }
