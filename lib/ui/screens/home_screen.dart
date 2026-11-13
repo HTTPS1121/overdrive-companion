@@ -60,9 +60,9 @@ class HomeScreen extends ConsumerWidget {
                       color: OdColors.pillDemoBg,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
+                    child: Text(
                       'מדומה',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: OdColors.blue),
+                      style: odBody(11, FontWeight.w600, OdColors.blue),
                     ),
                   ),
                 ],
@@ -176,7 +176,7 @@ class _RangeCard extends StatelessWidget {
                       children: [
                         Text('$range', style: odNum(48, weight: FontWeight.w400).copyWith(letterSpacing: -2, height: 0.9)),
                         const SizedBox(width: 6),
-                        Text('ק״מ', style: odMuted(16).copyWith(fontWeight: FontWeight.w500)),
+                        Text('ק״מ', style: odMuted(16)),
                       ],
                     ),
                   ],

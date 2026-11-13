@@ -29,9 +29,16 @@ class OverdriveCompanionApp extends StatelessWidget {
       theme: buildOdTheme(),
       locale: const Locale('he'),
       builder: (context, child) {
+        final base = Theme.of(context).textTheme.bodyMedium ?? const TextStyle();
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: child ?? const SizedBox.shrink(),
+          child: Material(
+            color: Colors.transparent,
+            child: DefaultTextStyle.merge(
+              style: base.copyWith(decoration: TextDecoration.none, decorationColor: Colors.transparent),
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
         );
       },
       home: const MainShell(),

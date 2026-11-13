@@ -111,13 +111,14 @@ TextStyle odH1([double size = 29]) => _hebrew(
 
 TextStyle odH2() => _hebrew(19, weight: FontWeight.w700, color: OdColors.ink);
 
-TextStyle odMuted([double size = 14]) => _hebrew(size, height: 1.5, color: OdColors.muted);
+TextStyle odMuted([double size = 14]) =>
+    _hebrew(size, weight: FontWeight.w400, height: 1.5, color: OdColors.muted);
 
 TextStyle odEyebrow() =>
     _hebrew(12, weight: FontWeight.w700, letterSpacing: 0.7, color: OdColors.blue);
 
 /// Latin wordmark (OVERDRIVE) — matches HTML system sans for Latin.
-TextStyle odBrand() => _latin(16, weight: FontWeight.w700, letterSpacing: 1, color: OdColors.ink);
+TextStyle odBrand() => _latin(16, weight: FontWeight.w800, letterSpacing: 1.2, color: OdColors.ink);
 
 TextStyle odNum(double size, {FontWeight weight = FontWeight.w400, Color? color}) => _latin(
       size,

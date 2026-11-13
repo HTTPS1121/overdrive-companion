@@ -16,7 +16,7 @@ class RecordingPlayerModal extends ConsumerWidget {
     final r = ref.read(demoRepoProvider).recordings.firstWhere((x) => x.id == id);
     final cam = DemoAppController.cams[ctrl.recPlayQuad];
     return Positioned.fill(
-      child: ColoredBox(
+      child: Material(
         color: const Color(0xC70C254A),
         child: SafeArea(
           child: Align(

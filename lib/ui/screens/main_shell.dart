@@ -19,7 +19,11 @@ class MainShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctrl = ref.watch(demoAppControllerProvider);
-    return Directionality(
+    return Material(
+      color: Colors.transparent,
+      child: DefaultTextStyle.merge(
+        style: const TextStyle(decoration: TextDecoration.none),
+        child: Directionality(
       textDirection: TextDirection.rtl,
       child: RepaintBoundary(
         key: const ValueKey('screenshot_root'),
@@ -42,6 +46,8 @@ class MainShell extends ConsumerWidget {
           if (!ctrl.loginVisible) const OdSheetOverlay(),
           if (!ctrl.loginVisible && ctrl.recPlayId != null) const RecordingPlayerModal(),
         ],
+        ),
+      ),
         ),
       ),
     );

@@ -133,7 +133,7 @@ class _LiveUtilityRail extends StatelessWidget {
         children: [
           Expanded(flex: 58, child: _CameraSelectorCard()),
           SizedBox(width: 8),
-          Expanded(child: _LocationCard()),
+          Expanded(flex: 42, child: _LocationCard()),
         ],
       ),
     );
@@ -188,18 +188,23 @@ class _LocationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 7, 10, 4),
-            child: Row(
+            padding: const EdgeInsets.fromLTRB(10, 9, 10, 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('מיקום הרכב', style: odBody(12, FontWeight.w600)),
-                const Spacer(),
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(color: Color(0xFF2D9F6F), shape: BoxShape.circle),
+                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(color: Color(0xFF2D9F6F), shape: BoxShape.circle),
+                    ),
+                    const SizedBox(width: 5),
+                    Text('לפני 2 דק׳ · דמו', style: odMuted(10)),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Text('2 דק׳', style: odMuted(10)),
               ],
             ),
           ),

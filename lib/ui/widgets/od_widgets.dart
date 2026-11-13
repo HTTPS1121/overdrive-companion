@@ -90,18 +90,9 @@ class OdTopBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.watch(demoAppControllerProvider);
-    final subtitle = switch (ctrl.screen) {
-      OdScreen.home => 'שליטה ובית',
-      OdScreen.camera => 'מצלמות הרכב',
-      OdScreen.record => 'אירועים והקלטות',
-      OdScreen.trip => 'נסיעות ואנרגיה',
-      OdScreen.more => 'יכולות ומידע',
-    };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 14, 0, 6),
+      padding: const EdgeInsets.fromLTRB(0, 14, 0, 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           OdIconButton(
             semanticKey: const ValueKey('btn_profile'),
@@ -110,28 +101,19 @@ class OdTopBar extends ConsumerWidget {
             onPressed: () => openProfileSheet(ref),
           ),
           Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'OVERDRIVE',
-                  style: odBrand(),
-                  textDirection: TextDirection.ltr,
-                ),
-                const SizedBox(height: 1),
-                Text(
-                  subtitle,
-                  style: odMuted(10).copyWith(fontWeight: FontWeight.w600),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+            child: Center(
+              child: Text(
+                'OVERDRIVE',
+                style: odBrand(),
+                textDirection: TextDirection.ltr,
+              ),
             ),
           ),
           OdIconButton(
             semanticKey: const ValueKey('btn_menu'),
             label: 'תפריט מסך',
             icon: const OdIcon(OdIconName.menu, color: OdColors.ink),
-            onPressed: () => openContextMenuSheet(ref, ctrl.screen),
+            onPressed: () => openContextMenuSheet(ref, ref.read(demoAppControllerProvider).screen),
           ),
         ],
       ),
@@ -177,33 +159,28 @@ class OdBottomNav extends ConsumerWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(OdRadii.nav),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-              child: Material(
-                color: const Color(0xE0FFFFFF).withValues(alpha: 0.92),
-                elevation: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(OdRadii.nav),
-                    border: Border.all(color: Colors.white),
-                    boxShadow: const [OdShadows.nav],
-                  ),
-                  padding: const EdgeInsets.all(6),
-                  child: Row(
-                    children: [
-                      for (final t in tabs)
-                        Expanded(
-                          child: _NavItem(
-                            key: ValueKey('nav_${t.$2.name}'),
-                            active: ctrl.screen == t.$2,
-                            icon: t.$1,
-                            label: t.$3,
-                            onTap: () => ref
-                                .read(demoAppControllerProvider)
-                                .setScreen(t.$2),
-                          ),
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xF2FFFFFF),
+                  borderRadius: BorderRadius.circular(OdRadii.nav),
+                  border: Border.all(color: Colors.white, width: 1.5),
+                  boxShadow: const [OdShadows.nav],
+                ),
+                padding: const EdgeInsets.all(5),
+                child: Row(
+                  children: [
+                    for (final t in tabs)
+                      Expanded(
+                        child: _NavItem(
+                          key: ValueKey('nav_${t.$2.name}'),
+                          active: ctrl.screen == t.$2,
+                          icon: t.$1,
+                          label: t.$3,
+                          onTap: () => ref.read(demoAppControllerProvider).setScreen(t.$2),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
               ),
             ),
@@ -398,14 +375,19 @@ class OdCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 16),
-      padding: padding,
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(OdRadii.card),
-        border: Border.all(color: OdColors.cardBorder),
         boxShadow: const [OdShadows.card],
       ),
-      child: child,
+      child: Material(
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(OdRadii.card),
+          side: const BorderSide(color: OdColors.cardBorder),
+        ),
+        child: Padding(padding: padding, child: child),
+      ),
     );
   }
 }
