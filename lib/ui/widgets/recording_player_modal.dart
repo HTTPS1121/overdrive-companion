@@ -19,6 +19,10 @@ class _RecordingPlayerModalState extends ConsumerState<RecordingPlayerModal> {
 
   int? _boundPlayId;
 
+  void _onVideoTick() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void didUpdateWidget(covariant RecordingPlayerModal oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -35,6 +39,7 @@ class _RecordingPlayerModalState extends ConsumerState<RecordingPlayerModal> {
     if (id == null) return;
     final r = ref.read(vehicleRepoProvider).recordings.firstWhere((x) => x.id == id);
     final client = ref.read(apiClientProvider);
+    _controller?.removeListener(_onVideoTick);
     await _controller?.dispose();
     setState(() {
       _initializing = true;
@@ -50,6 +55,7 @@ class _RecordingPlayerModalState extends ConsumerState<RecordingPlayerModal> {
         await video.dispose();
         return;
       }
+      video.addListener(_onVideoTick);
       setState(() {
         _controller = video;
         _initializing = false;
@@ -65,6 +71,7 @@ class _RecordingPlayerModalState extends ConsumerState<RecordingPlayerModal> {
 
   @override
   void dispose() {
+    _controller?.removeListener(_onVideoTick);
     _controller?.dispose();
     super.dispose();
   }

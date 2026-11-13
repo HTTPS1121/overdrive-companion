@@ -139,6 +139,13 @@ class CompanionAppController extends ChangeNotifier {
     return null;
   }
 
+  void clearLoginFeedback() {
+    connectionTestHebrew = null;
+    connectionTestOk = false;
+    loginErrorHebrew = null;
+    notifyListeners();
+  }
+
   Future<void> testConnection(ConnectionDraft draft) async {
     connectionTestHebrew = null;
     connectionTestOk = false;
@@ -184,7 +191,7 @@ class CompanionAppController extends ChangeNotifier {
   }
 
   Future<void> connect(ConnectionDraft draft) async {
-    loginErrorHebrew = null;
+    clearLoginFeedback();
     final validation = _validateDraft(draft);
     if (validation != null) {
       loginErrorHebrew = validation;

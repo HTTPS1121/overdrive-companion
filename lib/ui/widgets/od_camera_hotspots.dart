@@ -15,6 +15,8 @@ class OdCameraSelectorDiagram extends ConsumerWidget {
   static const _gutterTop = 14.0;
   static const _gutterBottom = 16.0;
   static const _dot = 32.0;
+  /// Wider than the car so DVR label can sit to the right of the front arc (HTML overflow).
+  static const _canvasW = 98.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,40 +24,43 @@ class OdCameraSelectorDiagram extends ConsumerWidget {
     const carW = _carW;
     const carH = _carH;
     const boxH = carH + _gutterTop + _gutterBottom;
+    final carLeft = (_canvasW - carW) / 2;
 
     return Center(
       child: SizedBox(
-        width: carW,
+        width: _canvasW,
         height: boxH,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             Positioned(
-              left: 0,
-              right: 0,
+              left: carLeft,
               top: _gutterTop,
+              width: carW,
               height: carH,
               child: const OdCarTopDown(),
             ),
-            _hotspot(ref, ctrl, 1, 'חזית', left: (carW - _dot) / 2, top: _gutterTop - 6),
-            _hotspot(ref, ctrl, 3, 'אחור', left: (carW - _dot) / 2, top: _gutterTop + carH - _dot + 6),
-            _hotspot(ref, ctrl, 4, 'שמאל', left: -16, top: _gutterTop + carH / 2 - _dot / 2),
-            _hotspot(ref, ctrl, 2, 'ימין', left: carW - _dot + 16, top: _gutterTop + carH / 2 - _dot / 2),
+            _hotspot(ref, ctrl, 1, 'חזית', left: carLeft + (carW - _dot) / 2, top: _gutterTop - 6),
+            _hotspot(ref, ctrl, 3, 'אחור', left: carLeft + (carW - _dot) / 2, top: _gutterTop + carH - _dot + 6),
+            _hotspot(ref, ctrl, 4, 'שמאל', left: carLeft - 16, top: _gutterTop + carH / 2 - _dot / 2),
+            _hotspot(ref, ctrl, 2, 'ימין', left: carLeft + carW - _dot + 16, top: _gutterTop + carH / 2 - _dot / 2),
             _hotspot(
               ref,
               ctrl,
               0,
               'הכל',
-              left: (carW - _dot) / 2,
+              left: carLeft + (carW - _dot) / 2,
               top: _gutterTop + carH / 2 - _dot / 2,
+              labelBelowCenter: true,
             ),
             _hotspot(
               ref,
               ctrl,
               6,
               'DVR',
-              left: carW * 0.62 - _dot / 2,
+              left: carLeft + carW * 0.62 - _dot / 2,
               top: _gutterTop + 18,
+              dvrLabel: true,
             ),
           ],
         ),
@@ -67,9 +72,12 @@ class OdCameraSelectorDiagram extends ConsumerWidget {
     WidgetRef ref,
     CompanionAppController ctrl,
     int id,
-    String label,
-    {required double left, required double top}
-  ) {
+    String label, {
+    required double left,
+    required double top,
+    bool labelBelowCenter = false,
+    bool dvrLabel = false,
+  }) {
     return Positioned(
       left: left,
       top: top,
@@ -77,9 +85,9 @@ class OdCameraSelectorDiagram extends ConsumerWidget {
         label: label,
         active: ctrl.odCamHotspotActive(id),
         labelBelow: id == 3,
-        labelOnStart: id == 4 || id == 6,
-        labelOnEnd: id == 2,
-        labelBelowCenter: id == 0,
+        labelOnStart: id == 4,
+        labelOnEnd: id == 2 || dvrLabel,
+        labelBelowCenter: labelBelowCenter,
         onTap: () => ref.read(companionAppControllerProvider).selectOdCamHotspot(id),
       ),
     );
@@ -126,27 +134,27 @@ class _HotspotDot extends StatelessWidget {
       child: Text(label, style: labelStyle),
     );
 
-  if (labelOnStart) {
-    labelChip = Positioned(
-      right: 35,
-      top: 0,
-      bottom: 0,
-      child: Center(child: labelChip),
-    );
-  } else if (labelOnEnd) {
-    labelChip = Positioned(
-      left: 35,
-      top: 0,
-      bottom: 0,
-      child: Center(child: labelChip),
-    );
-  } else if (labelBelow) {
-    labelChip = Positioned(top: 35, left: 0, right: 0, child: Center(child: labelChip));
-  } else if (labelBelowCenter) {
-    labelChip = Positioned(top: 45, left: 0, right: 0, child: Center(child: labelChip));
-  } else {
-    labelChip = Positioned(bottom: 26, left: 0, right: 0, child: Center(child: labelChip));
-  }
+    if (labelOnEnd) {
+      labelChip = Positioned(
+        left: 35,
+        top: 0,
+        bottom: 0,
+        child: Center(child: labelChip),
+      );
+    } else if (labelOnStart) {
+      labelChip = Positioned(
+        right: 35,
+        top: 0,
+        bottom: 0,
+        child: Center(child: labelChip),
+      );
+    } else if (labelBelow) {
+      labelChip = Positioned(top: 35, left: 0, right: 0, child: Center(child: labelChip));
+    } else if (labelBelowCenter) {
+      labelChip = Positioned(top: 45, left: 0, right: 0, child: Center(child: labelChip));
+    } else {
+      labelChip = Positioned(bottom: 26, left: 0, right: 0, child: Center(child: labelChip));
+    }
 
     return GestureDetector(
       onTap: onTap,

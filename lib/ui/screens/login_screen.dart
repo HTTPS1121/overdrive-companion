@@ -94,7 +94,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 8),
                       _ModePicker(
                         mode: _mode,
-                        onChanged: (m) => setState(() => _mode = m),
+                        onChanged: (m) {
+                          setState(() => _mode = m);
+                          ref.read(companionAppControllerProvider).clearLoginFeedback();
+                        },
                       ),
                       const SizedBox(height: 16),
                       _field(
@@ -170,6 +173,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         const SizedBox(height: 6),
         TextField(
           controller: c,
+          onChanged: (_) => ref.read(companionAppControllerProvider).clearLoginFeedback(),
           obscureText: obscure,
           style: odBody(15),
           decoration: InputDecoration(

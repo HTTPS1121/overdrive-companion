@@ -1,7 +1,7 @@
 name: overdrive_companion
 description: Overdrive Companion — Hebrew RTL companion for the Overdrive car server.
 publish_to: "none"
-version: 3.1.1+39
+version: 3.1.2+40
 
 environment:
   sdk: ^3.13.0

@@ -55,6 +55,8 @@ class OdRecordingTypeTab extends StatelessWidget {
               if (active) const OdFilterActiveChevron(color: fg),
               Text(
                 label,
+                softWrap: false,
+                overflow: TextOverflow.visible,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -112,6 +114,8 @@ class OdRecordingFilterChip extends StatelessWidget {
               if (active) OdFilterActiveChevron(color: fg),
               Text(
                 label,
+                softWrap: false,
+                overflow: TextOverflow.visible,
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: fg),
               ),
             ],

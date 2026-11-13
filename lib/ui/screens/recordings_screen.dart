@@ -231,6 +231,7 @@ class _TypeTabs extends ConsumerWidget {
     ];
     return ClipRRect(
       borderRadius: BorderRadius.circular(99),
+      clipBehavior: Clip.none,
       child: DecoratedBox(
         decoration: const BoxDecoration(color: Color(0xFFDFE6F0)),
         child: Padding(
@@ -239,6 +240,7 @@ class _TypeTabs extends ConsumerWidget {
             padding: EdgeInsets.zero,
             clipBehavior: Clip.hardEdge,
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 for (final t in tabs)
                   OdRecordingTypeTab(
@@ -333,6 +335,7 @@ class _FilterRows extends ConsumerWidget {
       padding: const EdgeInsetsDirectional.fromSTEB(10, 6, 10, 0),
       clipBehavior: Clip.none,
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
             padding: const EdgeInsetsDirectional.only(end: 10),

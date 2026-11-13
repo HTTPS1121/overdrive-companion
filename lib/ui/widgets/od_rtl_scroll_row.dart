@@ -40,12 +40,20 @@ class _OdRtlScrollRowState extends State<OdRtlScrollRow> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: _controller,
-      scrollDirection: Axis.horizontal,
-      padding: widget.padding,
-      clipBehavior: widget.clipBehavior,
-      child: widget.child,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final band = constraints.maxWidth.isFinite ? constraints.maxWidth : 0.0;
+        return SingleChildScrollView(
+          controller: _controller,
+          scrollDirection: Axis.horizontal,
+          padding: widget.padding,
+          clipBehavior: widget.clipBehavior,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: band),
+            child: widget.child,
+          ),
+        );
+      },
     );
   }
 }

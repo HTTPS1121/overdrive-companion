@@ -1,4 +1,4 @@
-# שדות התחברות — Overdrive Companion 3.1.1
+# שדות התחברות — Overdrive Companion 3.1.2
 
 ## סוג חיבור
 

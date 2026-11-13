@@ -1,13 +1,14 @@
-# PARITY_GAPS — 3.1.1+39 vs overdrive-chosen.html + Overdrive-release
+# PARITY_GAPS — 3.1.2+40 vs overdrive-chosen.html + Overdrive-release
 
 Reference HTML: `overdrive-chosen.html` (design tokens).
 
-## Closed in 3.1.1
+## Closed in 3.1.1 / 3.1.2
 
 - Offline refresh: stale vehicle banner + last-updated label; sheets/player dismissed on refresh failure
-- Recordings: removed `הדמיה` scenes; server thumb or neutral placeholder; player uses `/video/id/…` + JWT (`video_player`)
-- Camera selector: 60×126 car + HTML hotspot offsets (incl. DVR `top:18px; left:62%`)
-- Recordings filter/type rows: RTL scroll-to-start (`OdRtlScrollRow`)
+- Recordings: removed `הדמיה` scenes; server thumb or neutral placeholder; player uses `/video/id/…` + JWT (`video_player`); player clock tracks position
+- Camera selector: car diagram + HTML hotspot offsets; DVR pill to the right of front camera (not overlapping body)
+- Recordings filter/type rows: RTL horizontal scroll; chips size to label text (390dp RTL)
+- Login: single feedback line — `connect` / test / field edits clear stale connection errors
 - Trips: wired read-only `GET /api/trips?days=14&limit=30` when server returns data
 
 ## Remaining
