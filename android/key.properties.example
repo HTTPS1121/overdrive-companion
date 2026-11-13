@@ -1,9 +1,12 @@
 # Copy to android/key.properties (git-ignored). Never commit key.properties or .keystore files.
 #
-# Restore the signing keystore from Agent Store:
-#   artifacts/signing/c557-debug.keystore  ->  android/signing/c557-debug.keystore
+# Official release signing (RSA 4096, alias overdrive-release):
+#   Agent Store: artifacts/signing/release/overdrive-release.keystore
+#   -> android/signing/overdrive-release.keystore
 #
-storePassword=android
-keyPassword=android
-keyAlias=androiddebugkey
-storeFile=signing/c557-debug.keystore
+# PKCS12: keytool stores use one password for the store and the key — set keyPassword equal to storePassword.
+#
+storePassword=your-store-password
+keyPassword=your-store-password
+keyAlias=overdrive-release
+storeFile=signing/overdrive-release.keystore

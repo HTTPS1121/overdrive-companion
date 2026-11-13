@@ -1,16 +1,23 @@
 import java.util.Properties
+import org.gradle.api.GradleException
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 val keystorePropertiesFile = rootProject.file("key.properties")
-val keystoreProperties = Properties()
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(keystorePropertiesFile.inputStream())
+
+fun loadKeystoreProperties(): Properties {
+    val props = Properties()
+    keystorePropertiesFile.inputStream().use { props.load(it) }
+    listOf("storePassword", "keyAlias", "storeFile").forEach { key ->
+        if (props.getProperty(key)?.trim().isNullOrEmpty()) {
+            throw GradleException("android/key.properties is missing required property: $key")
+        }
+    }
+    return props
 }
 
 android {
@@ -24,39 +31,60 @@ android {
     }
 
     signingConfigs {
-        if (keystorePropertiesFile.exists()) {
+        if (keystorePropertiesFile.isFile) {
+            val props = loadKeystoreProperties()
             create("release") {
-                keyAlias = keystoreProperties.getProperty("keyAlias")
-                keyPassword = keystoreProperties.getProperty("keyPassword")
-                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
-                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = props.getProperty("keyAlias")
+                storePassword = props.getProperty("storePassword")
+                val storePass = props.getProperty("storePassword")
+                val keyPass = props.getProperty("keyPassword")?.trim().orEmpty()
+                keyPassword = if (keyPass.isEmpty()) storePass else keyPass
+                storeFile = rootProject.file(props.getProperty("storeFile"))
             }
         }
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.https1121.overdrive.companion"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
-        // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
-        // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
-        // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
+            val releaseConfig = signingConfigs.findByName("release")
+            if (releaseConfig != null) {
+                signingConfig = releaseConfig
             }
         }
+    }
+}
+
+gradle.taskGraph.whenReady {
+    val assemblesRelease = allTasks.any { task ->
+        val n = task.name
+        n.contains("assembleRelease", ignoreCase = true) ||
+            n.contains("bundleRelease", ignoreCase = true) ||
+            n.contains("assembleAndroid", ignoreCase = true) && n.contains("Release")
+    }
+    if (!assemblesRelease) return@whenReady
+
+    if (!keystorePropertiesFile.isFile) {
+        throw GradleException(
+            """
+            Release APK requires android/key.properties (no debug fallback).
+            Copy android/key.properties.example and install the release keystore under android/signing/.
+            """.trimIndent(),
+        )
+    }
+    val props = loadKeystoreProperties()
+    val store = rootProject.file(props.getProperty("storeFile"))
+    if (!store.isFile) {
+        throw GradleException(
+            "Release keystore missing at ${store.path}. Restore artifacts/signing/release/overdrive-release.keystore.",
+        )
     }
 }
 
