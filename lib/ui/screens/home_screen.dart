@@ -16,6 +16,14 @@ class HomeScreen extends ConsumerWidget {
     final ctrl = ref.watch(companionAppControllerProvider);
     return OdTabScroll(
       children: [
+        if (ctrl.vehicleStateStale)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: OdInlineAlert(
+              message: ctrl.vehicleOfflineHebrew ?? 'אין חיבור לשרת הרכב.',
+              subtitle: ctrl.refreshLabel,
+            ),
+          ),
         Center(
           child: Column(
             children: [

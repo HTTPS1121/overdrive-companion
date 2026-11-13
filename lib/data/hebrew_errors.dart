@@ -16,11 +16,24 @@ String hebrewConnectionFailure(ConnectionFailure f) {
   };
 }
 
+String hebrewAuthDenied() => 'אימות נדחה. בדוק את קוד הגישה.';
+
+String hebrewStaleVehicleLabel(DateTime lastOk) {
+  final age = DateTime.now().difference(lastOk);
+  if (age.inMinutes < 2) return 'נתונים לא מעודכנים · עודכן זה עתה';
+  if (age.inMinutes < 60) return 'נתונים לא מעודכנים · עודכן לפני ${age.inMinutes} דק׳';
+  if (age.inHours < 24) return 'נתונים לא מעודכנים · עודכן לפני ${age.inHours} שע׳';
+  return 'נתונים לא מעודכנים · עודכן לפני ${age.inDays} ימים';
+}
+
 String hebrewApiException(OverdriveApiException e) {
+  final code = e.statusCode;
+  if (code == 401) {
+    return e.authRequired ? 'נדרש אימות מחדש מול השרת.' : hebrewAuthDenied();
+  }
   if (e.authRequired) {
     return 'נדרש אימות מחדש מול השרת.';
   }
-  final code = e.statusCode;
   if (code == 404) {
     return 'הפקודה אינה נתמכת בשרת זה.';
   }

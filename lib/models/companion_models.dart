@@ -2,6 +2,26 @@ enum OdScreen { home, camera, record, trip, more }
 
 enum RecordingType { sentry, proximity, normal, replay }
 
+class TripSummary {
+  const TripSummary({
+    required this.id,
+    required this.startTimeMs,
+    required this.endTimeMs,
+    required this.distanceKm,
+    required this.durationSeconds,
+    required this.overallScore,
+    required this.subtitle,
+  });
+
+  final int id;
+  final int startTimeMs;
+  final int endTimeMs;
+  final double distanceKm;
+  final int durationSeconds;
+  final int overallScore;
+  final String subtitle;
+}
+
 class Recording {
   const Recording({
     required this.id,
@@ -23,6 +43,8 @@ class Recording {
     required this.proxLabel,
     required this.trigger,
     required this.file,
+    this.thumbPath,
+    this.cameraLabel,
   });
 
   final int id;
@@ -44,6 +66,8 @@ class Recording {
   final String proxLabel;
   final String trigger;
   final String file;
+  final String? thumbPath;
+  final String? cameraLabel;
 }
 
 class MoreGroupItem {

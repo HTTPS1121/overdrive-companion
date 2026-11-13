@@ -83,7 +83,8 @@ class OverdriveApiClient {
       headers: _headers(jsonBody: true),
       body: jsonEncode(body),
     );
-    return _decode(response);
+    final credentialCheck = path == OverdriveEndpoints.authToken;
+    return _decode(response, credentialFailure: credentialCheck);
   }
 
   Future<Map<String, dynamic>> putJson(
@@ -98,7 +99,10 @@ class OverdriveApiClient {
     return _decode(response);
   }
 
-  Map<String, dynamic> _decode(http.Response response) {
+  Map<String, dynamic> _decode(
+    http.Response response, {
+    bool credentialFailure = false,
+  }) {
     final body = response.body;
     final trimmed = body.trimLeft();
     if (trimmed.startsWith('<!') || trimmed.startsWith('<html')) {
@@ -126,7 +130,7 @@ class OverdriveApiClient {
       throw OverdriveApiException(
         json['error'] as String? ?? 'auth required',
         statusCode: 401,
-        authRequired: true,
+        authRequired: !credentialFailure,
       );
     }
 
@@ -181,6 +185,12 @@ class OverdriveApiClient {
     final json = await getJson(OverdriveEndpoints.authStatus);
     return AuthStatusResult.fromJson(json);
   }
+
+  Uri recordingVideoUri(String recordingId) => _uri(OverdriveEndpoints.videoById(recordingId));
+
+  Uri recordingThumbUri(String recordingId) => _uri(OverdriveEndpoints.thumbById(recordingId));
+
+  Map<String, String> authHeaders() => _headers();
 }
 
 class AuthStatusResult {

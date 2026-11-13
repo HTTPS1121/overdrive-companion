@@ -213,7 +213,7 @@ class CompanionAppController extends ChangeNotifier {
           .timeout(const Duration(seconds: 25));
       final sessionJwt = _client.jwt;
       if (sessionJwt == null || sessionJwt.isEmpty) {
-        loginErrorHebrew = 'אימות נדחה. בדוק קוד גישה.';
+        loginErrorHebrew = hebrewAuthDenied();
         return;
       }
       final sessionSettings = AppSettings(
@@ -242,25 +242,25 @@ class CompanionAppController extends ChangeNotifier {
   }
 
   Future<void> _refreshAfterLogin() async {
-    try {
-      await _repo.refreshVehicleState();
-    } on OverdriveApiException {
-      // home may show partial data
-    }
-    unawaited(_repo.refreshRecordings());
-    unawaited(_repo.refreshStreamStatus());
+    await _repo.refreshVehicleState();
+    await _repo.refreshRecordings();
+    await _repo.refreshStreamStatus();
+    await _repo.refreshTrips();
     notifyListeners();
   }
 
   Future<void> refreshAll() async {
-    try {
-      await _repo.refreshVehicleState();
-    } on OverdriveApiException catch (e) {
-      loginErrorHebrew = hebrewApiException(e);
-    }
+    _dismissTransientUi();
+    await _repo.refreshVehicleState();
     await _repo.refreshRecordings();
     await _repo.refreshStreamStatus();
+    await _repo.refreshTrips();
     notifyListeners();
+  }
+
+  void _dismissTransientUi() {
+    closeSheet();
+    closeRecordingPlayer();
   }
 
   Future<void> logout() async {
@@ -282,6 +282,9 @@ class CompanionAppController extends ChangeNotifier {
     }
     if (s == OdScreen.camera && !_repo.streamKnown) {
       unawaited(_repo.refreshStreamStatus().then((_) => notifyListeners()));
+    }
+    if (s == OdScreen.trip && !_repo.tripsKnown) {
+      unawaited(_repo.refreshTrips().then((_) => notifyListeners()));
     }
     notifyListeners();
   }
@@ -383,10 +386,16 @@ class CompanionAppController extends ChangeNotifier {
   String get carName => _repo.carName;
   String get carTrim => _repo.carTrim;
   String get refreshLabel => _repo.refreshLabel;
+  bool get vehicleStateStale => _repo.vehicleStateStale;
+  String? get vehicleOfflineHebrew => _repo.vehicleOfflineHebrew;
 
   DataLoadState get recordingsState => _repo.recordingsState;
   String? get recordingsErrorHebrew => _repo.recordingsErrorHebrew;
 
   DataLoadState get streamState => _repo.streamState;
   String? get streamErrorHebrew => _repo.streamErrorHebrew;
+
+  DataLoadState get tripsState => _repo.tripsState;
+  String? get tripsErrorHebrew => _repo.tripsErrorHebrew;
+  List<TripSummary> get trips => _repo.trips;
 }

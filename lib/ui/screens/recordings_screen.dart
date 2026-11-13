@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/companion_models.dart';
 import '../../design/od_design.dart';
 import '../../icons/od_icon.dart';
-import '../../illustrations/od_illustrations.dart';
 import '../../state/companion_app_controller.dart';
+import '../widgets/od_rtl_scroll_row.dart';
 import '../widgets/od_widgets.dart';
+import '../widgets/recording_thumb.dart';
 import '../widgets/recordings_filters.dart';
 
 class RecordingsScreen extends ConsumerWidget {
@@ -234,8 +235,8 @@ class _TypeTabs extends ConsumerWidget {
         decoration: const BoxDecoration(color: Color(0xFFDFE6F0)),
         child: Padding(
           padding: const EdgeInsets.all(3),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+          child: OdRtlScrollRow(
+            padding: EdgeInsets.zero,
             clipBehavior: Clip.hardEdge,
             child: Row(
               children: [
@@ -328,33 +329,29 @@ class _FilterRows extends ConsumerWidget {
     List<(String, String)> options,
     String current,
   ) {
-    return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: true),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsetsDirectional.fromSTEB(10, 6, 10, 0),
-        clipBehavior: Clip.none,
-        child: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 10),
-              child: Text(label, style: odMuted(11).copyWith(fontWeight: FontWeight.w600)),
+    return OdRtlScrollRow(
+      padding: const EdgeInsetsDirectional.fromSTEB(10, 6, 10, 0),
+      clipBehavior: Clip.none,
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 10),
+            child: Text(label, style: odMuted(11).copyWith(fontWeight: FontWeight.w600)),
+          ),
+          for (final o in options)
+            OdRecordingFilterChip(
+              label: o.$2,
+              active: current == o.$1,
+              severityTone: key == 'sev' && current == o.$1
+                  ? (o.$1 == 'ALERT'
+                      ? 'alert'
+                      : o.$1 == 'CRITICAL'
+                          ? 'critical'
+                          : null)
+                  : null,
+              onTap: () => ref.read(companionAppControllerProvider).setRecFilter(key, o.$1),
             ),
-            for (final o in options)
-              OdRecordingFilterChip(
-                label: o.$2,
-                active: current == o.$1,
-                severityTone: key == 'sev' && current == o.$1
-                    ? (o.$1 == 'ALERT'
-                        ? 'alert'
-                        : o.$1 == 'CRITICAL'
-                            ? 'critical'
-                            : null)
-                    : null,
-                onTap: () => ref.read(companionAppControllerProvider).setRecFilter(key, o.$1),
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -389,10 +386,7 @@ class _RecordingCard extends ConsumerWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                const OdSceneView(
-                  label: 'נגן',
-                  overlay: OdSceneOverlay.thumbnailTopEnd,
-                ),
+                RecordingThumb(recording: recording),
                 Center(
                   child: Container(
                     width: 44,

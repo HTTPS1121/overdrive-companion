@@ -1,20 +1,87 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../design/od_design.dart';
-import '../../illustrations/od_illustrations.dart';
 import '../../state/companion_app_controller.dart';
 
-class RecordingPlayerModal extends ConsumerWidget {
+class RecordingPlayerModal extends ConsumerStatefulWidget {
   const RecordingPlayerModal({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RecordingPlayerModal> createState() => _RecordingPlayerModalState();
+}
+
+class _RecordingPlayerModalState extends ConsumerState<RecordingPlayerModal> {
+  VideoPlayerController? _controller;
+  String? _errorHebrew;
+  bool _initializing = true;
+
+  int? _boundPlayId;
+
+  @override
+  void didUpdateWidget(covariant RecordingPlayerModal oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final id = ref.read(companionAppControllerProvider).recPlayId;
+    if (id != _boundPlayId) {
+      _boundPlayId = id;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _bindRecording());
+    }
+  }
+
+  Future<void> _bindRecording() async {
+    final ctrl = ref.read(companionAppControllerProvider);
+    final id = ctrl.recPlayId;
+    if (id == null) return;
+    final r = ref.read(vehicleRepoProvider).recordings.firstWhere((x) => x.id == id);
+    final client = ref.read(apiClientProvider);
+    await _controller?.dispose();
+    setState(() {
+      _initializing = true;
+      _errorHebrew = null;
+    });
+    try {
+      final video = VideoPlayerController.networkUrl(
+        client.recordingVideoUri(r.file),
+        httpHeaders: client.authHeaders(),
+      );
+      await video.initialize();
+      if (!mounted) {
+        await video.dispose();
+        return;
+      }
+      setState(() {
+        _controller = video;
+        _initializing = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _errorHebrew = 'לא ניתן להפעיל את ההקלטה מהשרת.';
+        _initializing = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final ctrl = ref.watch(companionAppControllerProvider);
     final id = ctrl.recPlayId;
     if (id == null) return const SizedBox.shrink();
-    final r = ref.read(vehicleRepoProvider).recordings.firstWhere((x) => x.id == id);
+    if (_boundPlayId != id) {
+      _boundPlayId = id;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _bindRecording());
+    }
+    final r = ref.watch(vehicleRepoProvider).recordings.firstWhere((x) => x.id == id);
     final cam = CompanionAppController.cams[ctrl.recPlayQuad];
+    final video = _controller;
+
     return Positioned.fill(
       child: Material(
         color: const Color(0xC70C254A),
@@ -55,11 +122,41 @@ class RecordingPlayerModal extends ConsumerWidget {
                       SizedBox(
                         height: 200,
                         width: double.infinity,
-                        child: OdSceneView(
-                          label: cam,
-                          height: 200,
-                          backdrop: const Color(0xFF123D5A),
-                          overlay: OdSceneOverlay.standardTopEnd,
+                        child: ColoredBox(
+                          color: const Color(0xFF123D5A),
+                          child: _initializing
+                              ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                              : _errorHebrew != null
+                                  ? Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Text(
+                                          _errorHebrew!,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                                        ),
+                                      ),
+                                    )
+                                  : video != null && video.value.isInitialized
+                                      ? Stack(
+                                          fit: StackFit.expand,
+                                          children: [
+                                            FittedBox(
+                                              fit: BoxFit.cover,
+                                              child: SizedBox(
+                                                width: video.value.size.width,
+                                                height: video.value.size.height,
+                                                child: VideoPlayer(video),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              top: 10,
+                                              right: 10,
+                                              child: _camBadge('$cam · ${r.time}'),
+                                            ),
+                                          ],
+                                        )
+                                      : const SizedBox.shrink(),
                         ),
                       ),
                       Positioned(
@@ -104,13 +201,8 @@ class RecordingPlayerModal extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'תחילת אירוע (7 שנ׳ לפני) · תנועה אדם · ${r.trigger}',
+                          'תחילת אירוע · ${r.trigger}',
                           style: const TextStyle(color: Color(0xFFB8C8DC), fontSize: 9),
-                        ),
-                        const SizedBox(height: 6),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: const LinearProgressIndicator(value: 0.18, minHeight: 8, color: OdColors.blue, backgroundColor: Color(0xFF2A4568)),
                         ),
                         const SizedBox(height: 8),
                         Row(
@@ -121,16 +213,29 @@ class RecordingPlayerModal extends ConsumerWidget {
                               shape: const CircleBorder(),
                               child: InkWell(
                                 customBorder: const CircleBorder(),
-                                onTap: () {},
-                                child: const SizedBox(
+                                onTap: video == null
+                                    ? null
+                                    : () {
+                                        if (video.value.isPlaying) {
+                                          video.pause();
+                                        } else {
+                                          video.play();
+                                        }
+                                        setState(() {});
+                                      },
+                                child: SizedBox(
                                   width: 40,
                                   height: 40,
-                                  child: Icon(Icons.play_arrow, color: Colors.white, size: 22),
+                                  child: Icon(
+                                    video?.value.isPlaying == true ? Icons.pause : Icons.play_arrow,
+                                    color: Colors.white,
+                                    size: 22,
+                                  ),
                                 ),
                               ),
                             ),
                             OdLtrText(
-                              '${odFormatClockSeconds(ctrl.recPlaySeconds)} / ${r.dur}',
+                              _clock(video) + ' / ${r.dur}',
                               style: const TextStyle(color: Color(0xFFDCE7F5), fontSize: 12),
                             ),
                             const OdLtrText('1.0×', style: TextStyle(color: Color(0xFFDCE7F5), fontSize: 12)),
@@ -158,6 +263,27 @@ class RecordingPlayerModal extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  String _clock(VideoPlayerController? video) {
+    if (video == null || !video.value.isInitialized) return '0:00';
+    final sec = video.value.position.inSeconds;
+    final m = sec ~/ 60;
+    final s = sec % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
+  }
+
+  Widget _camBadge(String text) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xE80C2348),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+        child: Text(text, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600)),
       ),
     );
   }

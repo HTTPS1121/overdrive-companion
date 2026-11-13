@@ -1,0 +1,6 @@
+overdrive-companion 3.1.1+39 (build 39)
+APK: final/overdrive-companion-3.1.1+39.apk
+SHA-256 (file): 7326abbcca73ec654f8d8fed04d1c40b7125b04fcaf332890825ec810b4e4d14
+Signer SHA-256: 4A:C0:9B:73:54:A7:13:52:C9:AA:70:6B:39:92:BF:97:70:53:B4:3D:BC:D7:35:2B:BF:39:A8:69:96:BD:29:B8
+Package: com.https1121.overdrive.companion
+Signed with: android/signing/overdrive-release.keystore (alias overdrive-release)

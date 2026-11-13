@@ -5,6 +5,7 @@ import 'package:overdrive_server/overdrive_server.dart';
 
 import '../models/companion_models.dart';
 import 'hebrew_errors.dart';
+import 'network_errors.dart';
 import 'vehicle_repository.dart';
 
 const _commandTimeout = Duration(seconds: 45);
@@ -35,6 +36,11 @@ class RealVehicleRepository implements VehicleRepository {
   String refreshLabel = 'ממתין לנתונים…';
 
   @override
+  bool vehicleStateStale = false;
+  @override
+  String? vehicleOfflineHebrew;
+
+  @override
   bool recordingsKnown = false;
   @override
   DataLoadState recordingsState = DataLoadState.idle;
@@ -48,8 +54,17 @@ class RealVehicleRepository implements VehicleRepository {
   @override
   String? streamErrorHebrew;
 
+  @override
+  bool tripsKnown = false;
+  @override
+  DataLoadState tripsState = DataLoadState.idle;
+  @override
+  String? tripsErrorHebrew;
+
+  DateTime? _lastVehicleRefresh;
   List<Recording> _recordings = [];
   List<String> _placeFilters = [];
+  List<TripSummary> _trips = [];
 
   @override
   List<Recording> get recordings => List.unmodifiable(_recordings);
@@ -58,14 +73,23 @@ class RealVehicleRepository implements VehicleRepository {
   List<String> get placeFilters => List.unmodifiable(_placeFilters);
 
   @override
+  List<TripSummary> get trips => List.unmodifiable(_trips);
+
+  @override
   Future<void> refreshVehicleState() async {
     try {
       final json = await _client
           .getJson(OverdriveEndpoints.vehicleState)
           .timeout(_readTimeout);
       _applyVehicleState(json);
-    } on TimeoutException {
-      throw OverdriveApiException('timeout');
+      vehicleStateStale = false;
+      vehicleOfflineHebrew = null;
+    } on TimeoutException catch (e) {
+      _markVehicleStale(hebrewFromAnyError(e));
+    } on OverdriveApiException catch (e) {
+      _markVehicleStale(hebrewFromAnyError(e));
+    } catch (e) {
+      _markVehicleStale(hebrewFromAnyError(e));
     }
   }
 
@@ -87,8 +111,19 @@ class RealVehicleRepository implements VehicleRepository {
     carName = (json['vehicleName'] ?? json['model'] ?? 'הרכב שלי').toString();
     carTrim = (json['trim'] ?? '').toString();
 
+    _lastVehicleRefresh = DateTime.now();
     final ts = (json['timestamp'] as num?)?.toInt();
     refreshLabel = ts != null ? _freshnessLabel(ts) : 'מעודכן מהשרת';
+  }
+
+  void _markVehicleStale(String message) {
+    vehicleStateStale = true;
+    vehicleOfflineHebrew = message;
+    if (_lastVehicleRefresh != null) {
+      refreshLabel = hebrewStaleVehicleLabel(_lastVehicleRefresh!);
+    } else {
+      refreshLabel = message;
+    }
   }
 
   String _freshnessLabel(int epochSec) {
@@ -110,14 +145,18 @@ class RealVehicleRepository implements VehicleRepository {
       _placeFilters = list.map((r) => r.shortPlace).where((p) => p.isNotEmpty).toSet().toList()..sort();
       recordingsKnown = true;
       recordingsState = list.isEmpty ? DataLoadState.empty : DataLoadState.ready;
-    } on TimeoutException {
+    } on TimeoutException catch (e) {
       recordingsKnown = true;
       recordingsState = DataLoadState.error;
-      recordingsErrorHebrew = hebrewForTimeout();
+      recordingsErrorHebrew = hebrewFromAnyError(e);
     } on OverdriveApiException catch (e) {
       recordingsKnown = true;
       recordingsState = DataLoadState.error;
-      recordingsErrorHebrew = hebrewApiException(e);
+      recordingsErrorHebrew = hebrewFromAnyError(e);
+    } catch (e) {
+      recordingsKnown = true;
+      recordingsState = DataLoadState.error;
+      recordingsErrorHebrew = hebrewFromAnyError(e);
     }
   }
 
@@ -152,10 +191,71 @@ class RealVehicleRepository implements VehicleRepository {
           proxLabel: (map['proxLabel'] ?? '').toString(),
           trigger: (map['trigger'] ?? '').toString(),
           file: recId,
+          thumbPath: map['thumbPath'] as String? ?? map['thumbnail'] as String?,
+          cameraLabel: _optionalStr(map['camera'] ?? map['cameraLabel'] ?? map['cam']),
         ),
       );
     }
     return out;
+  }
+
+  @override
+  Future<void> refreshTrips() async {
+    tripsState = DataLoadState.loading;
+    tripsErrorHebrew = null;
+    try {
+      final json = await _client
+          .getJson('${OverdriveEndpoints.trips}?days=14&limit=30')
+          .timeout(_readTimeout);
+      final raw = json['trips'];
+      final parsed = <TripSummary>[];
+      if (raw is List) {
+        for (final item in raw) {
+          if (item is! Map) continue;
+          final map = Map<String, dynamic>.from(item);
+          parsed.add(_parseTrip(map));
+        }
+      }
+      _trips = parsed;
+      tripsKnown = true;
+      tripsState = parsed.isEmpty ? DataLoadState.empty : DataLoadState.ready;
+    } on OverdriveApiException catch (e) {
+      tripsKnown = true;
+      if (e.statusCode == 404) {
+        _trips = [];
+        tripsState = DataLoadState.empty;
+        tripsErrorHebrew = null;
+        return;
+      }
+      tripsState = DataLoadState.error;
+      tripsErrorHebrew = hebrewFromAnyError(e);
+    } catch (e) {
+      tripsKnown = true;
+      tripsState = DataLoadState.error;
+      tripsErrorHebrew = hebrewFromAnyError(e);
+    }
+  }
+
+  TripSummary _parseTrip(Map<String, dynamic> map) {
+    final id = (map['id'] as num?)?.toInt() ?? 0;
+    final start = (map['startTime'] as num?)?.toInt() ?? 0;
+    final end = (map['endTime'] as num?)?.toInt() ?? start;
+    final dist = (map['distanceKm'] as num?)?.toDouble() ?? 0;
+    final dur = (map['durationSeconds'] as num?)?.toInt() ?? 0;
+    final score = (map['overallScore'] as num?)?.toInt() ?? 0;
+    final when = DateTime.fromMillisecondsSinceEpoch(start);
+    final hh = when.hour.toString().padLeft(2, '0');
+    final mm = when.minute.toString().padLeft(2, '0');
+    final subtitle = '${dist.toStringAsFixed(1)} ק״מ · ${dur ~/ 60} דק׳ · DNA $score · $hh:$mm';
+    return TripSummary(
+      id: id,
+      startTimeMs: start,
+      endTimeMs: end,
+      distanceKm: dist,
+      durationSeconds: dur,
+      overallScore: score,
+      subtitle: subtitle,
+    );
   }
 
   RecordingType _recordingType(Object? raw) {
@@ -176,14 +276,18 @@ class RealVehicleRepository implements VehicleRepository {
       streamKnown = true;
       streamState = active ? DataLoadState.ready : DataLoadState.empty;
       if (!active) streamErrorHebrew = hebrewStreamUnavailable();
-    } on TimeoutException {
+    } on TimeoutException catch (e) {
       streamKnown = true;
       streamState = DataLoadState.error;
-      streamErrorHebrew = hebrewForTimeout();
+      streamErrorHebrew = hebrewFromAnyError(e);
     } on OverdriveApiException catch (e) {
       streamKnown = true;
       streamState = DataLoadState.error;
-      streamErrorHebrew = hebrewApiException(e);
+      streamErrorHebrew = hebrewFromAnyError(e);
+    } catch (e) {
+      streamKnown = true;
+      streamState = DataLoadState.error;
+      streamErrorHebrew = hebrewFromAnyError(e);
     }
   }
 
@@ -208,10 +312,12 @@ class RealVehicleRepository implements VehicleRepository {
       } catch (_) {}
       final msg = json['message'] as String?;
       return CommandResult.ok(msg);
-    } on TimeoutException {
-      return CommandResult.fail(hebrewForTimeout());
+    } on TimeoutException catch (e) {
+      return CommandResult.fail(hebrewFromAnyError(e));
     } on OverdriveApiException catch (e) {
-      return CommandResult.fail(hebrewApiException(e));
+      return CommandResult.fail(hebrewFromAnyError(e));
+    } catch (e) {
+      return CommandResult.fail(hebrewFromAnyError(e));
     }
   }
 
@@ -232,6 +338,11 @@ class _ActionSpec {
   const _ActionSpec(this.path, this.body);
   final String path;
   final Map<String, dynamic> body;
+}
+
+String? _optionalStr(Object? raw) {
+  final s = raw?.toString().trim() ?? '';
+  return s.isEmpty ? null : s;
 }
 
 /// Test-only: hydrate from bundled fixture JSON string.

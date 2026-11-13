@@ -43,6 +43,7 @@ abstract final class OverdriveEndpoints {
   static const streamQuality = '/api/stream/quality';
 
   static const recordings = '/api/recordings';
+  static const trips = '/api/trips';
   static const recordingsStats = '/api/recordings/stats';
   static const surveillanceStatus = '/api/surveillance/status';
   static const surveillanceConfig = '/api/surveillance/config';

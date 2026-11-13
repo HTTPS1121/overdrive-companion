@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/io_client.dart';
+import 'package:overdrive_companion/data/hebrew_errors.dart';
 import 'package:overdrive_companion/data/real_vehicle_repository.dart';
 import 'package:overdrive_companion/data/secure_settings_store.dart';
 import 'package:overdrive_companion/models/connection_draft.dart';
@@ -63,7 +64,7 @@ void main() {
       ),
     );
     expect(ctrl.loginVisible, isTrue);
-    expect(ctrl.loginErrorHebrew, isNotNull);
+    expect(ctrl.loginErrorHebrew, hebrewAuthDenied());
   });
 }
 

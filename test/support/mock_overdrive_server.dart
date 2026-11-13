@@ -10,12 +10,14 @@ class MockOverdriveServer {
   static HttpServer? _server;
   static Uri? baseUri;
   static String mode = 'ok';
+  static List<int>? _sampleMp4;
 
   static Future<Uri> start() async {
     if (baseUri != null) return baseUri!;
     final stateJson = await rootBundle.loadString('fixtures/vehicle_state_sample.json');
     final authStatus = await rootBundle.loadString('fixtures/auth_status.json');
     final tokenOk = await rootBundle.loadString('fixtures/auth_token_success.json');
+    _sampleMp4 ??= (await rootBundle.load('fixtures/sample.mp4')).buffer.asUint8List();
     _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     final port = _server!.port;
     baseUri = Uri.parse('http://127.0.0.1:$port');
@@ -65,7 +67,45 @@ class MockOverdriveServer {
         return;
       }
       if (path == '/api/recordings') {
-        await _json(request, '{"recordings":[]}', 200);
+        await _json(
+          request,
+          jsonEncode({
+            'recordings': [
+              {
+                'id': 'mock-clip-1',
+                'day': 'היום',
+                'type': 'sentry',
+                'typeLabel': 'אבטחה',
+                'time': '12:34',
+                'duration': '0:12',
+                'size': '1.1 MB',
+                'trigger': 'תנועה',
+                'cameraLabel': 'חזית',
+              },
+            ],
+          }),
+          200,
+        );
+        return;
+      }
+      if (path.startsWith('/video/id/')) {
+        request.response.statusCode = 200;
+        request.response.headers.contentType = ContentType('video', 'mp4');
+        request.response.add(_sampleMp4!);
+        await request.response.close();
+        return;
+      }
+      if (path.startsWith('/thumb/id/')) {
+        request.response.statusCode = 404;
+        await request.response.close();
+        return;
+      }
+      if (path == '/api/trips') {
+        await _json(
+          request,
+          '{"success":true,"trips":[{"id":1,"startTime":1700000000000,"endTime":1700003600000,"distanceKm":12.4,"durationSeconds":1800,"overallScore":82}]}',
+          200,
+        );
         return;
       }
       if (path == '/api/stream/status') {

@@ -388,3 +388,34 @@ class OdCard extends StatelessWidget {
     );
   }
 }
+
+class OdInlineAlert extends StatelessWidget {
+  const OdInlineAlert({super.key, required this.message, this.subtitle});
+
+  final String message;
+  final String? subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4E6),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE8C89A)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(message, style: odBody(13, FontWeight.w700, const Color(0xFF8A4B00))),
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(subtitle!, style: odMuted(11)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}

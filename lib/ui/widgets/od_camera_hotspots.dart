@@ -10,89 +10,56 @@ import '../../state/companion_app_controller.dart';
 class OdCameraSelectorDiagram extends ConsumerWidget {
   const OdCameraSelectorDiagram({super.key});
 
-  static const _carW = 81.0;
-  static const _carH = 152.0;
+  static const _carW = 60.0;
+  static const _carH = 126.0;
+  static const _gutterTop = 14.0;
+  static const _gutterBottom = 16.0;
+  static const _dot = 32.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctrl = ref.watch(companionAppControllerProvider);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const scale = 1.0;
-        final carW = _carW * scale;
-        final carH = _carH * scale;
-        final padX = 32 * scale;
-        final boxW = carW + padX * 2;
-        final boxH = carH + 12 * scale;
-        final left = padX;
+    const carW = _carW;
+    const carH = _carH;
+    const boxH = carH + _gutterTop + _gutterBottom;
 
-        return Center(
-          child: SizedBox(
-            width: boxW,
-            height: boxH,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned(
-                  left: left,
-                  top: 6 * scale,
-                  width: carW,
-                  height: carH,
-                  child: const OdCarTopDown(),
-                ),
-                _hotspot(
-                  ref,
-                  ctrl,
-                  1,
-                  'חזית',
-                  left + carW / 2 - 16 * scale,
-                  0,
-                ),
-                _hotspot(
-                  ref,
-                  ctrl,
-                  3,
-                  'אחור',
-                  left + carW / 2 - 16 * scale,
-                  6 * scale + carH - 10 * scale,
-                ),
-                _hotspot(
-                  ref,
-                  ctrl,
-                  4,
-                  'שמאל',
-                  left - 16 * scale,
-                  6 * scale + carH / 2 - 16 * scale,
-                ),
-                _hotspot(
-                  ref,
-                  ctrl,
-                  2,
-                  'ימין',
-                  left + carW - 16 * scale,
-                  6 * scale + carH / 2 - 16 * scale,
-                ),
-                _hotspot(
-                  ref,
-                  ctrl,
-                  0,
-                  'הכל',
-                  left + carW / 2 - 16 * scale,
-                  6 * scale + carH / 2 - 16 * scale,
-                ),
-                _hotspot(
-                  ref,
-                  ctrl,
-                  6,
-                  'DVR',
-                  left + carW * 0.62 - 16 * scale,
-                  6 * scale + 18 * scale,
-                ),
-              ],
+    return Center(
+      child: SizedBox(
+        width: carW,
+        height: boxH,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              left: 0,
+              right: 0,
+              top: _gutterTop,
+              height: carH,
+              child: const OdCarTopDown(),
             ),
-          ),
-        );
-      },
+            _hotspot(ref, ctrl, 1, 'חזית', left: (carW - _dot) / 2, top: _gutterTop - 6),
+            _hotspot(ref, ctrl, 3, 'אחור', left: (carW - _dot) / 2, top: _gutterTop + carH - _dot + 6),
+            _hotspot(ref, ctrl, 4, 'שמאל', left: -16, top: _gutterTop + carH / 2 - _dot / 2),
+            _hotspot(ref, ctrl, 2, 'ימין', left: carW - _dot + 16, top: _gutterTop + carH / 2 - _dot / 2),
+            _hotspot(
+              ref,
+              ctrl,
+              0,
+              'הכל',
+              left: (carW - _dot) / 2,
+              top: _gutterTop + carH / 2 - _dot / 2,
+            ),
+            _hotspot(
+              ref,
+              ctrl,
+              6,
+              'DVR',
+              left: carW * 0.62 - _dot / 2,
+              top: _gutterTop + 18,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -101,16 +68,18 @@ class OdCameraSelectorDiagram extends ConsumerWidget {
     CompanionAppController ctrl,
     int id,
     String label,
-    double x,
-    double y,
+    {required double left, required double top}
   ) {
-    final active = ctrl.odCamHotspotActive(id);
     return Positioned(
-      left: x,
-      top: y,
+      left: left,
+      top: top,
       child: _HotspotDot(
         label: label,
-        active: active,
+        active: ctrl.odCamHotspotActive(id),
+        labelBelow: id == 3,
+        labelOnStart: id == 4 || id == 6,
+        labelOnEnd: id == 2,
+        labelBelowCenter: id == 0,
         onTap: () => ref.read(companionAppControllerProvider).selectOdCamHotspot(id),
       ),
     );
@@ -118,11 +87,23 @@ class OdCameraSelectorDiagram extends ConsumerWidget {
 }
 
 class _HotspotDot extends StatelessWidget {
-  const _HotspotDot({required this.label, required this.active, required this.onTap});
+  const _HotspotDot({
+    required this.label,
+    required this.active,
+    required this.onTap,
+    this.labelBelow = false,
+    this.labelOnStart = false,
+    this.labelOnEnd = false,
+    this.labelBelowCenter = false,
+  });
 
   final String label;
   final bool active;
   final VoidCallback onTap;
+  final bool labelBelow;
+  final bool labelOnStart;
+  final bool labelOnEnd;
+  final bool labelBelowCenter;
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +116,38 @@ class _HotspotDot extends StatelessWidget {
       letterSpacing: 0.04,
       color: active ? Colors.white : OdColors.ink,
     );
+    Widget labelChip = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      decoration: BoxDecoration(
+        color: active ? OdColors.blue : Colors.white,
+        border: Border.all(color: active ? OdColors.blue : OdColors.line),
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Text(label, style: labelStyle),
+    );
+
+  if (labelOnStart) {
+    labelChip = Positioned(
+      right: 35,
+      top: 0,
+      bottom: 0,
+      child: Center(child: labelChip),
+    );
+  } else if (labelOnEnd) {
+    labelChip = Positioned(
+      left: 35,
+      top: 0,
+      bottom: 0,
+      child: Center(child: labelChip),
+    );
+  } else if (labelBelow) {
+    labelChip = Positioned(top: 35, left: 0, right: 0, child: Center(child: labelChip));
+  } else if (labelBelowCenter) {
+    labelChip = Positioned(top: 45, left: 0, right: 0, child: Center(child: labelChip));
+  } else {
+    labelChip = Positioned(bottom: 26, left: 0, right: 0, child: Center(child: labelChip));
+  }
+
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
@@ -144,18 +157,7 @@ class _HotspotDot extends StatelessWidget {
           clipBehavior: Clip.none,
           alignment: Alignment.center,
           children: [
-            Positioned(
-              bottom: 26,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                decoration: BoxDecoration(
-                  color: active ? OdColors.blue : Colors.white,
-                  border: Border.all(color: active ? OdColors.blue : OdColors.line),
-                  borderRadius: BorderRadius.circular(99),
-                ),
-                child: Text(label, style: labelStyle),
-              ),
-            ),
+            labelChip,
             Container(
               width: 21,
               height: 21,

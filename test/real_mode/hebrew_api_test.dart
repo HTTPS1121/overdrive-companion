@@ -18,4 +18,15 @@ void main() {
     final f = ConnectionFailure(ConnectionFailureKind.authRejected);
     expect(hebrewConnectionFailure(f), contains('אימות'));
   });
+
+  test('401 wrong access code vs expired session', () {
+    expect(
+      hebrewApiException(OverdriveApiException('invalid', statusCode: 401, authRequired: false)),
+      hebrewAuthDenied(),
+    );
+    expect(
+      hebrewApiException(OverdriveApiException('expired', statusCode: 401, authRequired: true)),
+      contains('מחדש'),
+    );
+  });
 }

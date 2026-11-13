@@ -1,7 +1,7 @@
 name: overdrive_companion
 description: Overdrive Companion — Hebrew RTL companion for the Overdrive car server.
 publish_to: "none"
-version: 3.1.0+38
+version: 3.1.1+39
 
 environment:
   sdk: ^3.13.0
@@ -17,6 +17,7 @@ dependencies:
   overdrive_server:
     path: packages/overdrive_server
   flutter_secure_storage: ^9.2.4
+  video_player: ^2.10.0
 
 dev_dependencies:
   flutter_test:
