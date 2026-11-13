@@ -14,8 +14,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctrl = ref.watch(demoAppControllerProvider);
-    return ListView(
-      padding: EdgeInsets.zero,
+    return OdTabScroll(
       children: [
         Center(
           child: Column(
@@ -186,9 +185,9 @@ class _RangeCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.only(left: 14),
+                padding: const EdgeInsetsDirectional.only(start: 14),
                 decoration: const BoxDecoration(
-                  border: Border(left: BorderSide(color: OdColors.line)),
+                  border: BorderDirectional(start: BorderSide(color: OdColors.line)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -216,7 +215,15 @@ class _RangeCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: Text('לא בטעינה', style: odMuted(11))),
+              Expanded(
+                child: Row(
+                  children: [
+                    const OdIcon(OdIconName.battery, size: 17, color: OdColors.muted),
+                    const SizedBox(width: 4),
+                    Text('לא בטעינה', style: odMuted(11)),
+                  ],
+                ),
+              ),
               Expanded(child: Text('מגבלת טעינה 90%', style: odMuted(11), textAlign: TextAlign.center)),
               Expanded(child: Text('עודכן לפני 2 דק׳', style: odMuted(11), textAlign: TextAlign.end)),
             ],

@@ -111,11 +111,23 @@ class RecordingPlayerModal extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text('נגן', style: TextStyle(color: Colors.white)),
+                            Material(
+                              color: const Color(0x1AFFFFFF),
+                              shape: const CircleBorder(),
+                              child: InkWell(
+                                customBorder: const CircleBorder(),
+                                onTap: () {},
+                                child: const SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: Icon(Icons.play_arrow, color: Colors.white, size: 22),
+                                ),
+                              ),
                             ),
-                            OdLtrText('0:02 / ${r.dur}', style: const TextStyle(color: Color(0xFFDCE7F5), fontSize: 12)),
+                            OdLtrText(
+                              '${odFormatClockSeconds(ctrl.recPlaySeconds)} / ${r.dur}',
+                              style: const TextStyle(color: Color(0xFFDCE7F5), fontSize: 12),
+                            ),
                             const OdLtrText('1.0×', style: TextStyle(color: Color(0xFFDCE7F5), fontSize: 12)),
                           ],
                         ),

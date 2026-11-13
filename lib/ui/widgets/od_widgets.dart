@@ -54,6 +54,53 @@ class OdIconButton extends StatelessWidget {
   }
 }
 
+/// Space reserved above the floating demo chip and bottom nav pill (matches HTML `calc(112px + safe-area)` plus chip stack).
+class OdChrome {
+  OdChrome._();
+
+  static const double _navOuterBottom = 14;
+  static const double _demoChipHeight = 24;
+  static const double _demoChipGap = 6;
+  static const double _navBarHeight = 62;
+  static const double _contentMargin = 16;
+
+  static double bottomInset(BuildContext context) {
+    final safe = MediaQuery.paddingOf(context).bottom;
+    return _navOuterBottom + safe + _demoChipHeight + _demoChipGap + _navBarHeight + _contentMargin;
+  }
+}
+
+/// Tab content that scrolls together with the top bar and demo line (demo HTML `#app` scroll model).
+class OdTabScroll extends ConsumerWidget {
+  const OdTabScroll({
+    super.key,
+    required this.children,
+    this.controller,
+    this.showDemoBanner = true,
+    this.padding,
+  });
+
+  final List<Widget> children;
+  final ScrollController? controller;
+  final bool showDemoBanner;
+  final EdgeInsets? padding;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final screen = ref.watch(demoAppControllerProvider).screen;
+    final demo = showDemoBanner && screen != OdScreen.camera && screen != OdScreen.record;
+    return ListView(
+      controller: controller,
+      padding: EdgeInsets.only(bottom: OdChrome.bottomInset(context)).add(padding ?? EdgeInsets.zero),
+      children: [
+        const OdTopBar(),
+        if (demo) const OdDemoBanner(),
+        ...children,
+      ],
+    );
+  }
+}
+
 class OdDemoBanner extends StatelessWidget {
   const OdDemoBanner({super.key});
 

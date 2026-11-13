@@ -6,6 +6,7 @@ import '../../icons/od_icon.dart';
 import '../../illustrations/od_illustrations.dart';
 import '../../state/demo_app_controller.dart';
 import '../widgets/od_camera_hotspots.dart';
+import '../widgets/od_widgets.dart';
 
 class CameraScreen extends ConsumerWidget {
   const CameraScreen({super.key});
@@ -14,17 +15,28 @@ class CameraScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ctrl = ref.watch(demoAppControllerProvider);
     final label = ctrl.camModeAll ? 'כל המצלמות' : DemoAppController.cams[ctrl.camSel];
+    final bottom = OdChrome.bottomInset(context);
     return ColoredBox(
       color: OdColors.bg,
       child: Column(
         children: [
-          Expanded(
-            flex: 58,
-            child: _CameraStage(label: label, ctrl: ctrl),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: OdTopBar(),
           ),
-          const Expanded(
-            flex: 20,
-            child: _LiveUtilityRail(),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: bottom),
+              child: Column(
+                children: [
+                  Expanded(child: _CameraStage(label: label, ctrl: ctrl)),
+                  const SizedBox(
+                    height: 220,
+                    child: _LiveUtilityRail(),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

@@ -14,11 +14,11 @@ class TripScreen extends StatelessWidget {
     const bars = <double>[22, 35, 16, 29, 11, 32, 19];
     return Consumer(
       builder: (context, ref, _) {
-        return ListView(
+        return OdTabScroll(
           children: [
-            Text('נסיעות', style: odEyebrow()),
+            Text('לראות את הדרך', style: odEyebrow()),
             const SizedBox(height: 4),
-            Text('לראות את הדרך', style: odH1()),
+            Text('נסיעות', style: odH1()),
             const SizedBox(height: 5),
             Text('המרחק, האנרגיה וכל מה שביניהם.', style: odMuted()),
             const SizedBox(height: 22),
@@ -95,19 +95,19 @@ class TripScreen extends StatelessWidget {
               child: Column(
                 children: [
                   _TripRow(
-                    title: 'הבית <- מרכז העיר',
+                    title: 'הבית ← מרכז העיר',
                     subtitle: 'היום, 18:10 · 18.6 ק״מ',
-                    onTap: () => openTripDetailSheet(ref, 'הבית <- מרכז העיר', 'היום, 18:10'),
+                    onTap: () => openTripDetailSheet(ref, 'הבית ← מרכז העיר', 'היום, 18:10'),
                   ),
                   _TripRow(
-                    title: 'מרכז העיר <- הבית',
+                    title: 'מרכז העיר ← הבית',
                     subtitle: 'היום, 08:40 · 19.2 ק״מ',
-                    onTap: () => openTripDetailSheet(ref, 'מרכז העיר <- הבית', 'היום, 08:40'),
+                    onTap: () => openTripDetailSheet(ref, 'מרכז העיר ← הבית', 'היום, 08:40'),
                   ),
                   _TripRow(
-                    title: 'הבית <- הפארק',
+                    title: 'הבית ← הפארק',
                     subtitle: 'אתמול, 16:20 · 8.4 ק״מ',
-                    onTap: () => openTripDetailSheet(ref, 'הבית <- הפארק', 'אתמול, 16:20'),
+                    onTap: () => openTripDetailSheet(ref, 'הבית ← הפארק', 'אתמול, 16:20'),
                   ),
                 ],
               ),

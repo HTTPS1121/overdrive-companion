@@ -3,6 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:overdrive_companion/main.dart';
 
+Future<void> _scrollTab(WidgetTester tester, double delta) async {
+  final scrollable = find.byType(Scrollable).first;
+  await tester.drag(scrollable, Offset(0, delta));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('export rebuild v1 flutter screens at 390×844', (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
@@ -26,6 +32,12 @@ void main() {
       find.byKey(const ValueKey('screenshot_root')),
       matchesGoldenFile('rebuild-v1/02_home.png'),
     );
+    await _scrollTab(tester, -520);
+    await expectLater(
+      find.byKey(const ValueKey('screenshot_root')),
+      matchesGoldenFile('rebuild-v1/02_home_scrolled.png'),
+    );
+    await _scrollTab(tester, 520);
 
     await tester.tap(find.byKey(const ValueKey('control_lock')));
     await tester.pump(const Duration(milliseconds: 500));
@@ -66,6 +78,12 @@ void main() {
       find.byKey(const ValueKey('screenshot_root')),
       matchesGoldenFile('rebuild-v1/04_recordings.png'),
     );
+    await _scrollTab(tester, -900);
+    await expectLater(
+      find.byKey(const ValueKey('screenshot_root')),
+      matchesGoldenFile('rebuild-v1/04_recordings_scrolled.png'),
+    );
+    await _scrollTab(tester, 900);
 
     await tester.tap(find.byKey(const ValueKey('nav_trip')));
     await tester.pump(const Duration(milliseconds: 500));
@@ -73,12 +91,23 @@ void main() {
       find.byKey(const ValueKey('screenshot_root')),
       matchesGoldenFile('rebuild-v1/05_trip.png'),
     );
+    await _scrollTab(tester, -420);
+    await expectLater(
+      find.byKey(const ValueKey('screenshot_root')),
+      matchesGoldenFile('rebuild-v1/05_trip_scrolled.png'),
+    );
+    await _scrollTab(tester, 420);
 
     await tester.tap(find.byKey(const ValueKey('nav_more')));
     await tester.pump(const Duration(milliseconds: 500));
     await expectLater(
       find.byKey(const ValueKey('screenshot_root')),
       matchesGoldenFile('rebuild-v1/06_more.png'),
+    );
+    await _scrollTab(tester, -1200);
+    await expectLater(
+      find.byKey(const ValueKey('screenshot_root')),
+      matchesGoldenFile('rebuild-v1/06_more_scrolled.png'),
     );
   });
 }

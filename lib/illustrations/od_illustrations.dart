@@ -81,11 +81,18 @@ class _CarSidePainter extends CustomPainter {
 
 /// Parking-lot scene from overdrive-chosen.html `scene()`.
 class OdSceneView extends StatelessWidget {
-  const OdSceneView({super.key, this.label = 'חזית', this.height, this.dark = false});
+  const OdSceneView({
+    super.key,
+    this.label = 'חזית',
+    this.height,
+    this.dark = false,
+    this.thumbnailOverlay = false,
+  });
 
   final String label;
   final double? height;
   final bool dark;
+  final bool thumbnailOverlay;
 
   @override
   Widget build(BuildContext context) {
@@ -100,15 +107,21 @@ class OdSceneView extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               CustomPaint(painter: _ScenePainter(dark: dark)),
-              if (!dark)
+              if (!dark && thumbnailOverlay)
                 Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 8,
-                  child: Center(
-                    child: Text(
-                      label,
-                      style: odMuted(11).copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF476181)),
+                  top: 10,
+                  right: 10,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: const Color(0xE80C2348),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                      child: Text(
+                        '$label · הדמיה',
+                        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
                 ),

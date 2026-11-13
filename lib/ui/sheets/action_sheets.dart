@@ -34,6 +34,9 @@ class _ConfirmBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctrl = ref.read(demoAppControllerProvider);
+    final footnote = ['power', 'off', 'pin', 'down'].contains(actionId)
+        ? 'התמיכה בפעולה מרחוק עדיין לא אומתה.'
+        : 'זמינות השליטה בפועל כשהרכב נעול או ישן טעונה בדיקה.';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -46,7 +49,7 @@ class _ConfirmBody extends ConsumerWidget {
               Text('הרכב שלי · ${ctrl.carName}', style: const TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               Text(
-                'אין פקודה שנשלחת לרכב.',
+                'אין פקודה שנשלחת לרכב. $footnote',
                 style: odMuted(),
               ),
             ],

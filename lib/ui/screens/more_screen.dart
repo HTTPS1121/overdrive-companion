@@ -14,11 +14,11 @@ class MoreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, _) {
-        return ListView(
+        return OdTabScroll(
           children: [
-            Text('עוד אפשרויות', style: odEyebrow()),
+            Text('השכבה שמאחורי השקט', style: odEyebrow()),
             const SizedBox(height: 4),
-            Text('השכבה שמאחורי השקט', style: odH1()),
+            Text('עוד אפשרויות', style: odH1()),
             const SizedBox(height: 5),
             Text('כל היכולות, מאורגנות לפי הצורך.', style: odMuted()),
             const SizedBox(height: 16),
@@ -29,7 +29,6 @@ class MoreScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFFE3EBF7),
                 borderRadius: BorderRadius.circular(14),
-                border: const Border(right: BorderSide(color: OdColors.blue, width: 3)),
               ),
               child: Text(
                 'מפת יכולות, לא הבטחת חיבור.\nמבוסס תיעוד OverDrive ציבורי. תמיכה בכל רכב ובשליטה מהטלפון לא אומתה.',

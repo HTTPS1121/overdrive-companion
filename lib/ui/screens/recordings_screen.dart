@@ -6,6 +6,7 @@ import '../../design/od_design.dart';
 import '../../icons/od_icon.dart';
 import '../../illustrations/od_illustrations.dart';
 import '../../state/demo_app_controller.dart';
+import '../widgets/od_widgets.dart';
 
 class RecordingsScreen extends ConsumerWidget {
   const RecordingsScreen({super.key});
@@ -14,8 +15,7 @@ class RecordingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ctrl = ref.watch(demoAppControllerProvider);
     final list = ctrl.filteredRecordings();
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 8),
+    return OdTabScroll(
       children: [
         _EventsTopBar(ctrl: ctrl),
         const SizedBox(height: 12),
@@ -400,7 +400,7 @@ class _RecordingCard extends ConsumerWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                const OdSceneView(label: 'תצוגה מדומה'),
+                const OdSceneView(label: 'תצוגה מדומה', thumbnailOverlay: true),
                 Center(
                   child: Container(
                     width: 44,
@@ -415,7 +415,7 @@ class _RecordingCard extends ConsumerWidget {
                 ),
                 Positioned(
                   top: 8,
-                  right: 8,
+                  left: 8,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 9),
                     height: 24,

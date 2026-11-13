@@ -35,6 +35,13 @@ class OdLtrText extends StatelessWidget {
   }
 }
 
+/// `mm:ss` with two-digit minutes (demo player uses `00:02`, not `0:02`).
+String odFormatClockSeconds(int totalSeconds) {
+  final m = totalSeconds ~/ 60;
+  final s = totalSeconds % 60;
+  return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+}
+
 /// Shorthand for tabular nums with LTR isolation.
 Widget odLtrNum(
   String value, {
