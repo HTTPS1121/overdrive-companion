@@ -1,66 +1,70 @@
-# Overdrive rebuild v1 — design parity gaps
+# Overdrive rebuild v1 — parity gaps (final)
 
-Reference: `overdrive-chosen.html` (SHA-256 `9d51550e4a62cc3a9fc34f999b678b5889e0f43fa40d95044b10ab67e0075e7a`).
+Design reference: `overdrive-chosen.html` (SHA-256 `9d51550e4a62cc3a9fc34f999b678b5889e0f43fa40d95044b10ab67e0075e7a`).
 
-## Signing (blocker)
+## Signing (resolved policy)
 
-- **Required** cert SHA-256: `0d1b4493974f41eaa061f2f6a4f8f5cc44f0417582b64185a6189fa8cf932956` (Android Debug, builds 24–29).
-- **Built APK** on this agent was signed with the VM default `~/.android/debug.keystore` → `c55757d19355e8818297da59374e6dc16ffd76696236cb0161032c78555d4d29`.
-- The lineage keystore is **not in the repository** (gitignored `**/*.keystore`); release Gradle only sets `signingConfig = debug`, which resolves to whatever debug keystore exists on the build host.
-- **Impact:** APK will **not** install over existing builds until re-signed with the original debug keystore file from the maintainer machine.
+- **Permanent key:** `c55757d19355e8818297da59374e6dc16ffd76696236cb0161032c78555d4d29` (Android Debug CN, PKCS12 at `android/signing/c557-debug.keystore` via git-ignored `android/key.properties`).
+- Legacy `0d1b4493…932956` keystore is **lost** — installs over builds 24–29 are not expected; all v1+ rebuilds use `c557…`.
+
+## QA capture notes
+
+- **Emulator:** AVD `Overdrive390` 390×844, `-accel off` + SwiftShader (KVM denied on cloud VM). Boot succeeded; **System UI ANR** under load limited UIAutomator/adb navigation.
+- **Flutter app captures in `final/`:** widget goldens at 390×844 logical (`flutter test` — labelled `SOURCE=widget-golden-390x844` in VERIFY.txt) unless `final/emulator/` contains adb captures.
+- **HTML captures:** Puppeteer viewport 390×844 (`tool/capture_html_demo.mjs`).
 
 ## Typography & colour
 
-- App uses bundled **NotoSansHebrew**; HTML uses `-apple-system, BlinkMacSystemFont, Segoe UI, Arial` — metrics differ slightly (h1/h2/num sizes).
-- Focus ring `outline: 3px solid #e3a52c` on HTML buttons — Flutter uses platform defaults unless focused manually.
+- Bundled **NotoSansHebrew** vs HTML system font stack — line metrics and letter-spacing differ slightly.
+- Focus ring `outline: 3px solid #e3a52c` on HTML buttons — not replicated on all Flutter controls.
 
 ## Motion
 
-- HTML `@keyframes arrive` on cards — not reproduced.
-- `connPulse` / `hotspotPulse` on cameras — conn dot only partially (fade); camera hotspots not interactive.
+- HTML card `arrive` animation — not implemented.
+- Camera `connPulse` / hotspot `hotspotPulse` — partial (fade only); hotspots not interactive.
 
 ## Illustrations
 
-- Car side/top and parking `scene` / `map` are **simplified** `CustomPaint`/`path_drawing` subsets of the HTML SVG paths (not full path fidelity).
+- Car side/top, parking scene, map — simplified `CustomPaint` / `path_drawing` paths, not full SVG fidelity.
 
 ## Home
 
-- HTML `energy` gradient hero variant on login only; home uses `rangecard` — matched at content level.
-- Quick-control icons via SVG paths — Flutter `OdIcon` stroke paths; minor stroke/join differences possible.
-- `היום בתנועה` rows not wired to sheets/trip navigation.
+- Range card content matched; energy-gradient login hero matched on login screen.
+- `OdIcon` stroke SVG paths — minor join/cap deltas vs browser.
+- “היום בתנועה” rows — not linked to trip/record sheets.
 
-## Bottom nav
+## Bottom navigation
 
-- Glass: `BackdropFilter` blur without CSS `saturate(150%)` — frosted look slightly different.
-- Nav item press states / exact shadow colour `#132f5926` approximated.
+- `BackdropFilter` blur without CSS `backdrop-filter: saturate(150%)`.
+- Shadow colour/blur approximated (`#132f5926`, 30px).
 
 ## Cameras
 
-- No cam hotspot selector on car diagram (HTML interactive `cam-hotspot` rings).
-- No quad / all-cams mode, DVR hotspot, map-expanded fullscreen, quality prefs sheet, or fullscreen expand.
-- Top bar buttons (prefs/expand) omitted.
+- Missing: car-diagram cam hotspots, quad/all-cams, DVR hotspot, map-expanded mode, top-bar prefs/fullscreen, quality sheet.
 
 ## Recordings
 
-- Multi-row actor/severity/proximity/storage/place filter chips — **collapsed** to summary strip (horizontal type tabs + placeholder filter card).
-- Video modal player, timeline scrubber, quadrant bar — not implemented.
-- Calendar / OEM DVR chip — visual only.
+- Full five filter rows (actor/severity/proximity/storage/place chips) — **placeholder strip** only; type tabs work in demo.
+- Video modal, scrubber, quadrant bar, recording player — not built.
+- Calendar / OEM DVR — chrome only.
 
 ## Trip / More
 
-- Trip detail sheet on row tap — not wired.
-- More group rows — no detail bottom sheets.
+- Trip list / More capability rows — no detail bottom sheets from HTML `detail()` / `groups`.
 
-## Sheets
+## Sheets & flows
 
-- Profile / menu / confirm / result flows — core confirm + result for controls present; extensive HTML `detail()` catalog not ported.
+- Lock confirm + result demo flow — present.
+- Profile sheet — simplified body vs HTML.
+- Context menu sheet — single paragraph vs full `screenMenuExtras` list.
+- Entire HTML `detail()` catalog for connection states, records, trips — not ported.
 
-## iOS
+## Platform
 
-- Bundle ID updated to `com.https1121.overdrive.companion` in `project.pbxproj`; **no iOS build** on this Linux VM.
+- **iOS:** Bundle ID set; no build on Linux CI.
+- **Release APK:** demo data only; `packages/overdrive_server` unused at runtime.
 
-## QA captures
+## Intentional scope (stage 1)
 
-- Flutter: widget goldens at 390×844 (`test/screenshot/rebuild-v1/`).
-- HTML: Puppeteer at 390×844 (`artifacts/rebuild-v1/html/`).
-- Side-by-side: `artifacts/rebuild-v1/compare/*_side_by_side.png` (HTML left, Flutter right).
+- No live tunnel, JWT, or vehicle HTTP commands.
+- No WebView.

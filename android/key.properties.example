@@ -1,0 +1,9 @@
+# Copy to android/key.properties (git-ignored). Never commit key.properties or .keystore files.
+#
+# Restore the signing keystore from Agent Store:
+#   artifacts/signing/c557-debug.keystore  ->  android/signing/c557-debug.keystore
+#
+storePassword=android
+keyPassword=android
+keyAlias=androiddebugkey
+storeFile=signing/c557-debug.keystore

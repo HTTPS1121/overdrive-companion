@@ -38,11 +38,10 @@ class HomeScreen extends ConsumerWidget {
           children: [
             for (final a in kControlActions)
               _ControlTile(
+                tapKey: a.$1 == 'lock' ? const ValueKey('control_lock') : null,
                 icon: _iconFor(a.$1),
                 label: a.$2,
-                onTap: () => a.$3
-                    ? showConfirmAction(context, ref, a.$1, a.$2)
-                    : showConfirmAction(context, ref, a.$1, a.$2),
+                onTap: () => showConfirmAction(context, ref, a.$1, a.$2),
               ),
           ],
         ),
@@ -226,15 +225,22 @@ class _RangeCard extends StatelessWidget {
 }
 
 class _ControlTile extends StatelessWidget {
-  const _ControlTile({required this.icon, required this.label, required this.onTap});
+  const _ControlTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.tapKey,
+  });
 
   final OdIconName icon;
   final String label;
   final VoidCallback onTap;
+  final Key? tapKey;
 
   @override
   Widget build(BuildContext context) {
     return Material(
+      key: tapKey,
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(OdRadii.control),

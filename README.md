@@ -65,7 +65,8 @@ flutter build apk --release
 
 APK: `build/app/outputs/flutter-apk/app-release.apk`  
 Package id: `com.https1121.overdrive.companion`  
-**Signing:** debug keystore (see `android/app/build.gradle.kts`) until you add release keys.
+
+**Signing (rebuild v1):** release builds use `android/signing/c557-debug.keystore` when `android/key.properties` exists (git-ignored). Copy `android/key.properties.example` → `android/key.properties` and restore the keystore from Agent Store: `artifacts/signing/c557-debug.keystore` → `android/signing/c557-debug.keystore`. Cert SHA-256 lineage: `c55757d19355e8818297da59374e6dc16ffd76696236cb0161032c78555d4d29` (permanent project debug signing key; do not commit keystore or passwords).
 
 ### Screenshots (portrait 390×844, real Flutter goldens)
 

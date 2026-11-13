@@ -23,6 +23,33 @@ void main() {
       matchesGoldenFile('rebuild-v1/02_home.png'),
     );
 
+    await tester.tap(find.byKey(const ValueKey('control_lock')));
+    await tester.pump(const Duration(milliseconds: 500));
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('rebuild-v1/07_confirm_lock.png'),
+    );
+    await tester.tap(find.text('ביטול'));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.byKey(const ValueKey('btn_profile')));
+    await tester.pump(const Duration(milliseconds: 500));
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('rebuild-v1/08_profile.png'),
+    );
+    await tester.tap(find.text('×').first);
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.byKey(const ValueKey('btn_menu')));
+    await tester.pump(const Duration(milliseconds: 500));
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('rebuild-v1/09_menu.png'),
+    );
+    await tester.tap(find.text('×').first);
+    await tester.pump(const Duration(milliseconds: 300));
+
     await tester.tap(find.text('מצלמות'));
     await tester.pump(const Duration(milliseconds: 500));
     await expectLater(

@@ -14,7 +14,11 @@ class OdIconButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.label,
+    this.semanticKey,
   });
+
+  /// Used by integration/device screenshot tests (not shown in UI).
+  final Key? semanticKey;
 
   final Widget icon;
   final VoidCallback onPressed;
@@ -26,6 +30,7 @@ class OdIconButton extends StatelessWidget {
       button: true,
       label: label,
       child: Material(
+        key: semanticKey,
         color: OdColors.iconBtnBg,
         shape: const CircleBorder(),
         child: InkWell(
@@ -89,6 +94,7 @@ class OdTopBar extends ConsumerWidget {
       child: Row(
         children: [
           OdIconButton(
+            semanticKey: const ValueKey('btn_profile'),
             label: 'פרופיל',
             icon: const OdIcon(OdIconName.user, color: OdColors.ink),
             onPressed: () => ctrl.openSheet('המרחב שלך', (_) => const _ProfileSheet()),
@@ -103,6 +109,7 @@ class OdTopBar extends ConsumerWidget {
             ),
           ),
           OdIconButton(
+            semanticKey: const ValueKey('btn_menu'),
             label: 'תפריט מסך',
             icon: const OdIcon(OdIconName.menu, color: OdColors.ink),
             onPressed: () => ctrl.openSheet(

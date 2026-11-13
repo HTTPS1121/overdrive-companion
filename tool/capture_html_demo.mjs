@@ -2,9 +2,14 @@ import puppeteer from 'puppeteer';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const html = '/home/ubuntu/.cursor/projects/agent-repos-overdrive-companion/uploads/overdrive-chosen_a570.html';
-const outDir = '/cursor/stores/self/artifacts/rebuild-v1/html';
+const html = process.env.OD_HTML ?? '/home/ubuntu/.cursor/projects/agent-repos-overdrive-companion/uploads/overdrive-chosen_a570.html';
+const outDir = process.env.OD_OUT ?? '/cursor/stores/self/artifacts/rebuild-v1/final/html';
 fs.mkdirSync(outDir, { recursive: true });
+
+async function closeSheet(page) {
+  const close = await page.$('#close');
+  if (close) await close.click();
+}
 
 const screens = [
   ['01_login', null],
@@ -12,7 +17,22 @@ const screens = [
     await page.click('#enter');
     await page.waitForSelector('#nav:not([hidden])', { timeout: 5000 });
   }],
+  ['07_confirm_lock', async (page) => {
+    await page.click('button[data-action="lock"]');
+    await page.waitForSelector('#shade:not([hidden])', { timeout: 3000 });
+  }],
+  ['08_profile', async (page) => {
+    await closeSheet(page);
+    await page.click('#profile');
+    await page.waitForSelector('#shade:not([hidden])', { timeout: 3000 });
+  }],
+  ['09_menu', async (page) => {
+    await closeSheet(page);
+    await page.click('#menu');
+    await page.waitForSelector('#shade:not([hidden])', { timeout: 3000 });
+  }],
   ['03_camera', async (page) => {
+    await closeSheet(page);
     await page.click('button[data-screen="camera"]');
   }],
   ['04_recordings', async (page) => {
