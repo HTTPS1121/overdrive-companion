@@ -65,6 +65,8 @@ class RealVehicleRepository implements VehicleRepository {
   List<Recording> _recordings = [];
   List<String> _placeFilters = [];
   List<TripSummary> _trips = [];
+  VehicleStatusSnapshot _vehicleStatus = const VehicleStatusSnapshot(doorsLine: '—');
+  RecordingStatsSnapshot _recordingStats = const RecordingStatsSnapshot(available: false);
 
   @override
   List<Recording> get recordings => List.unmodifiable(_recordings);
@@ -74,6 +76,12 @@ class RealVehicleRepository implements VehicleRepository {
 
   @override
   List<TripSummary> get trips => List.unmodifiable(_trips);
+
+  @override
+  VehicleStatusSnapshot get vehicleStatus => _vehicleStatus;
+
+  @override
+  RecordingStatsSnapshot get recordingStats => _recordingStats;
 
   @override
   Future<void> refreshVehicleState() async {
@@ -114,6 +122,88 @@ class RealVehicleRepository implements VehicleRepository {
     _lastVehicleRefresh = DateTime.now();
     final ts = (json['timestamp'] as num?)?.toInt();
     refreshLabel = ts != null ? _freshnessLabel(ts) : 'מעודכן מהשרת';
+    _vehicleStatus = _parseVehicleStatus(json, locked);
+  }
+
+  VehicleStatusSnapshot _parseVehicleStatus(Map<String, dynamic> json, bool doorsLocked) {
+    final doorsLine = doorsLocked ? 'נעולות' : 'פתוחות לנעילה';
+
+    String? windowsLine;
+    final windowOpen = json['windowOpen'] as Map<String, dynamic>?;
+    if (windowOpen != null) {
+      final anyOpen = windowOpen.values.any((v) => v == true);
+      windowsLine = anyOpen ? 'פתוחים' : 'סגורים';
+    }
+
+    String? climateLine;
+    final climate = json['climate'] as Map<String, dynamic>?;
+    if (climate != null) {
+      final setpoint = (climate['setpointDriver'] as num?)?.round();
+      final active = climate['acOn'] == true || climate['remoteClimateActive'] == true;
+      if (setpoint != null) {
+        climateLine = '$setpoint° · ${active ? 'פועל' : 'כבוי'}';
+      } else if (climate.containsKey('acOn') || climate.containsKey('remoteClimateActive')) {
+        climateLine = active ? 'פועל' : 'כבוי';
+      }
+    }
+
+    String? tyresLine;
+    final tyres = json['tyres'] as Map<String, dynamic>?;
+    if (tyres != null && tyres['available'] == true) {
+      final parts = <String>[];
+      for (final key in ['fl', 'fr', 'rl', 'rr']) {
+        final wheel = tyres[key] as Map<String, dynamic>?;
+        if (wheel == null || wheel['available'] != true) continue;
+        final psi = (wheel['psi'] as num?)?.toDouble();
+        if (psi != null) {
+          parts.add(psi.toStringAsFixed(1));
+        }
+      }
+      if (parts.length == 4) tyresLine = parts.join(' · ');
+    }
+
+    String? driveLine;
+    final gear = json['gear'] ?? json['transmission'];
+    final speed = (json['speedKmh'] as num?) ?? (json['speed'] as num?);
+    if (gear != null || speed != null) {
+      final g = gear?.toString() ?? '—';
+      final spd = speed != null ? '${speed.round()} קמ״ש' : '—';
+      driveLine = '$g · $spd';
+    }
+
+    String? sentryLine;
+    final sentry = json['sentry'] ?? json['surveillance'];
+    if (sentry is Map) {
+      final armed = sentry['armed'] == true || sentry['enabled'] == true || sentry['active'] == true;
+      sentryLine = armed ? 'דרוך' : 'מושבת';
+    }
+
+    String? chargingLine;
+    String? chargeCapLine;
+    final battery = json['battery'] as Map<String, dynamic>?;
+    if (battery != null) {
+      final charging = battery['charging'] == true || battery['isCharging'] == true;
+      if (battery.containsKey('charging') || battery.containsKey('isCharging')) {
+        chargingLine = charging ? 'בטעינה' : 'לא בטעינה';
+      }
+      final cap = (battery['chargeLimitPercent'] as num?) ??
+          (battery['acChargeLimitPercent'] as num?) ??
+          (json['chargeCap'] as Map?)?['limitPercent'] as num?;
+      if (cap != null) {
+        chargeCapLine = 'מגבלת טעינה ${cap.round()}%';
+      }
+    }
+
+    return VehicleStatusSnapshot(
+      doorsLine: doorsLine,
+      windowsLine: windowsLine,
+      climateLine: climateLine,
+      tyresLine: tyresLine,
+      driveLine: driveLine,
+      sentryLine: sentryLine,
+      chargingLine: chargingLine,
+      chargeCapLine: chargeCapLine,
+    );
   }
 
   void _markVehicleStale(String message) {
@@ -145,6 +235,7 @@ class RealVehicleRepository implements VehicleRepository {
       _placeFilters = list.map((r) => r.shortPlace).where((p) => p.isNotEmpty).toSet().toList()..sort();
       recordingsKnown = true;
       recordingsState = list.isEmpty ? DataLoadState.empty : DataLoadState.ready;
+      await _refreshRecordingStats();
     } on TimeoutException catch (e) {
       recordingsKnown = true;
       recordingsState = DataLoadState.error;
@@ -157,6 +248,47 @@ class RealVehicleRepository implements VehicleRepository {
       recordingsKnown = true;
       recordingsState = DataLoadState.error;
       recordingsErrorHebrew = hebrewFromAnyError(e);
+    }
+  }
+
+  Future<void> _refreshRecordingStats() async {
+    try {
+      final json = await _client.getJson(OverdriveEndpoints.recordingsStats).timeout(_readTimeout);
+      if (json['success'] == false) {
+        _recordingStats = const RecordingStatsSnapshot(available: false);
+        return;
+      }
+      final usagePct = (json['recordingsUsagePercent'] as num?)?.toDouble();
+      final totalSize = json['totalSizeFormatted'] as String? ?? json['totalSize']?.toString();
+      double? fraction;
+      if (usagePct != null) {
+        fraction = (usagePct / 100).clamp(0.0, 1.0);
+      } else {
+        final used = json['totalSize'] as num?;
+        final cap = json['totalSpace'] as num? ?? json['recordingsLimitBytes'] as num?;
+        if (used != null && cap != null && cap > 0) {
+          fraction = (used / cap).clamp(0.0, 1.0);
+        }
+      }
+      final oem = json['oemDvrLabel'] as String? ??
+          json['dvrLabel'] as String? ??
+          json['storageSourceLabel'] as String?;
+      final trimmedOem = oem?.trim();
+      _recordingStats = RecordingStatsSnapshot(
+        available: totalSize != null || fraction != null,
+        totalSizeFormatted: totalSize,
+        usageFraction: fraction,
+        oemDvrLabel: trimmedOem != null && trimmedOem.isNotEmpty ? trimmedOem : null,
+        totalTodayCount: (json['totalTodayCount'] as num?)?.toInt(),
+      );
+    } on OverdriveApiException catch (e) {
+      if (e.statusCode == 404) {
+        _recordingStats = const RecordingStatsSnapshot(available: false);
+        return;
+      }
+      _recordingStats = const RecordingStatsSnapshot(available: false);
+    } catch (_) {
+      _recordingStats = const RecordingStatsSnapshot(available: false);
     }
   }
 
@@ -193,10 +325,19 @@ class RealVehicleRepository implements VehicleRepository {
           file: recId,
           thumbPath: map['thumbPath'] as String? ?? map['thumbnail'] as String?,
           cameraLabel: _optionalStr(map['camera'] ?? map['cameraLabel'] ?? map['cam']),
+          cameraAngles: _parseCameraAngles(map),
         ),
       );
     }
     return out;
+  }
+
+  List<String> _parseCameraAngles(Map<String, dynamic> map) {
+    final raw = map['cameras'] ?? map['angles'] ?? map['files'];
+    if (raw is List && raw.isNotEmpty) {
+      return raw.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+    }
+    return const [];
   }
 
   @override
@@ -288,6 +429,39 @@ class RealVehicleRepository implements VehicleRepository {
       streamKnown = true;
       streamState = DataLoadState.error;
       streamErrorHebrew = hebrewFromAnyError(e);
+    }
+  }
+
+  @override
+  Future<CommandResult> runServerControl(ControlKind kind) async {
+    final cap = kCompanionControls.firstWhere(
+      (c) => c.kind == kind,
+      orElse: () => throw ArgumentError('Unknown control $kind'),
+    );
+    try {
+      final json = await _client
+          .postJson(cap.path, body: cap.defaultBody ?? const {})
+          .timeout(_commandTimeout);
+      final ok = json['success'] != false && json['commandSuccess'] != false;
+      if (!ok) {
+        return CommandResult.fail(
+          hebrewCommandRejected(json['error'] as String? ?? json['message'] as String?),
+        );
+      }
+      try {
+        await refreshVehicleState();
+      } catch (_) {}
+      final msg = json['message'] as String?;
+      return CommandResult.ok(msg);
+    } on TimeoutException catch (e) {
+      return CommandResult.fail(hebrewFromAnyError(e));
+    } on OverdriveApiException catch (e) {
+      if (e.statusCode == 404) {
+        return CommandResult.fail(hebrewFeatureNotOnServer());
+      }
+      return CommandResult.fail(hebrewFromAnyError(e));
+    } catch (e) {
+      return CommandResult.fail(hebrewFromAnyError(e));
     }
   }
 

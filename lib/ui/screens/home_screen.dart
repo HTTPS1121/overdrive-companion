@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/hebrew_errors.dart';
 import '../../design/od_design.dart';
+import '../../models/companion_models.dart';
 import '../../icons/od_icon.dart';
 import '../../illustrations/od_illustrations.dart';
 import '../../state/companion_app_controller.dart';
@@ -34,7 +36,13 @@ class HomeScreen extends ConsumerWidget {
             ],
           ),
         ),
-        _RangeCard(range: ctrl.rangeKm, battery: ctrl.batteryPercent, updated: ctrl.refreshLabel),
+        _RangeCard(
+          range: ctrl.rangeKm,
+          battery: ctrl.batteryPercent,
+          updated: ctrl.refreshLabel,
+          chargingLine: ctrl.vehicleStatus.chargingLine,
+          chargeCapLine: ctrl.vehicleStatus.chargeCapLine,
+        ),
         GridView.count(
           crossAxisCount: 4,
           shrinkWrap: true,
@@ -65,37 +73,11 @@ class HomeScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              _VehicleGrid(locked: ctrl.locked),
+              _VehicleGrid(status: ctrl.vehicleStatus),
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(2, 8, 2, 12),
-          child: Row(
-            children: [
-              Text('היום בתנועה', style: odH2()),
-              const Spacer(),
-              Text('מהשרת', style: odMuted(12)),
-            ],
-          ),
-        ),
-        OdCard(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Column(
-            children: [
-              _ListRow(
-                title: 'הנסיעה האחרונה',
-                subtitle: 'אין נתוני נסיעה מהשרת עדיין.',
-                icon: OdIconName.trip,
-              ),
-              _ListRow(
-                title: 'אירועי חניה',
-                subtitle: 'טרם נטענו אירועים מהשרת.',
-                icon: OdIconName.shield,
-              ),
-            ],
-          ),
-        ),
+        _TodayTripsSection(ctrl: ctrl),
       ],
     );
   }
@@ -146,12 +128,75 @@ class _CarChip extends StatelessWidget {
   }
 }
 
+class _TodayTripsSection extends StatelessWidget {
+  const _TodayTripsSection({required this.ctrl});
+
+  final CompanionAppController ctrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final today = ctrl.todayTrips;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(2, 8, 2, 12),
+          child: Row(
+            children: [
+              Text('היום בתנועה', style: odH2()),
+              const Spacer(),
+              Text('מהשרת', style: odMuted(12)),
+            ],
+          ),
+        ),
+        OdCard(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: ctrl.tripsState == DataLoadState.loading || ctrl.tripsState == DataLoadState.idle
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text('טוען נסיעות מהשרת…', textAlign: TextAlign.center, style: odMuted(13)),
+                )
+              : today.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Text(hebrewTripsTodayEmpty(), textAlign: TextAlign.center, style: odMuted(13)),
+                    )
+                  : Column(
+                      children: [
+                        for (final trip in today)
+                          _ListRow(
+                            title: 'נסיעה #${trip.id}',
+                            subtitle: trip.subtitle,
+                            icon: OdIconName.trip,
+                          ),
+                        if (ctrl.vehicleStatus.sentryLine == null)
+                          _ListRow(
+                            title: 'אירועי חניה',
+                            subtitle: hebrewParkingEventsEmpty(),
+                            icon: OdIconName.shield,
+                          ),
+                      ],
+                    ),
+        ),
+      ],
+    );
+  }
+}
+
 class _RangeCard extends StatelessWidget {
-  const _RangeCard({required this.range, required this.battery, required this.updated});
+  const _RangeCard({
+    required this.range,
+    required this.battery,
+    required this.updated,
+    this.chargingLine,
+    this.chargeCapLine,
+  });
 
   final int range;
   final int battery;
   final String updated;
+  final String? chargingLine;
+  final String? chargeCapLine;
 
   @override
   Widget build(BuildContext context) {
@@ -233,11 +278,26 @@ class _RangeCard extends StatelessWidget {
                   children: [
                     const OdIcon(OdIconName.battery, size: 17, color: OdColors.muted),
                     const SizedBox(width: 4),
-                    Text('לא בטעינה', style: odMuted(11)),
+                    Flexible(
+                      child: Text(
+                        chargingLine ?? hebrewNoServerValue(),
+                        style: odMuted(11),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Expanded(child: Text('מגבלת טעינה 90%', style: odMuted(11), textAlign: TextAlign.center)),
+              Expanded(
+                child: Text(
+                  chargeCapLine ?? '',
+                  style: odMuted(11),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               Expanded(child: Text(updated, style: odMuted(11), textAlign: TextAlign.end)),
             ],
           ),
@@ -291,19 +351,21 @@ class _ControlTile extends StatelessWidget {
 }
 
 class _VehicleGrid extends StatelessWidget {
-  const _VehicleGrid({required this.locked});
+  const _VehicleGrid({required this.status});
 
-  final bool locked;
+  final VehicleStatusSnapshot status;
+
+  String _val(String? v) => v ?? hebrewNoServerValue();
 
   @override
   Widget build(BuildContext context) {
     final items = [
-      (OdIconName.lock, 'דלתות', locked ? 'נעולות' : 'פתוחות לנעילה'),
-      (OdIconName.window, 'חלונות', 'סגורים'),
-      (OdIconName.trip, 'הילוך', 'P · 0 קמ״ש'),
-      (OdIconName.climate, 'אקלים', '22° · כבוי'),
-      (OdIconName.tire, 'צמיגים', '2.4 · 2.4 · 2.5 · 2.4'),
-      (OdIconName.shield, 'מעקב חניה', locked ? 'דרוך' : 'מושבת'),
+      (OdIconName.lock, 'דלתות', status.doorsLine),
+      (OdIconName.window, 'חלונות', _val(status.windowsLine)),
+      (OdIconName.trip, 'הילוך', _val(status.driveLine)),
+      (OdIconName.climate, 'אקלים', _val(status.climateLine)),
+      (OdIconName.tire, 'צמיגים', _val(status.tyresLine)),
+      (OdIconName.shield, 'מעקב חניה', _val(status.sentryLine)),
     ];
     return Container(
       decoration: BoxDecoration(

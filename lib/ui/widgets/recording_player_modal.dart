@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../data/hebrew_errors.dart';
 import '../../design/od_design.dart';
 import '../../state/companion_app_controller.dart';
 
@@ -86,7 +87,11 @@ class _RecordingPlayerModalState extends ConsumerState<RecordingPlayerModal> {
       WidgetsBinding.instance.addPostFrameCallback((_) => _bindRecording());
     }
     final r = ref.watch(vehicleRepoProvider).recordings.firstWhere((x) => x.id == id);
-    final cam = CompanionAppController.cams[ctrl.recPlayQuad];
+    final angles = r.cameraAngles;
+    final multiCam = angles.length > 1;
+    final cam = multiCam
+        ? (ctrl.recPlayQuad < angles.length ? angles[ctrl.recPlayQuad] : angles.first)
+        : (r.cameraLabel ?? 'מצלמה');
     final video = _controller;
 
     return Positioned.fill(
@@ -166,39 +171,40 @@ class _RecordingPlayerModalState extends ConsumerState<RecordingPlayerModal> {
                                       : const SizedBox.shrink(),
                         ),
                       ),
-                      Positioned(
-                        bottom: 10,
-                        left: 10,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xBF0C2348),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              for (var i = 0; i < CompanionAppController.cams.length; i++)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                                  child: Material(
-                                    color: ctrl.recPlayQuad == i ? OdColors.blue : const Color(0x1FFFFFFF),
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: InkWell(
-                                      onTap: () => ref.read(companionAppControllerProvider).setRecPlayQuad(i),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                        child: Text(
-                                          CompanionAppController.cams[i].split(' ').last,
-                                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                      if (multiCam)
+                        Positioned(
+                          bottom: 10,
+                          left: 10,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xBF0C2348),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                for (var i = 0; i < angles.length; i++)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                                    child: Material(
+                                      color: ctrl.recPlayQuad == i ? OdColors.blue : const Color(0x1FFFFFFF),
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: InkWell(
+                                        onTap: () => ref.read(companionAppControllerProvider).setRecPlayQuad(i),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                          child: Text(
+                                            angles[i],
+                                            style: const TextStyle(color: Colors.white, fontSize: 10),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                   Container(
@@ -245,7 +251,6 @@ class _RecordingPlayerModalState extends ConsumerState<RecordingPlayerModal> {
                               _clock(video) + ' / ${r.dur}',
                               style: const TextStyle(color: Color(0xFFDCE7F5), fontSize: 12),
                             ),
-                            const OdLtrText('1.0×', style: TextStyle(color: Color(0xFFDCE7F5), fontSize: 12)),
                           ],
                         ),
                       ],
@@ -258,7 +263,11 @@ class _RecordingPlayerModalState extends ConsumerState<RecordingPlayerModal> {
                       children: [
                         Expanded(child: OdLtrText('${r.day} · ${r.time} · ${r.size}', style: odMuted(12))),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(hebrewFeatureNotOnServer())),
+                            );
+                          },
                           style: TextButton.styleFrom(backgroundColor: OdColors.navActiveBg),
                           child: const Text('הורדה', style: TextStyle(color: OdColors.navActiveFg)),
                         ),

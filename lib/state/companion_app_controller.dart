@@ -352,6 +352,21 @@ class CompanionAppController extends ChangeNotifier {
     return result;
   }
 
+  Future<CommandResult> confirmServerControl(ControlKind kind) async {
+    final result = await _repo.runServerControl(kind);
+    notifyListeners();
+    return result;
+  }
+
+  List<TripSummary> get todayTrips {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day);
+    return trips.where((t) {
+      final started = DateTime.fromMillisecondsSinceEpoch(t.startTimeMs);
+      return !started.isBefore(start);
+    }).toList();
+  }
+
   List<Recording> filteredRecordings() {
     return _repo.recordings.where((r) {
       if (recFilters.type != 'all' && r.type.name != recFilters.type) {
@@ -405,4 +420,8 @@ class CompanionAppController extends ChangeNotifier {
   DataLoadState get tripsState => _repo.tripsState;
   String? get tripsErrorHebrew => _repo.tripsErrorHebrew;
   List<TripSummary> get trips => _repo.trips;
+
+  VehicleStatusSnapshot get vehicleStatus => _repo.vehicleStatus;
+
+  RecordingStatsSnapshot get recordingStats => _repo.recordingStats;
 }

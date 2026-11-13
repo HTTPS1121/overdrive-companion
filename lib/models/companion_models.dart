@@ -2,6 +2,44 @@ enum OdScreen { home, camera, record, trip, more }
 
 enum RecordingType { sentry, proximity, normal, replay }
 
+class VehicleStatusSnapshot {
+  const VehicleStatusSnapshot({
+    required this.doorsLine,
+    this.windowsLine,
+    this.climateLine,
+    this.tyresLine,
+    this.driveLine,
+    this.sentryLine,
+    this.chargingLine,
+    this.chargeCapLine,
+  });
+
+  final String doorsLine;
+  final String? windowsLine;
+  final String? climateLine;
+  final String? tyresLine;
+  final String? driveLine;
+  final String? sentryLine;
+  final String? chargingLine;
+  final String? chargeCapLine;
+}
+
+class RecordingStatsSnapshot {
+  const RecordingStatsSnapshot({
+    required this.available,
+    this.totalSizeFormatted,
+    this.usageFraction,
+    this.oemDvrLabel,
+    this.totalTodayCount,
+  });
+
+  final bool available;
+  final String? totalSizeFormatted;
+  final double? usageFraction;
+  final String? oemDvrLabel;
+  final int? totalTodayCount;
+}
+
 class TripSummary {
   const TripSummary({
     required this.id,
@@ -45,6 +83,7 @@ class Recording {
     required this.file,
     this.thumbPath,
     this.cameraLabel,
+    this.cameraAngles = const [],
   });
 
   final int id;
@@ -68,6 +107,7 @@ class Recording {
   final String file;
   final String? thumbPath;
   final String? cameraLabel;
+  final List<String> cameraAngles;
 }
 
 class MoreGroupItem {

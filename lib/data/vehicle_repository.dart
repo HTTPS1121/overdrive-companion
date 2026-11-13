@@ -1,3 +1,5 @@
+import 'package:overdrive_server/overdrive_server.dart';
+
 import '../models/companion_models.dart';
 
 abstract class VehicleRepository {
@@ -28,10 +30,14 @@ abstract class VehicleRepository {
   String? get tripsErrorHebrew;
   List<TripSummary> get trips;
 
+  VehicleStatusSnapshot get vehicleStatus;
+  RecordingStatsSnapshot get recordingStats;
+
   Future<void> refreshVehicleState();
   Future<void> refreshRecordings();
   Future<void> refreshStreamStatus();
   Future<void> refreshTrips();
 
   Future<CommandResult> runCompanionAction(String actionId);
+  Future<CommandResult> runServerControl(ControlKind kind);
 }

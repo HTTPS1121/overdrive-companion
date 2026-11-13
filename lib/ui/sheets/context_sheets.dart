@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:overdrive_server/overdrive_server.dart';
+
 import '../../content/more_groups.dart';
+import '../../data/hebrew_errors.dart';
 import '../../data/secure_settings_store.dart';
 import '../../design/od_design.dart';
 import '../../icons/od_icon.dart';
@@ -31,10 +34,23 @@ void openContextMenuSheet(WidgetRef ref, OdScreen screen) {
       );
 }
 
-void openMoreDetailSheet(WidgetRef ref, MoreGroupItem item, String groupTitle) {
+void openMoreItem(BuildContext context, WidgetRef ref, MoreGroupItem item, String groupTitle) {
+  if (item.title == 'בקרות הרכב') {
+    ref.read(companionAppControllerProvider).openSheet(
+          item.title,
+          (_) => MoreVehicleControlsSheetBody(groupTitle: groupTitle),
+        );
+    return;
+  }
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(hebrewFeatureNotOnServer())),
+  );
+}
+
+void showServerControlConfirm(WidgetRef ref, String label, ControlKind kind) {
   ref.read(companionAppControllerProvider).openSheet(
-        item.title,
-        (_) => MoreDetailSheetBody(item: item, groupTitle: groupTitle),
+        label,
+        (_) => _ServerControlConfirmBody(label: label, kind: kind),
       );
 }
 
@@ -115,20 +131,102 @@ class ProfileSheetBody extends ConsumerWidget {
   }
 }
 
-class MoreDetailSheetBody extends StatelessWidget {
-  const MoreDetailSheetBody({super.key, required this.item, required this.groupTitle});
+class MoreVehicleControlsSheetBody extends ConsumerWidget {
+  const MoreVehicleControlsSheetBody({super.key, required this.groupTitle});
 
-  final MoreGroupItem item;
   final String groupTitle;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(groupTitle, style: odMuted(12)),
         const SizedBox(height: 8),
-        Text(item.subtitle, style: odBody(14)),
+        Text(
+          'פקודות נשלחות לשרת Overdrive ברכב. תוצאה אמיתית בלבד.',
+          style: odBody(14),
+        ),
+        const SizedBox(height: 16),
+        OdPrimaryButton(
+          label: 'הדלקת מיזוג מרחוק',
+          onPressed: () => showServerControlConfirm(ref, 'הדלקת מיזוג', ControlKind.climateOn),
+        ),
+        OdSecondaryButton(
+          label: 'כיבוי מיזוג',
+          onPressed: () => showServerControlConfirm(ref, 'כיבוי מיזוג', ControlKind.climateOff),
+        ),
+        OdSecondaryButton(
+          label: 'סגירת חלונות',
+          onPressed: () => showServerControlConfirm(ref, 'סגירת חלונות', ControlKind.windowsClose),
+        ),
+        OdSecondaryButton(
+          label: 'אוורור חלונות',
+          onPressed: () => showServerControlConfirm(ref, 'אוורור חלונות', ControlKind.windowsVent),
+        ),
+        OdSecondaryButton(label: 'סגור', onPressed: () => ref.read(companionAppControllerProvider).closeSheet()),
+      ],
+    );
+  }
+}
+
+class _ServerControlConfirmBody extends ConsumerWidget {
+  const _ServerControlConfirmBody({required this.label, required this.kind});
+
+  final String label;
+  final ControlKind kind;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ctrl = ref.read(companionAppControllerProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('לבצע $label?', style: odMuted()),
+        const SizedBox(height: 16),
+        OdPrimaryButton(
+          label: 'אישור',
+          onPressed: () async {
+            final result = await ctrl.confirmServerControl(kind);
+            ctrl.openSheet(
+              label,
+              (_) => _ServerControlResultBody(
+                ok: result.ok,
+                label: label,
+                message: result.ok ? result.message : result.errorHebrew,
+              ),
+            );
+          },
+        ),
+        OdSecondaryButton(label: 'ביטול', onPressed: ctrl.closeSheet),
+      ],
+    );
+  }
+}
+
+class _ServerControlResultBody extends ConsumerWidget {
+  const _ServerControlResultBody({required this.ok, required this.label, this.message});
+
+  final bool ok;
+  final String label;
+  final String? message;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        Text(ok ? '$label בוצע' : '$label נכשל', style: odH2()),
+        const SizedBox(height: 8),
+        Text(
+          message ?? (ok ? 'השרת אישר את הפעולה.' : hebrewFeatureNotOnServer()),
+          textAlign: TextAlign.center,
+          style: odMuted(),
+        ),
+        const SizedBox(height: 16),
+        OdPrimaryButton(
+          label: 'הבנתי',
+          onPressed: () => ref.read(companionAppControllerProvider).closeSheet(),
+        ),
       ],
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/hebrew_errors.dart';
 import '../../models/companion_models.dart';
 import '../../design/od_design.dart';
 import '../../icons/od_icon.dart';
@@ -19,7 +20,7 @@ class RecordingsScreen extends ConsumerWidget {
     final list = ctrl.filteredRecordings();
     return OdTabScroll(
       children: [
-        _EventsTopBar(ctrl: ctrl),
+        _EventsTopBar(ctrl: ctrl, stats: ref.watch(vehicleRepoProvider).recordingStats),
         const SizedBox(height: 12),
         _FilterRows(ctrl: ctrl),
         const SizedBox(height: 8),
@@ -94,38 +95,60 @@ class RecordingsScreen extends ConsumerWidget {
       };
 }
 
-class _EventsTopBar extends StatelessWidget {
-  const _EventsTopBar({required this.ctrl});
+class _EventsTopBar extends ConsumerWidget {
+  const _EventsTopBar({required this.ctrl, required this.stats});
 
   final CompanionAppController ctrl;
+  final RecordingStatsSnapshot stats;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showCalendar = stats.totalTodayCount != null;
+    final showStorage = stats.available && stats.totalSizeFormatted != null;
+    final showOem = stats.oemDvrLabel != null;
+  if (!showCalendar && !showStorage && !showOem) {
+      return _TypeTabs(ctrl: ctrl);
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _CalendarToggle(),
-            const SizedBox(width: 8),
+            if (showCalendar) ...[
+              _CalendarToggle(count: stats.totalTodayCount!, onTap: () => _showUnsupported(context)),
+              const SizedBox(width: 8),
+            ],
             Expanded(child: _TypeTabs(ctrl: ctrl)),
           ],
         ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            const Expanded(child: _StorageStats()),
-            const SizedBox(width: 8),
-            _OemDvrChip(),
-          ],
-        ),
+        if (showStorage || showOem) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              if (showStorage) Expanded(child: _StorageStats(stats: stats)),
+              if (showStorage && showOem) const SizedBox(width: 8),
+              if (showOem) _OemDvrChip(label: stats.oemDvrLabel!),
+            ],
+          ),
+        ],
       ],
+    );
+  }
+
+  void _showUnsupported(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(hebrewFeatureNotOnServer())),
     );
   }
 }
 
 class _CalendarToggle extends StatelessWidget {
+  const _CalendarToggle({required this.count, required this.onTap});
+
+  final int count;
+  final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -133,17 +156,20 @@ class _CalendarToggle extends StatelessWidget {
       shape: StadiumBorder(side: const BorderSide(color: OdColors.line)),
       child: InkWell(
         customBorder: const StadiumBorder(),
-        onTap: () {},
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
           child: SizedBox(
             height: 42,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                OdIcon(OdIconName.trip, size: 17, color: OdColors.blue),
-                SizedBox(width: 8),
-                Text('בחר תאריך', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                const OdIcon(OdIconName.trip, size: 17, color: OdColors.blue),
+                const SizedBox(width: 8),
+                Text(
+                  'היום · $count',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
               ],
             ),
           ),
@@ -154,10 +180,13 @@ class _CalendarToggle extends StatelessWidget {
 }
 
 class _StorageStats extends StatelessWidget {
-  const _StorageStats();
+  const _StorageStats({required this.stats});
+
+  final RecordingStatsSnapshot stats;
 
   @override
   Widget build(BuildContext context) {
+    final frac = stats.usageFraction;
     return Container(
       height: 42,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -169,20 +198,25 @@ class _StorageStats extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          OdLtrText('31.2 GB', style: odNum(11, weight: FontWeight.w600, color: OdColors.muted)),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 48,
-            height: 5,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: const LinearProgressIndicator(
-                value: 0.24,
-                backgroundColor: Color(0xFFD5DFEC),
-                valueColor: AlwaysStoppedAnimation(OdColors.blue),
+          OdLtrText(
+            stats.totalSizeFormatted!,
+            style: odNum(11, weight: FontWeight.w600, color: OdColors.muted),
+          ),
+          if (frac != null) ...[
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 48,
+              height: 5,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: LinearProgressIndicator(
+                  value: frac,
+                  backgroundColor: const Color(0xFFD5DFEC),
+                  valueColor: const AlwaysStoppedAnimation(OdColors.blue),
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -190,23 +224,23 @@ class _StorageStats extends StatelessWidget {
 }
 
 class _OemDvrChip extends StatelessWidget {
+  const _OemDvrChip({required this.label});
+
+  final String label;
+
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
       shape: StadiumBorder(side: const BorderSide(color: OdColors.line)),
-      child: InkWell(
-        customBorder: const StadiumBorder(),
-        onTap: () {},
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12),
-          child: SizedBox(
-            height: 40,
-            child: Center(
-              child: Text(
-                'מצלמת הדרך של היצרן',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: OdColors.blue),
-              ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: SizedBox(
+          height: 40,
+          child: Center(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: OdColors.blue),
             ),
           ),
         ),

@@ -49,7 +49,7 @@ class MoreScreen extends StatelessWidget {
                         title: item.title,
                         subtitle: item.subtitle,
                         icon: _icon(g.icon),
-                        onTap: () => openMoreDetailSheet(ref, item, g.title),
+                        onTap: () => openMoreItem(context, ref, item, g.title),
                       ),
                   ],
                 ),

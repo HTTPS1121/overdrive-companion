@@ -60,6 +60,14 @@ String hebrewStreamUnavailable() => 'אין שידור חי מהמצלמות כ�
 
 String hebrewTripsEmpty() => 'אין נסיעות להצגה מהשרת.';
 
+String hebrewTripsTodayEmpty() => 'אין נסיעות היום מהשרת.';
+
+String hebrewParkingEventsEmpty() => 'אין אירועי חניה מהשרת.';
+
+String hebrewFeatureNotOnServer() => 'לא נתמך עדיין בשרת';
+
+String hebrewNoServerValue() => 'אין נתון מהשרת';
+
 String hebrewCommandRejected(String? serverMessage) {
   if (serverMessage != null && serverMessage.trim().isNotEmpty) {
     return serverMessage.trim();

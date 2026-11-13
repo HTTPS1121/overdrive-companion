@@ -66,6 +66,20 @@ class MockOverdriveServer {
         await _json(request, await rootBundle.loadString('fixtures/command_lock_confirmed.json'), 200);
         return;
       }
+      if (path == '/api/recordings/stats') {
+        await _json(
+          request,
+          jsonEncode({
+            'success': true,
+            'totalSizeFormatted': '6.1 GB',
+            'recordingsUsagePercent': 24,
+            'totalTodayCount': 1,
+            'oemDvrLabel': 'מצלמת הדרך של היצרן',
+          }),
+          200,
+        );
+        return;
+      }
       if (path == '/api/recordings') {
         await _json(
           request,
@@ -101,9 +115,12 @@ class MockOverdriveServer {
         return;
       }
       if (path == '/api/trips') {
+        final dayStart = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 8);
+        final startMs = dayStart.millisecondsSinceEpoch;
+        final endMs = startMs + 1800000;
         await _json(
           request,
-          '{"success":true,"trips":[{"id":1,"startTime":1700000000000,"endTime":1700003600000,"distanceKm":12.4,"durationSeconds":1800,"overallScore":82}]}',
+          '{"success":true,"trips":[{"id":1,"startTime":$startMs,"endTime":$endMs,"distanceKm":12.4,"durationSeconds":1800,"overallScore":82}]}',
           200,
         );
         return;
