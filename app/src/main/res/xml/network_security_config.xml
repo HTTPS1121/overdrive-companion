@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Local mode uses http://<car-ip>:8080 on the car's own network. -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

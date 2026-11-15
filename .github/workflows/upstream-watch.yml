@@ -1,0 +1,54 @@
+name: Update bundled OverDrive web UI
+
+# Manual only — run from Actions when you want to pull a newer upstream release APK.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Check for newer upstream release
+        id: check
+        run: |
+          chmod +x tools/check-upstream-release.sh
+          set +e
+          tools/check-upstream-release.sh > upstream-check.json
+          code=$?
+          set -e
+          cat upstream-check.json
+          if [ "$code" -eq 2 ]; then
+            echo "newer=false" >> "$GITHUB_OUTPUT"
+            echo "Already up to date with upstream." >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$code" -eq 0 ]; then
+            echo "newer=true" >> "$GITHUB_OUTPUT"
+          else
+            exit "$code"
+          fi
+
+      - name: Refresh web assets
+        if: steps.check.outputs.newer == 'true'
+        run: |
+          chmod +x tools/update-web-assets.sh
+          tools/update-web-assets.sh
+
+      - name: Reset shell patch counter
+        if: steps.check.outputs.newer == 'true'
+        run: echo 0 > app/shell_patch.txt
+
+      - name: Commit and push
+        if: steps.check.outputs.newer == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/assets/web app/src/main/assets/WEB_SOURCE.json app/shell_patch.txt
+          VERSION="$(python3 -c 'import json; print(json.load(open("app/src/main/assets/WEB_SOURCE.json"))["versionName"])')"
+          git commit -m "chore: bundle OverDrive release ${VERSION}"
+          git push

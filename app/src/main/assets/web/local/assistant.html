@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title data-i18n="app.assistant_title">Assistant - OverDrive</title>
+    <link rel="icon" type="image/webp" href="../shared/app-icon-dark.webp">
+    <script src="../shared/theme.js?v=12"></script>
+    <script src="../shared/app-shell.js?v=23"></script>
+    <script>
+        window.OT_TABS = [
+            { id: 'assistant', label: 'Assistant', i18n: 'genai.tab_assistant', svg: '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>' },
+            { id: 'briefing', label: 'Trip Briefing', i18n: 'trip_briefing.tab', svg: '<polygon points="3 11 22 2 13 21 11 13 3 11"/>' },
+            { id: 'provider', label: 'Provider', i18n: 'genai.tab_provider', svg: '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>' },
+            { id: 'privacy', label: 'Privacy', i18n: 'genai.tab_privacy', svg: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' }
+        ];
+        window.OT_setActiveTab = function (id) {
+            var button = document.querySelector('.bottom-tab[data-tab-target="' + id + '"]');
+            if (button) button.click();
+        };
+    </script>
+    <script src="../shared/app-tabs.js?v=4"></script>
+    <link rel="stylesheet" href="../shared/styles.css?v=38">
+    <link rel="stylesheet" href="../shared/revamp.css?v=2">
+    <style>
+        /* Summary tile: the existing status block styled as the mock's .r-hero.
+           genai.js colours the icon inline, so its chip stays tonal instead of solid primary. */
+        .ai-state { margin-bottom: var(--card-gap); }
+        .ai-state > .r-hero-icon { background: var(--primary-soft); }
+
+        /* Grounded quick actions: tonal chips in one swipe rail; they wrap where a mouse cannot swipe. */
+        .ai-quick-actions {
+            display: flex; overflow-x: auto; margin: 0 0 8px; padding: 2px 0 0;
+            scrollbar-width: none; overscroll-behavior-x: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+        .ai-quick-actions > * { margin: 0 8px 8px 0; }
+        [dir="rtl"] .ai-quick-actions > * { margin: 0 0 8px 8px; }
+        .ai-quick-actions::-webkit-scrollbar { display: none; }
+        @media (hover: hover) and (pointer: fine) {
+            .ai-quick-actions { flex-wrap: wrap; overflow-x: visible; }
+        }
+        .ai-chip {
+            flex: 0 0 auto; display: inline-flex; align-items: center;
+            min-height: 44px; padding: 0 16px;
+            border: 0; border-radius: var(--radius-full);
+            background: var(--well); color: var(--on-surface-variant);
+            font: inherit; font-size: var(--fs-label); font-weight: 600; line-height: 1.25;
+            white-space: nowrap; cursor: pointer;
+            transition: background-color var(--duration-fast) var(--easing-standard),
+                        color var(--duration-fast) var(--easing-standard),
+                        transform var(--duration-fast) var(--easing-standard);
+        }
+        .ai-chip:active { transform: scale(.97); }
+        .ai-chip:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+        @media (hover: hover) {
+            .ai-chip:hover:not(:disabled) { background: var(--well-2); color: var(--on-surface); }
+        }
+
+        /* Conversation tile: replies on a neutral well, your own messages on primary. */
+        .ai-chat-card > .card-body:first-child { padding: 16px; }
+        .ai-conversation {
+            min-height: 300px; height: 48vh; height: calc(var(--vh, 1vh) * 48);
+            max-height: 720px; overflow-y: auto; overscroll-behavior: contain;
+            padding: 4px 4px 8px;
+        }
+        .ai-empty {
+            box-sizing: border-box; min-height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+            padding: 24px 16px; color: var(--on-surface-variant);
+        }
+        .ai-empty svg {
+            box-sizing: border-box; width: 56px; height: 56px; margin-bottom: 14px; padding: 14px;
+            border-radius: var(--radius-lg); background: var(--primary-soft); color: var(--primary);
+        }
+        .ai-empty strong { color: var(--on-surface); font-size: var(--fs-title); font-weight: 600; }
+        .ai-empty span { max-width: 420px; margin-top: 6px; font-size: var(--fs-label); line-height: 1.5; }
+        .ai-message { display: flex; min-width: 0; margin: 12px 0; }
+        .ai-message.user { justify-content: flex-end; }
+        .ai-bubble {
+            min-width: 0; max-width: 680px; box-sizing: border-box;
+            padding: 12px 16px; border-radius: var(--radius-lg);
+            font-size: var(--fs-body); line-height: 1.5; white-space: normal;
+            overflow-wrap: break-word; overflow-wrap: anywhere;
+            color: var(--on-surface); background: var(--well);
+        }
+        .ai-message.user .ai-bubble {
+            color: var(--on-primary); background: var(--primary);
+            border-bottom-right-radius: var(--radius-xs);
+            white-space: pre-wrap;
+        }
+        .ai-message.assistant .ai-bubble { border-bottom-left-radius: var(--radius-xs); }
+        [dir="rtl"] .ai-message.user .ai-bubble { border-bottom-right-radius: var(--radius-lg); border-bottom-left-radius: var(--radius-xs); }
+        [dir="rtl"] .ai-message.assistant .ai-bubble { border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-xs); }
+        /* Pending reply: full-contrast text plus a pulsing dot. */
+        .ai-message.pending .ai-bubble { color: var(--on-surface-variant); }
+        .ai-message.pending .ai-bubble::after {
+            content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 8px;
+            border-radius: 50%; background: currentColor; vertical-align: middle;
+            animation: ai-pending 900ms ease-in-out infinite alternate;
+        }
+        [dir="rtl"] .ai-message.pending .ai-bubble::after { margin-left: 0; margin-right: 8px; }
+        @keyframes ai-pending { from { opacity: .25; } to { opacity: 1; } }
+        .ai-rich-text p { margin: 0; }
+        .ai-rich-text p + p,
+        .ai-rich-text p + ul,
+        .ai-rich-text p + ol,
+        .ai-rich-text ul + p,
+        .ai-rich-text ol + p { margin-top: 10px; }
+        .ai-rich-text ul,
+        .ai-rich-text ol {
+            margin: 8px 0 0; padding-left: 22px;
+        }
+        [dir="rtl"] .ai-rich-text ul,
+        [dir="rtl"] .ai-rich-text ol { padding-left: 0; padding-right: 22px; }
+        .ai-rich-text li { padding-left: 2px; }
+        [dir="rtl"] .ai-rich-text li { padding-left: 0; padding-right: 2px; }
+        .ai-rich-text li + li { margin-top: 8px; }
+        .ai-rich-text strong { font-weight: 700; color: var(--on-surface); }
+        .ai-rich-text code {
+            padding: 2px 6px; border-radius: var(--radius-xs);
+            color: var(--on-surface); background: var(--well-2);
+            font-family: 'JetBrains Mono', 'SF Mono', monospace;
+            font-size: .9em; word-break: break-all;
+        }
+        .ai-rich-heading {
+            margin: 14px 0 0; color: var(--on-surface);
+            font-size: var(--fs-body); font-weight: 700;
+        }
+        .ai-rich-heading:first-child { margin-top: 0; }
+        .ai-rich-quote {
+            margin: 10px 0 0; padding-left: 12px;
+            border-left: 3px solid var(--primary);
+            color: var(--on-surface-variant);
+        }
+        [dir="rtl"] .ai-rich-quote { padding-left: 0; padding-right: 12px; border-left: 0; border-right: 3px solid var(--primary); }
+        /* Grounded answers carry their source as a primary chip (mock .chip.is-primary). */
+        .ai-grounding-label {
+            display: table; margin: 0 0 8px; padding: 3px 10px;
+            border-radius: var(--radius-full);
+            color: var(--primary); background: var(--primary-soft);
+            font-size: var(--fs-caption); font-weight: 600; line-height: 1.4;
+        }
+        /* Result cards (routine suggestions, evidence packs, drafts, proposals, search hits):
+           wells inside tiles, raised back onto the tile colour inside a reply bubble. */
+        .ai-result-card {
+            min-width: 0; max-width: 100%; box-sizing: border-box;
+            margin-top: 10px; padding: 14px 16px; overflow: hidden;
+            overflow-wrap: break-word; overflow-wrap: anywhere; white-space: normal;
+            border-radius: var(--radius-md);
+            background: var(--well);
+        }
+        .ai-bubble .ai-result-card { background: var(--tile); }
+        .ai-result-card strong {
+            display: block; color: var(--on-surface);
+            font-size: var(--fs-body); font-weight: 600; line-height: 1.35;
+        }
+        .ai-result-detail {
+            margin-top: 4px; color: var(--on-surface-variant);
+            font-size: var(--fs-label); line-height: 1.45;
+        }
+        .ai-result-meta {
+            margin-top: 6px; color: var(--on-surface-variant);
+            font-size: var(--fs-caption); font-variant-numeric: tabular-nums;
+        }
+        .ai-result-actions {
+            display: flex; flex-wrap: wrap; margin: 12px 0 -8px;
+        }
+        .ai-result-actions > * { margin: 0 8px 8px 0; }
+        [dir="rtl"] .ai-result-actions > * { margin: 0 0 8px 8px; }
+        .ai-result-actions .btn { min-height: 40px; padding: 0 16px; font-size: var(--fs-label); }
+        @media (pointer: coarse) {
+            .ai-result-actions .btn { min-height: 44px; }
+        }
+        .ai-draft-safety {
+            margin-top: 10px; padding: 8px 12px; border-radius: var(--radius-sm);
+            color: var(--on-surface); background: var(--warning-soft);
+            box-shadow: inset 3px 0 0 var(--warning);
+            font-size: var(--fs-label); line-height: 1.4;
+        }
+        [dir="rtl"] .ai-draft-safety { box-shadow: inset -3px 0 0 var(--warning); }
+        .ai-community-results { margin-top: 8px; }
+
+        /* Tile grids under the conversation: intrinsic columns, one column on phones. */
+        .ai-local-grid,
+        .ai-insight-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            align-items: start; align-content: start;
+            grid-gap: var(--card-gap); gap: var(--card-gap);
+            margin-top: var(--card-gap);
+        }
+        .ai-local-grid > .card + .card { margin-top: 0; }
+        .ai-local-list {
+            color: var(--on-surface-variant); font-size: var(--fs-label); line-height: 1.45;
+        }
+        .ai-local-list > .ai-result-card { margin-top: 8px; }
+        .ai-local-list > :first-child { margin-top: 0; }
+
+        .ai-insight-card {
+            align-self: start;
+            margin: 0 !important;
+        }
+        /* "Generate an insight" reads as the mock's AI insight tile: tertiary tint and chip. */
+        .ai-insight-grid > .ai-insight-card:first-child {
+            background-image:
+                radial-gradient(320px 220px at 100% 0%, var(--tertiary-soft), rgba(0, 0, 0, 0) 70%),
+                linear-gradient(180deg, var(--sheen) 0%, rgba(255, 255, 255, 0) 140px);
+        }
+        [dir="rtl"] .ai-insight-grid > .ai-insight-card:first-child {
+            background-image:
+                radial-gradient(320px 220px at 0% 0%, var(--tertiary-soft), rgba(0, 0, 0, 0) 70%),
+                linear-gradient(180deg, var(--sheen) 0%, rgba(255, 255, 255, 0) 140px);
+        }
+        .ai-insight-grid > .ai-insight-card:first-child .card-title > svg:first-child {
+            background-color: var(--tertiary-soft); color: var(--tertiary);
+        }
+        .ai-insight-controls,
+        .ai-form-grid {
+            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-gap: 16px; gap: 16px;
+        }
+        .ai-local-grid > *,
+        .ai-insight-grid > *,
+        .ai-insight-controls > *,
+        .ai-form-grid > * { min-width: 0; }
+        .ai-insight-controls > .md-field,
+        .ai-form-grid > .md-field { margin-top: 0; margin-bottom: 0; }
+        .ai-insight-controls .wide,
+        .ai-form-grid .wide { grid-column: 1 / -1; }
+        .ai-inline-note {
+            margin-top: 12px; padding: 12px 14px; border-radius: var(--radius-md);
+            color: var(--on-surface-variant); background: var(--well);
+            font-size: var(--fs-label); line-height: 1.45;
+        }
+
+        /* Composer: a filled field between a round tonal voice button and a round primary send button. */
+        .ai-composer-dock {
+            position: relative; margin-top: 12px; padding-top: 12px;
+            border-top: 1px solid var(--hairline);
+        }
+        .ai-composer {
+            display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+            grid-gap: 8px; gap: 8px; align-items: end; margin: 0;
+        }
+        .ai-composer textarea {
+            display: block; width: 100%; min-height: 48px; max-height: 132px; margin: 0; resize: none;
+            box-sizing: border-box; padding: 13px 18px;
+            border: 1px solid var(--outline-variant); border-radius: var(--radius-xl);
+            color: var(--on-surface); background: var(--well);
+            font: inherit; font-size: var(--fs-body); line-height: 1.4;
+            transition: border-color var(--duration-fast) var(--easing-standard),
+                        box-shadow var(--duration-fast) var(--easing-standard);
+        }
+        .ai-composer textarea::placeholder { color: var(--on-surface-variant); opacity: 1; }
+        .ai-composer textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+        .ai-composer textarea:disabled { opacity: .6; cursor: not-allowed; }
+        @media (hover: hover) {
+            .ai-composer textarea:hover:not(:focus):not(:disabled) { border-color: var(--outline); }
+        }
+        @media (pointer: coarse) {
+            .ai-composer textarea { font-size: 16px; }
+        }
+        .ai-icon-button {
+            width: 48px; height: 48px; min-height: 48px; padding: 0;
+            border-radius: var(--radius-full);
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .ai-icon-button svg { width: 22px; height: 22px; }
+        .ai-icon-button[hidden] { display: none; }
+        .ai-icon-button.is-cancel svg { display: none; }
+        .ai-icon-button.is-cancel::before {
+            content: "";
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            background: currentColor;
+        }
+        /* Live voice: danger tonal with a solid ring (the label and note also change). */
+        .ai-icon-button.is-live {
+            color: var(--danger); background-color: var(--danger-soft);
+            box-shadow: 0 0 0 2px var(--danger);
+        }
+        .ai-voice-note {
+            margin: 8px 4px 0; color: var(--on-surface-variant);
+            font-size: var(--fs-caption); line-height: 1.4;
+        }
+        .ai-voice-note.is-live { color: var(--danger); font-weight: 600; }
+
+        .ai-custom-model-field { margin-top: 8px; }
+        .ai-custom-model-field[hidden] { display: none; }
+        .voice-enroll-voices {
+            list-style: none;
+            margin: 8px 0 0;
+            padding: 0;
+        }
+        .voice-enroll-voices li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        .voice-enroll-voices li + li { border-top: 1px solid var(--hairline); }
+        .voice-enroll-voices li > span { flex: 1 1 auto; min-width: 0; margin-right: 12px; overflow-wrap: break-word; }
+        [dir="rtl"] .voice-enroll-voices li > span { margin-right: 0; margin-left: 12px; }
+
+        /* Name field and the three buttons share one row and wrap together on a narrow head unit. */
+        .voice-enroll-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 12px 0 -8px;
+        }
+        .voice-enroll-actions > *,
+        .voice-enroll-actions > .voice-enroll-name { margin: 0 12px 8px 0; }
+        [dir="rtl"] .voice-enroll-actions > *,
+        [dir="rtl"] .voice-enroll-actions > .voice-enroll-name { margin: 0 0 8px 12px; }
+        .voice-enroll-actions .voice-enroll-name {
+            flex: 1 1 220px;
+            max-width: 320px;
+        }
+
+        .voice-enroll-actions .btn,
+        .voice-enroll-voices .btn {
+            white-space: nowrap;
+            flex: 0 0 auto;
+        }
+
+        .assistant-page select.md-input { touch-action: manipulation; }
+        .ai-actions { display: flex; flex-wrap: wrap; margin: 16px 0 -8px; }
+        .ai-actions > * { margin: 0 8px 8px 0; }
+        [dir="rtl"] .ai-actions > * { margin: 0 0 8px 8px; }
+
+        /* Runtime readouts: the mock's stat wells. */
+        .ai-runtime-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-gap: 8px; gap: 8px; margin-top: 12px;
+        }
+        .ai-runtime-item {
+            min-width: 0; padding: 12px 14px; border-radius: var(--radius-md);
+            background: var(--well);
+        }
+        .ai-runtime-item span { display: block; font-size: var(--fs-caption); color: var(--on-surface-variant); }
+        .ai-runtime-item strong {
+            display: block; margin-top: 2px; color: var(--on-surface);
+            font-size: var(--fs-body); font-weight: 600;
+            overflow-wrap: break-word; overflow-wrap: anywhere;
+        }
+        .ai-voice-modes { grid-template-columns: minmax(0, 1fr); }
+        .ai-voice-modes .mode-option input:disabled + .mode-card { opacity: .45; cursor: not-allowed; }
+        .ai-voice-modes .mode-option input:disabled + .mode-card:active { transform: none; }
+
+        /* Privacy statements read as mock rows: hairline-separated, primary marker. */
+        .ai-privacy-list { margin: 0 0 8px; padding: 0; list-style: none; }
+        .ai-privacy-list li {
+            position: relative; margin: 0; padding: 12px 0 12px 20px;
+            color: var(--on-surface-variant); font-size: var(--fs-body); line-height: 1.5;
+        }
+        .ai-privacy-list li + li { border-top: 1px solid var(--hairline); }
+        .ai-privacy-list li::before {
+            content: ""; position: absolute; top: 20px; left: 2px;
+            width: 6px; height: 6px; border-radius: 50%; background: var(--primary);
+        }
+        [dir="rtl"] .ai-privacy-list li { padding: 12px 20px 12px 0; }
+        [dir="rtl"] .ai-privacy-list li::before { left: auto; right: 2px; }
+        /* Provider and Privacy are forms: the same readable measure as body.r-settings pages.
+           The Assistant tab (chat) keeps the full width. */
+        @media (min-width: 1280px) {
+            html:not([data-android-embed="1"]) .page-body > section[data-tab="provider"],
+            html:not([data-android-embed="1"]) .page-body > section[data-tab="privacy"] { max-width: none; }
+        }
+        @media (max-width: 900px) {
+            /* Phones and narrow head units: the conversation takes what the header, chips and composer leave. */
+            .ai-conversation {
+                height: calc((var(--vh, 1vh) * 100) - 480px);
+                min-height: 180px; max-height: 720px;
+            }
+
+            /* A floating (undocked) theme FAB uses the empty right side of the
+               header instead of covering the composer; a docked one stays in the bar. */
+            .assistant-page #bydThemePicker:not(.is-docked) {
+                top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+                right: 16px !important; bottom: auto !important;
+                left: auto !important; transform: none !important;
+            }
+            /* English sits in the empty side of the mobile header (physical right).
+               Hebrew mirrors that slot to the physical left, same top and size. */
+            html[dir="rtl"] .assistant-page #bydThemePicker:not(.is-docked) {
+                right: auto !important;
+                left: 16px !important;
+            }
+            .assistant-page #bydThemePicker:not(.is-docked) .byd-theme-fab {
+                width: 40px; height: 40px;
+            }
+            .assistant-page #bydThemePicker:not(.is-docked) .byd-theme-popup {
+                top: 48px !important; right: 0 !important;
+                bottom: auto !important; left: auto !important;
+            }
+            html[dir="rtl"] .assistant-page #bydThemePicker:not(.is-docked) .byd-theme-popup {
+                right: auto !important;
+                left: 0 !important;
+            }
+        }
+        @media (max-width: 768px) {
+            /* Chip rail runs edge to edge; the first chip still lines up with the content. */
+            .ai-quick-actions {
+                margin: 0 -16px 8px; padding: 2px 16px 0;
+                scroll-snap-type: x proximity; scroll-padding: 0 16px;
+            }
+            .ai-chip { scroll-snap-align: start; }
+            .ai-chat-card > .card-body:first-child { padding: 12px; }
+            .ai-message { margin: 10px 0; }
+            .ai-bubble { padding: 10px 14px; }
+            .ai-message.assistant .ai-bubble { max-width: 100%; }
+            .ai-message.user .ai-bubble { max-width: 85%; }
+            .ai-form-grid { grid-template-columns: minmax(0, 1fr); }
+            .ai-form-grid .wide { grid-column: auto; }
+        }
+        @media (max-width: 600px) {
+            .ai-local-grid,
+            .ai-insight-grid { grid-template-columns: minmax(0, 1fr); }
+            .ai-insight-controls { grid-template-columns: minmax(0, 1fr); }
+            .ai-insight-controls .wide { grid-column: auto; }
+        }
+        @media (max-width: 480px) {
+            .ai-runtime-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .ai-actions > .btn { width: 100%; margin: 0 0 8px; justify-content: center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .ai-message.pending .ai-bubble::after { animation: none; }
+            .ai-chip, .ai-composer textarea { transition: none; }
+            .ai-chip:active { transform: none; }
+        }
+
+        /* Car: 56px targets and body-size text, like body.r-settings pages. */
+        :root[data-android-embed="1"] .assistant-page .page-body .btn { min-height: 56px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .ai-chip { min-height: 56px; padding: 0 20px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .ai-composer .ai-icon-button { width: 56px; height: 56px; }
+        :root[data-android-embed="1"] .ai-icon-button svg { width: 24px; height: 24px; }
+        :root[data-android-embed="1"] .ai-composer textarea { min-height: 56px; padding: 16px 20px; }
+        :root[data-android-embed="1"] .ai-result-meta,
+        :root[data-android-embed="1"] .ai-voice-note { font-size: var(--fs-label); }
+
+        /* Trip Briefing tab (trip-briefing.js): routines and places are wells on the tiles. */
+        .tb-section [hidden] { display: none !important; }
+        .tb-section > * + * { margin-top: var(--card-gap); }
+        .tb-section .setting-desc + .setting-desc { margin-top: 4px; }
+        .tb-row-action { margin-top: 10px; }
+        .tb-learn-row { align-items: center; }
+        .tb-caption { color: var(--on-surface-variant); font-size: var(--fs-label); }
+        .tb-result { display: flex; align-items: center; margin-top: 16px; }
+        .tb-result-figure {
+            flex: 0 0 auto; margin-right: 16px; color: var(--primary);
+            font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums;
+        }
+        [dir="rtl"] .tb-result-figure { margin-right: 0; margin-left: 16px; }
+        .tb-result-text { flex: 1 1 auto; min-width: 0; }
+        .tb-cta {
+            display: flex; flex-wrap: wrap; align-items: center;
+            margin-top: 12px; padding: 12px 16px 4px; border-radius: var(--radius-md);
+            background: var(--primary-soft); box-shadow: inset 0 0 0 1px var(--primary);
+        }
+        .tb-cta > * { margin-bottom: 8px; }
+        .tb-cta-text {
+            flex: 1 1 220px; min-width: 0; margin-right: 12px;
+            color: var(--on-surface); font-size: var(--fs-label); line-height: 1.45;
+        }
+        [dir="rtl"] .tb-cta-text { margin-right: 0; margin-left: 12px; }
+        .tb-note-action { margin-top: 10px; }
+        .tb-list {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-gap: 12px; gap: 12px; margin-top: 12px;
+        }
+        .tb-list > .ai-result-card { margin: 0; }
+        .tb-item-head { display: flex; align-items: center; }
+        .tb-route {
+            display: flex; flex-wrap: wrap; align-items: center; flex: 1 1 auto; min-width: 0;
+            color: var(--on-surface); font-size: var(--fs-body); font-weight: 600; line-height: 1.35;
+        }
+        .tb-route > * { margin-right: 6px; }
+        [dir="rtl"] .tb-route > * { margin-right: 0; margin-left: 6px; }
+        .tb-route > span { min-width: 0; overflow-wrap: break-word; }
+        .tb-route .is-unnamed { color: var(--on-surface-variant); }
+        .tb-route-arrow { flex: 0 0 auto; width: 16px; height: 16px; color: var(--on-surface-variant); }
+        [dir="rtl"] .tb-route-arrow { -webkit-transform: scaleX(-1); transform: scaleX(-1); }
+        .tb-item-head > .toggle-switch { flex: 0 0 auto; margin: -6px 0 -6px 12px; }
+        [dir="rtl"] .tb-item-head > .toggle-switch { margin: -6px 12px -6px 0; }
+        .tb-item.is-hidden .tb-route > span:not(.setting-badge),
+        .tb-item.is-hidden .ai-result-detail { opacity: .6; }
+        .tb-item .ai-result-actions { align-items: center; }
+        .tb-app {
+            display: flex; align-items: center; flex: 1 1 240px; min-width: 0;
+            color: var(--on-surface-variant); font-size: var(--fs-label);
+        }
+        .tb-app-label { flex: 0 0 auto; margin-right: 8px; }
+        [dir="rtl"] .tb-app-label { margin-right: 0; margin-left: 8px; }
+        .tb-item .text-input {
+            flex: 1 1 auto; width: auto; min-width: 0; min-height: 40px;
+            padding-top: 8px; padding-bottom: 8px; background-color: var(--tile);
+        }
+        .tb-name-form .text-input { flex: 1 1 160px; }
+        @media (pointer: coarse) {
+            .tb-item .text-input { min-height: 44px; }
+        }
+        .tb-notice { padding: 32px 20px; }
+        .tb-notice.is-error .empty-icon { color: var(--danger); }
+        .tb-notice-actions { margin-top: 16px; }
+        .tb-loading { display: flex; align-items: center; justify-content: center; }
+        @media (max-width: 600px) {
+            .tb-list { grid-template-columns: minmax(0, 1fr); }
+        }
+        :root[data-android-embed="1"] .tb-section .text-input { min-height: 56px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .tb-route-arrow { width: 18px; height: 18px; }
+    </style>
+</head>
+<body class="assistant-page">
+    <div class="app-layout">
+        <div id="app-shell-mount"></div>
+        <main class="main-content">
+            <div class="mobile-header">
+                <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Open menu" data-i18n-attr="aria-label:genai.aria_open_menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                </button>
+                <span style="font-weight:600;" data-i18n="nav.assistant">Assistant</span>
+                <div style="width:40px;"></div>
+            </div>
+
+            <header class="page-header">
+                <h1 class="page-title" data-i18n="genai.page_title">OverDrive Assistant</h1>
+                <div class="header-actions">
+                    <span class="status-badge inactive" id="genAiBadge" data-i18n="genai.off">OFF</span>
+                </div>
+            </header>
+
+            <div class="page-body">
+                <section data-tab="assistant">
+                    <div class="ai-state r-hero" id="genAiState" data-hero-badge="genAiBadge">
+                        <div class="ai-state-icon r-hero-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="6" width="16" height="13" rx="3"/><path d="M9 3v3M8 12h.01M16 12h.01M9 16h6"/></svg>
+                        </div>
+                        <div class="ai-state-copy r-hero-text">
+                            <div class="ai-state-title r-hero-title" id="genAiStateTitle" data-i18n="genai.loading">Loading assistant…</div>
+                            <div class="ai-state-desc r-hero-sub" id="genAiStateDesc" data-i18n="genai.checking_runtime">Checking the on-vehicle BYOK runtime.</div>
+                        </div>
+                        <div class="ai-state-action r-hero-ctl">
+                            <button class="btn btn-secondary" id="genAiConfigureBtn" type="button" onclick="GenAI.openProvider()" data-i18n="genai.configure">Configure</button>
+                        </div>
+                    </div>
+
+                    <div class="ai-quick-actions" aria-label="Grounded assistant actions" data-i18n-attr="aria-label:genai.aria_quick_actions">
+                        <button class="ai-chip" type="button" data-mode="vehicle_history" data-i18n="genai.chip_vehicle_history" data-prompt="Find ">Search vehicle history</button>
+                        <button class="ai-chip" type="button" data-mode="current_vehicle" data-i18n="genai.chip_current_vehicle" data-prompt="Explain the current vehicle state and call out anything unusual.">Current vehicle</button>
+                        <button class="ai-chip" type="button" data-mode="latest_trip" data-i18n="genai.chip_latest_trip" data-prompt="Explain my latest trip, including efficiency and notable moments.">Explain latest trip</button>
+                        <button class="ai-chip" type="button" data-mode="trip_comparison" data-i18n="genai.chip_more_battery" data-prompt="Why did my latest trip use more battery than comparable trips?">Why more battery?</button>
+                        <button class="ai-chip" type="button" data-mode="recent_events" data-i18n="genai.chip_summarize_events" data-prompt="Summarize my recent recording and surveillance events.">Summarize events</button>
+                        <button class="ai-chip" type="button" data-mode="roadsense" data-i18n="genai.chip_roadsense" data-prompt="Summarize recent RoadSense hazards and what they mean.">RoadSense hazards</button>
+                        <button class="ai-chip" type="button" data-mode="charging" data-i18n="genai.chip_charging" data-prompt="Review recent charging and highlight useful trends.">Charging review</button>
+                        <button class="ai-chip" type="button" data-mode="diagnostics" data-i18n="genai.chip_diagnostics" data-prompt="Review current diagnostics and explain any likely issues.">Diagnostics</button>
+                        <button class="ai-chip" type="button" data-mode="diagnostic_logs" data-i18n="genai.chip_analyze_logs" data-prompt="Analyze the recent redacted daemon warnings and errors, identify the strongest evidence, and say what is still uncertain.">Analyze logs</button>
+                        <button class="ai-chip" type="button" data-mode="automation_diagnostics" data-i18n="genai.chip_diagnose_automation" data-prompt="Why did my automation not run? Diagnose its conditions, recent logs, action timing, and safe fixes.">Diagnose automation</button>
+                        <button class="ai-chip" type="button" data-mode="vehicle_action" data-i18n="genai.chip_control_vehicle" data-prompt="Set the cabin temperature to ">Control vehicle</button>
+                        <button class="ai-chip" type="button" data-mode="automation_draft" data-i18n="genai.chip_create_automation" data-prompt="Create an automation that ">Create automation</button>
+                        <button class="ai-chip" type="button" data-mode="community_search" data-i18n="genai.chip_find_automation" data-prompt="Find a community automation for ">Find automation</button>
+                    </div>
+
+                    <div class="card ai-chat-card" data-tab="assistant">
+                        <div class="card-body">
+                            <div class="ai-conversation" id="genAiConversation" aria-live="polite">
+                                <div class="ai-empty" id="genAiEmpty">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+                                    <strong data-i18n="genai.empty_title">Ask about your vehicle</strong>
+                                    <span data-i18n="genai.empty_desc">Text is the default. Vehicle data is attached only when you choose a grounded action or explicitly ask for it.</span>
+                                </div>
+                            </div>
+                            <div class="ai-composer-dock">
+                                <form class="ai-composer" id="genAiComposer">
+                                    <button class="btn btn-secondary ai-icon-button" id="genAiVoiceBtn" type="button" disabled aria-label="Voice unavailable" aria-pressed="false" title="Native realtime voice is unavailable for this provider" data-i18n-attr="aria-label:genai.voice_unavailable;title:genai.voice_unavailable">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/></svg>
+                                    </button>
+                                    <textarea id="genAiInput" rows="1" maxlength="12000" placeholder="Ask OverDrive…" data-i18n-attr="placeholder:genai.input_placeholder"></textarea>
+                                    <button class="btn btn-primary ai-icon-button" id="genAiSendBtn" type="submit" aria-label="Send" data-i18n-attr="aria-label:genai.aria_send">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                    </button>
+                                </form>
+                                <div class="ai-voice-note" id="genAiVoiceNote" data-i18n="genai.voice_note">Voice appears only for providers with native realtime audio; OverDrive does not add speech-to-text fallback.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ai-local-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <span data-i18n="genai.routine_suggestions">Routine suggestions</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="ai-local-list" id="genAiRoutineSuggestions"><span data-i18n="genai.routine_loading">Loading local routine learner…</span></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg>
+                                    <span data-i18n="genai.packs_title">Incident evidence packs</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="ai-local-list" id="genAiIncidentPacks"><span data-i18n="genai.packs_empty">Create a pack from a recording on the Events page.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section data-tab="assistant">
+                    <div class="ai-insight-grid">
+                        <div class="card ai-insight-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/><path d="m5 5 14 14"/></svg>
+                                    <span data-i18n="genai.generate_insight">Generate an insight</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="ai-insight-controls">
+                                    <div class="md-field">
+                                        <div class="md-field-box">
+                                            <select class="md-input" id="genAiInsightMode">
+                                                <option value="overview" data-i18n="genai.mode_overview">Vehicle overview</option>
+                                                <option value="current_vehicle" data-i18n="genai.mode_current_vehicle">Current vehicle</option>
+                                                <option value="latest_trip" data-i18n="genai.mode_latest_trip">Latest trip</option>
+                                                <option value="trip_comparison" data-i18n="genai.mode_trip_comparison">Trip consumption comparison</option>
+                                                <option value="recent_events" data-i18n="genai.mode_recent_events">Recent events</option>
+                                                <option value="roadsense" data-i18n="genai.mode_roadsense">RoadSense hazards</option>
+                                                <option value="charging" data-i18n="genai.mode_charging">Charging</option>
+                                                <option value="diagnostics" data-i18n="genai.mode_diagnostics">Diagnostics</option>
+                                            </select>
+                                            <label class="md-label" for="genAiInsightMode" data-i18n="genai.insight_type">Insight type</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-field">
+                                        <div class="md-field-box">
+                                            <input class="md-input" id="genAiInsightPrompt" type="text" maxlength="600" placeholder=" ">
+                                            <label class="md-label" for="genAiInsightPrompt" data-i18n="genai.optional_focus">Optional focus</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setting-row" style="margin-top:12px;">
+                                    <div class="setting-info">
+                                        <div class="setting-name" data-i18n="genai.notify_once">Also send a notification</div>
+                                        <div class="setting-desc" data-i18n="genai.notify_once_desc">One-time delivery for this generation only.</div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="genAiInsightNotifyNow">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="ai-actions">
+                                    <button class="btn btn-primary" id="genAiInsightGenerateBtn" type="button" onclick="GenAI.generateInsight()" data-i18n="genai.generate_now">Generate now</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card ai-insight-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                                    <span data-i18n="genai.dashboard_insights">Dashboard insights</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="setting-row">
+                                    <div class="setting-info">
+                                        <div class="setting-name" data-i18n="genai.show_on_dashboard">Show latest insight on dashboards</div>
+                                        <div class="setting-desc" data-i18n="genai.show_on_dashboard_desc">Displays the latest saved insight in the native dashboard and web dashboard only while GenAI is enabled.</div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="genAiInsightDashboard">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="ai-insight-controls">
+                                    <div class="md-field">
+                                        <div class="md-field-box">
+                                            <select class="md-input" id="genAiInsightSchedule">
+                                                <option value="off" data-i18n="genai.freq_off">Off</option>
+                                                <option value="daily" data-i18n="genai.freq_daily">Daily</option>
+                                                <option value="weekly" data-i18n="genai.freq_weekly">Weekly</option>
+                                            </select>
+                                            <label class="md-label" for="genAiInsightSchedule" data-i18n="genai.frequency">Frequency</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-field">
+                                        <div class="md-field-box">
+                                            <input class="md-input" id="genAiInsightTime" type="time" value="20:00">
+                                            <label class="md-label" for="genAiInsightTime" data-i18n="genai.local_time">Local time</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-field wide" id="genAiInsightDayField">
+                                        <div class="md-field-box">
+                                            <select class="md-input" id="genAiInsightDay">
+                                                <option value="1" data-i18n="genai.monday">Monday</option>
+                                                <option value="2" data-i18n="genai.tuesday">Tuesday</option>
+                                                <option value="3" data-i18n="genai.wednesday">Wednesday</option>
+                                                <option value="4" data-i18n="genai.thursday">Thursday</option>
+                                                <option value="5" data-i18n="genai.friday">Friday</option>
+                                                <option value="6" data-i18n="genai.saturday">Saturday</option>
+                                                <option value="7" data-i18n="genai.sunday">Sunday</option>
+                                            </select>
+                                            <label class="md-label" for="genAiInsightDay" data-i18n="genai.day">Day</label>
+                                        </div>
+                                    </div>
+                                    <div class="md-field wide">
+                                        <div class="md-field-box">
+                                            <select class="md-input" id="genAiInsightScheduleMode">
+                                                <option value="overview" data-i18n="genai.mode_overview">Vehicle overview</option>
+                                                <option value="current_vehicle" data-i18n="genai.mode_current_vehicle">Current vehicle</option>
+                                                <option value="latest_trip" data-i18n="genai.mode_latest_trip">Latest trip</option>
+                                                <option value="trip_comparison" data-i18n="genai.mode_trip_comparison">Trip consumption comparison</option>
+                                                <option value="recent_events" data-i18n="genai.mode_recent_events">Recent events</option>
+                                                <option value="roadsense" data-i18n="genai.mode_roadsense">RoadSense hazards</option>
+                                                <option value="charging" data-i18n="genai.mode_charging">Charging</option>
+                                                <option value="diagnostics" data-i18n="genai.mode_diagnostics">Diagnostics</option>
+                                            </select>
+                                            <label class="md-label" for="genAiInsightScheduleMode" data-i18n="genai.schedule_type">Scheduled summary type</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setting-row" style="margin-top:12px;">
+                                    <div class="setting-info">
+                                        <div class="setting-name" data-i18n="genai.notify_when_ready">Notify when ready</div>
+                                        <div class="setting-desc" data-i18n="genai.notify_when_ready_desc">Off keeps scheduled summaries stored on this vehicle without sending a notification.</div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="genAiInsightNotifications">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="ai-inline-note" data-i18n="genai.schedule_note">The dashboard only reads already-generated text; displaying it never calls the provider. Daily and weekly presets use the existing automation clock. For after-trip, charging, RoadSense, or another trigger, add the “Generate AI insight” action in Automations.</div>
+                                <div class="ai-actions">
+                                    <button class="btn btn-primary" id="genAiInsightScheduleSaveBtn" type="button" onclick="GenAI.saveInsightSettings()" data-i18n="genai.save_settings">Save settings</button>
+                                    <button class="btn btn-secondary" type="button" onclick="window.location.href='/automations'" data-i18n="genai.open_automations">Open Automations</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Trip Briefing (trip-briefing.js, /api/briefing): settings, self-test, routines, places. -->
+                <section data-tab="briefing" id="tbSection" class="tb-section" data-state="loading">
+                    <div class="r-hero tb-hero is-off" id="tbHero">
+                        <div class="r-hero-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                        </div>
+                        <div class="r-hero-text">
+                            <h2 class="r-hero-title" id="tbTitle" data-i18n="trip_briefing.title">Trip Briefing</h2>
+                            <div class="r-hero-sub" data-i18n="trip_briefing.intro">At car start, OverDrive suggests where you're likely going and asks if you want directions.</div>
+                        </div>
+                        <div class="r-hero-ctl">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="tbEnabled" aria-labelledby="tbTitle" disabled>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card" id="tbNotice">
+                        <div class="loading-state tb-loading" role="status"><span class="r-btn-spinner" aria-hidden="true"></span><span data-i18n="trip_briefing.loading">Loading Trip Briefing…</span></div>
+                    </div>
+
+                    <div class="ai-local-grid" id="tbMain" hidden>
+                        <div class="card" id="tbLearnCard" hidden>
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                                    <span data-i18n="trip_briefing.learn_title">Learn from my trips</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="setting-desc" data-i18n="trip_briefing.learn_desc">Replays your past trips to check how often it would have guessed right.</div>
+                                <div class="ai-actions tb-learn-row">
+                                    <button class="btn btn-primary" id="tbLearnBtn" type="button">Learn from my trips</button>
+                                    <span class="tb-caption" id="tbLearnedAt"></span>
+                                </div>
+                                <div id="tbResult" aria-live="polite"></div>
+                                <div class="tb-cta" id="tbCta" hidden>
+                                    <div class="tb-cta-text" data-i18n="trip_briefing.cta_desc">Trip Briefing is off. Turn it on to get these suggestions at car start.</div>
+                                    <button class="btn btn-primary" id="tbCtaBtn" type="button" data-i18n="trip_briefing.cta">Turn on Trip Briefing</button>
+                                </div>
+                                <div class="info-box-warning" id="tbTripsOff" role="note" hidden>
+                                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                    <div>
+                                        <div class="info-note" data-i18n="trip_briefing.trips_off_note">Trip recording is off, so new trips aren't learned.</div>
+                                        <a class="btn btn-secondary tb-note-action" href="/trips#storage" data-i18n="trip_briefing.turn_on_trips">Turn on trip recording</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" id="tbSettingsCard">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></svg>
+                                    <span data-i18n="trip_briefing.settings_title">How it asks</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="setting-row">
+                                    <div class="setting-info">
+                                        <div class="setting-name" id="tbVoiceName" data-i18n="trip_briefing.voice">Ask by voice</div>
+                                        <div class="setting-desc" data-i18n="trip_briefing.voice_desc">Off shows the card only.</div>
+                                        <div class="setting-desc" data-i18n="trip_briefing.voice_ai_note">In GenAI mode, and in Hybrid when your language isn't one the car understands offline, the place's name is sent to your AI provider so it can ask.</div>
+                                        <div class="setting-desc" id="tbVoiceMode"></div>
+                                        <div class="tb-row-action" id="tbVoiceSettings" hidden>
+                                            <button class="btn btn-secondary" id="tbVoiceSettingsBtn" type="button" data-i18n="trip_briefing.voice_settings">Voice settings</button>
+                                        </div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="tbVoice" aria-labelledby="tbVoiceName" disabled>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="setting-row">
+                                    <div class="setting-info">
+                                        <label class="setting-name" for="tbDefaultApp" data-i18n="trip_briefing.app">Default navigation app</label>
+                                        <div class="setting-desc" data-i18n="trip_briefing.app_desc">Opens when you say yes. If it isn't installed, OverDrive is offered first.</div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <select class="text-input" id="tbDefaultApp" disabled>
+                                            <option value="overdrive" data-i18n="trip_briefing.app_overdrive">OverDrive</option>
+                                            <option value="waze" data-i18n="trip_briefing.app_waze">Waze</option>
+                                            <option value="gmaps" data-i18n="trip_briefing.app_gmaps">Google Maps</option>
+                                            <option value="car" data-i18n="trip_briefing.app_car">Car navigation</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="setting-row">
+                                    <div class="setting-info">
+                                        <div class="setting-name" id="tbExtrasName" data-i18n="trip_briefing.extras">Range and hazard notes</div>
+                                        <div class="setting-desc" data-i18n="trip_briefing.extras_desc">Adds one short note when it matters: range too low for the trip, or new road hazards on the way. Worked out on the car.</div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="tbExtras" aria-labelledby="tbExtrasName" disabled>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="setting-row">
+                                    <div class="setting-info">
+                                        <div class="setting-name" id="tbOnlineExtrasName" data-i18n="trip_briefing.online_extras">Rain note</div>
+                                        <div class="setting-desc" data-i18n="trip_briefing.online_extras_desc">Says when rain is likely in the next few hours. Sends the car's position to the weather service (Open-Meteo) at each car start.</div>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="tbOnlineExtras" aria-labelledby="tbOnlineExtrasName" disabled>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="tbRoutinesCard" hidden>
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+                                <span data-i18n="trip_briefing.routines_title">Your routines</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="setting-desc" data-i18n="trip_briefing.routines_desc">Trips you make again and again at about the same time.</div>
+                            <div class="ai-inline-note" id="tbRoutinesEmpty" data-i18n="trip_briefing.routines_empty" hidden>It stays quiet until it sees a routine at least 3 times.</div>
+                            <div class="tb-list" id="tbRoutines"></div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="tbPlacesCard" hidden>
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                                <span data-i18n="trip_briefing.places_title">Places to name</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="setting-desc" data-i18n="trip_briefing.places_desc">Places you often drive to. Named places get a spoken suggestion.</div>
+                            <div class="tb-list" id="tbPlaces"></div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="tbForgetCard" hidden>
+                        <div class="card-body">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-name" data-i18n="trip_briefing.forget_title">Forget my patterns</div>
+                                    <div class="setting-desc" data-i18n="trip_briefing.forget_desc">Clears place names, hidden routines, app choices and your answers. Your trips are kept.</div>
+                                </div>
+                                <div class="setting-control">
+                                    <button class="btn btn-danger-ghost" id="tbForgetBtn" type="button" data-i18n="trip_briefing.forget">Forget</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section data-tab="provider">
+                    <div class="card" data-tab="provider">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                                <span data-i18n="genai.provider_title">Bring your own provider</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-name" data-i18n="genai.enable_title">Enable GenAI</div>
+                                    <div class="setting-desc" data-i18n="genai.enable_desc">Master kill switch. Off cancels active requests and releases the provider transport.</div>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="genAiEnabled">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="ai-form-grid" style="margin-top:16px;">
+                                <div class="md-field">
+                                    <div class="md-field-box">
+                                        <select class="md-input" id="genAiProvider">
+                                            <option value="openai">OpenAI</option>
+                                            <option value="anthropic">Anthropic</option>
+                                            <option value="gemini">Google Gemini</option>
+                                            <option value="openai_compatible" data-i18n="genai.provider_openai_compatible">OpenAI-compatible</option>
+                                        </select>
+                                        <label class="md-label" for="genAiProvider" data-i18n="genai.provider">Provider</label>
+                                    </div>
+                                </div>
+                                <div class="md-field">
+                                    <div class="md-field-box">
+                                        <select class="md-input" id="genAiModelPreset"></select>
+                                        <label class="md-label" for="genAiModelPreset" data-i18n="genai.text_model">Text model</label>
+                                    </div>
+                                    <div class="md-field-box ai-custom-model-field" id="genAiModelCustomField" hidden>
+                                        <input class="md-input" id="genAiModel" type="text" maxlength="200" autocomplete="off" placeholder=" ">
+                                        <label class="md-label" for="genAiModel" data-i18n="genai.custom_model">Custom model ID</label>
+                                    </div>
+                                    <span class="md-supporting" id="genAiModelHint" data-i18n="genai.model_hint">Choose a suggested model or enter any compatible model ID.</span>
+                                </div>
+                                <div class="md-field wide">
+                                    <div class="md-field-box">
+                                        <input class="md-input" id="genAiBaseUrl" type="url" maxlength="2048" placeholder=" ">
+                                        <label class="md-label" for="genAiBaseUrl" data-i18n="genai.base_url">Provider base URL</label>
+                                    </div>
+                                    <span class="md-supporting" data-i18n="genai.base_url_hint">HTTPS is recommended. HTTP is accepted for a trusted local compatible endpoint.</span>
+                                </div>
+                                <div class="md-field">
+                                    <div class="md-field-box">
+                                        <input class="md-input" id="genAiApiKey" type="password" maxlength="8192" autocomplete="off" placeholder=" ">
+                                        <label class="md-label" for="genAiApiKey" data-i18n="genai.api_key">API key</label>
+                                    </div>
+                                    <span class="md-supporting" id="genAiKeyHint" data-i18n="genai.key_keep">Leave blank to keep the saved key.</span>
+                                </div>
+                                <div class="md-field">
+                                    <div class="md-field-box">
+                                        <input class="md-input" id="genAiMaxTokens" type="number" min="64" max="8192" step="64" value="1200" placeholder=" ">
+                                        <label class="md-label" for="genAiMaxTokens" data-i18n="genai.max_tokens">Maximum output tokens</label>
+                                    </div>
+                                </div>
+                                <div class="md-field wide" id="genAiRealtimeField">
+                                    <div class="md-field-box">
+                                        <select class="md-input" id="genAiRealtimeModelPreset"></select>
+                                        <label class="md-label" for="genAiRealtimeModelPreset" data-i18n="genai.realtime_model">Realtime voice model (optional)</label>
+                                    </div>
+                                    <div class="md-field-box ai-custom-model-field" id="genAiRealtimeModelCustomField" hidden>
+                                        <input class="md-input" id="genAiRealtimeModel" type="text" maxlength="200" autocomplete="off" placeholder=" ">
+                                        <label class="md-label" for="genAiRealtimeModel" data-i18n="genai.custom_realtime_model">Custom realtime model ID</label>
+                                    </div>
+                                    <span class="md-supporting" data-i18n="genai.realtime_hint">Used only for provider-native realtime audio. It is never routed through a speech-to-text fallback.</span>
+                                </div>
+                            </div>
+
+                            <div class="ai-actions">
+                                <button class="btn btn-primary" id="genAiSaveBtn" type="button" onclick="GenAI.saveConfig()" data-i18n="common.save">Save</button>
+                                <button class="btn btn-secondary" id="genAiTestBtn" type="button" onclick="GenAI.testConnection()" data-i18n="genai.test">Test provider</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" data-tab="provider" id="voiceAssistantCard">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/></svg>
+                                <span data-i18n="voice_assistant.title">Hands-free voice assistant</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-name" data-i18n="voice_assistant.enable_title">Voice assistant</div>
+                                    <div class="setting-desc" data-i18n="voice_assistant.enable_desc">Say “OverDrive” to talk. Commands run instantly. Works only while the car is on, and nothing leaves the car until you say the wake word.</div>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="voiceEnabled" disabled>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="ai-runtime-grid">
+                                <div class="ai-runtime-item"><span data-i18n="voice_assistant.status_label">Status</span><strong id="voiceState">—</strong></div>
+                                <div class="ai-runtime-item"><span data-i18n="voice_assistant.last_wake">Last wake</span><strong id="voiceLastWake">—</strong></div>
+                                <div class="ai-runtime-item"><span data-i18n="voice_assistant.wake_model">Wake word model</span><strong id="voiceWakeModel">—</strong></div>
+                                <div class="ai-runtime-item"><span data-i18n="voice_assistant.local_engine">Local commands</span><strong id="voiceLocalEngine">—</strong></div>
+                                <div class="ai-runtime-item"><span data-i18n="voice_assistant.wakes">Wake-ups</span><strong id="voiceWakes">—</strong></div>
+                                <div class="ai-runtime-item"><span data-i18n="voice_assistant.handled">Commands</span><strong id="voiceHandled">—</strong></div>
+                            </div>
+                            <div class="ai-inline-note" id="voiceRuntimeNote" hidden></div>
+
+                            <div class="setting-row" style="margin-top:12px;border-bottom:none;padding-bottom:12px;">
+                                <div class="setting-info">
+                                    <div class="setting-name" data-i18n="voice_assistant.mode_title">How commands are understood</div>
+                                    <div class="setting-desc" data-i18n="voice_assistant.mode_desc">Choose where your speech is understood.</div>
+                                </div>
+                            </div>
+                            <div class="mode-selector ai-voice-modes" id="voiceModeSelector" role="radiogroup" aria-busy="true" aria-label="Voice assistant mode" data-i18n-attr="aria-label:voice_assistant.mode_aria">
+                                <label class="mode-option">
+                                    <input type="radio" name="voiceMode" value="local" disabled>
+                                    <div class="mode-card">
+                                        <span class="mode-icon" aria-hidden="true">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>
+                                        </span>
+                                        <span class="mode-body">
+                                            <span class="mode-name" data-i18n="voice_assistant.mode_local_name">Local</span>
+                                            <span class="mode-desc" data-i18n="voice_assistant.mode_local_desc">Works offline and instantly. Understands a fixed set of commands like 'AC on' or 'temperature 22'. English and Chinese.</span>
+                                        </span>
+                                        <span class="mode-radio" aria-hidden="true"></span>
+                                    </div>
+                                </label>
+                                <label class="mode-option">
+                                    <input type="radio" name="voiceMode" value="hybrid" disabled>
+                                    <div class="mode-card">
+                                        <span class="mode-icon" aria-hidden="true">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.17-2.88L3 3"/><path d="m15 9 6-6"/></svg>
+                                        </span>
+                                        <span class="mode-body">
+                                            <span class="mode-name" data-i18n="voice_assistant.mode_hybrid_name">Hybrid (recommended)</span>
+                                            <span class="mode-desc" data-i18n="voice_assistant.mode_hybrid_desc">Common commands run instantly on the car. Anything else goes to your AI provider. Needs internet and an OpenAI or Gemini voice model.</span>
+                                        </span>
+                                        <span class="mode-radio" aria-hidden="true"></span>
+                                    </div>
+                                </label>
+                                <label class="mode-option">
+                                    <input type="radio" name="voiceMode" value="genai" disabled>
+                                    <div class="mode-card">
+                                        <span class="mode-icon" aria-hidden="true">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+                                        </span>
+                                        <span class="mode-body">
+                                            <span class="mode-name" data-i18n="voice_assistant.mode_genai_name">GenAI</span>
+                                            <span class="mode-desc" data-i18n="voice_assistant.mode_genai_desc">Understands natural speech in almost any language and can answer questions about your car. Every request goes to your AI provider, takes about 1–2 s, and uses your API key.</span>
+                                        </span>
+                                        <span class="mode-radio" aria-hidden="true"></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div id="voiceGenAiGate" hidden>
+                                <div class="ai-inline-note" id="voiceGenAiReason"></div>
+                                <div class="ai-actions">
+                                    <button class="btn btn-secondary" id="voiceSetupGenAiBtn" type="button" data-i18n="voice_assistant.setup_genai">Set up GenAI</button>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-name" data-i18n="voice_assistant.share_title">Let the assistant read live car status</div>
+                                    <div class="setting-desc" data-i18n="voice_assistant.share_desc">Hybrid and GenAI only. Your AI provider receives the car's live status with your requests so the assistant can answer questions about your car.</div>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="voiceShareVehicleState" disabled>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-name" data-i18n="voice_assistant.share_location_title">Share the car's approximate location</div>
+                                    <div class="setting-desc" data-i18n="voice_assistant.share_location_desc">Hybrid and GenAI only. While you talk to the assistant, the car's approximate location (a nearby place name, or a position rounded to about 1 km) is sent to your AI provider so it can answer questions like “where am I”.</div>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="voiceShareLocationWithAi" disabled>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="ai-form-grid" style="margin-top:16px;">
+                                <div class="md-field">
+                                    <div class="md-field-box">
+                                        <select class="md-input" id="voiceSensitivity" disabled>
+                                            <option value="low" data-i18n="voice_assistant.sensitivity_low">Low</option>
+                                            <option value="normal" data-i18n="voice_assistant.sensitivity_normal">Normal</option>
+                                            <option value="high" data-i18n="voice_assistant.sensitivity_high">High</option>
+                                        </select>
+                                        <label class="md-label" for="voiceSensitivity" data-i18n="voice_assistant.sensitivity">Wake word sensitivity</label>
+                                    </div>
+                                    <span class="md-supporting" data-i18n="voice_assistant.sensitivity_hint">Lower it if OverDrive wakes up on its own; raise it if it often misses you.</span>
+                                </div>
+                                <div class="md-field">
+                                    <div class="md-field-box">
+                                        <select class="md-input" id="voiceFollowUp" disabled></select>
+                                        <label class="md-label" for="voiceFollowUp" data-i18n="voice_assistant.follow_up">Follow-up window</label>
+                                    </div>
+                                    <span class="md-supporting" data-i18n="voice_assistant.follow_up_hint">How long OverDrive keeps listening for another command without the wake word.</span>
+                                </div>
+                                <div class="md-field">
+                                    <div class="md-field-box">
+                                        <select class="md-input" id="voiceCommandLanguage" disabled>
+                                            <option value="" data-i18n="voice_assistant.command_language_auto">Automatic (follow the app language)</option>
+                                            <option value="en" data-i18n="voice_assistant.command_language_en">English</option>
+                                            <option value="zh-CN" data-i18n="voice_assistant.command_language_zh_cn">中文（简体）</option>
+                                            <option value="zh-TW" data-i18n="voice_assistant.command_language_zh_tw">中文（繁體）</option>
+                                        </select>
+                                        <label class="md-label" for="voiceCommandLanguage" data-i18n="voice_assistant.command_language">Command language</label>
+                                    </div>
+                                    <span class="md-supporting" data-i18n="voice_assistant.command_language_hint">Which spoken commands OverDrive listens for. Only commands in this language are recognised locally.</span>
+                                </div>
+                                <div class="md-field wide">
+                                    <div class="md-field-box">
+                                        <select class="md-input" id="voiceAudioChannel" disabled>
+                                            <option value="media" data-i18n="voice_assistant.channel_media">Media</option>
+                                            <option value="navigation" data-i18n="voice_assistant.channel_navigation">Navigation</option>
+                                            <option value="voice" data-i18n="voice_assistant.channel_voice">Voice</option>
+                                        </select>
+                                        <label class="md-label" for="voiceAudioChannel" data-i18n="voice_assistant.audio_channel">Reply audio channel</label>
+                                    </div>
+                                    <span class="md-supporting" data-i18n="voice_assistant.audio_channel_hint">The car volume used for spoken replies and sounds.</span>
+                                </div>
+                                <div class="md-field wide">
+                                    <div class="md-field-box">
+                                        <select class="md-input" id="voiceMicSource" disabled>
+                                            <option value="mic" data-i18n="voice_assistant.mic_source_mic">Standard microphone</option>
+                                            <option value="voice_recognition" data-i18n="voice_assistant.mic_source_voice_recognition">Voice recognition</option>
+                                            <option value="voice_communication" data-i18n="voice_assistant.mic_source_voice_communication">Voice communication (echo cancelling)</option>
+                                            <option value="car_array" data-i18n="voice_assistant.mic_source_car_array">Car microphones with echo and noise cancelling</option>
+                                        </select>
+                                        <label class="md-label" for="voiceMicSource" data-i18n="voice_assistant.mic_source">Microphone input (experimental)</label>
+                                    </div>
+                                    <span class="md-supporting" data-i18n="voice_assistant.mic_source_hint">Voice communication may let the car cancel its own speakers so the wake word is heard over music. Try it if OverDrive misses you while media plays.</span>
+                                </div>
+                            </div>
+
+                            <div class="setting-row" id="voiceEnrollRow">
+                                <div class="setting-info">
+                                    <div class="setting-name" data-i18n="voice_assistant.enroll_title">Train the wake word to your voice</div>
+                                    <div class="setting-desc" data-i18n="voice_assistant.enroll_desc">Say “OverDrive” 4 times when the car asks. OverDrive learns how you say it, which helps with accents. Train parked, with the car on and the assistant listening.</div>
+                                    <div class="setting-desc" data-i18n="voice_assistant.enroll_people_desc">Each person can train their own voice: type their name, then Train. Up to 4 voices.</div>
+                                    <div class="setting-desc" data-i18n="voice_assistant.enroll_music_desc">For the wake word over music, play music at your usual volume and use Train with music.</div>
+                                    <div class="setting-desc" id="voiceEnrollStatus" aria-live="polite"></div>
+                                    <ul class="voice-enroll-voices" id="voiceEnrollVoices" hidden></ul>
+                                    <div class="voice-enroll-actions">
+                                        <div class="md-field voice-enroll-name">
+                                            <div class="md-field-box">
+                                                <input class="md-input" id="voiceEnrollName" type="text" maxlength="24" placeholder=" " autocomplete="off">
+                                                <label class="md-label" for="voiceEnrollName" data-i18n="voice_assistant.enroll_name">Who is training? (optional)</label>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-secondary" id="voiceEnrollBtn" type="button" disabled data-i18n="voice_assistant.enroll_start">Train</button>
+                                        <button class="btn btn-secondary" id="voiceEnrollMusicBtn" type="button" disabled data-i18n="voice_assistant.enroll_music_start">Train with music</button>
+                                        <button class="btn btn-secondary" id="voiceEnrollClearBtn" type="button" hidden data-i18n="voice_assistant.enroll_clear">Forget all</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-name" data-i18n="voice_assistant.pause_media_title">Pause media while listening</div>
+                                    <div class="setting-desc" data-i18n="voice_assistant.pause_media_desc">When music or a podcast is playing, saying “OverDrive” pauses it for the command and resumes it afterwards. Turn off to only lower its volume instead.</div>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="voicePauseMediaWhileListening" disabled>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-name" data-i18n="voice_assistant.resume_media_title">Resume media afterwards</div>
+                                    <div class="setting-desc" data-i18n="voice_assistant.resume_media_desc">Plays the music or podcast again when OverDrive is done, but only if OverDrive paused it. Turn off to leave it paused.</div>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="voiceResumeMediaAfterListening" disabled>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-name" data-i18n="voice_assistant.direct_fallback_title">Allow a direct connection when the proxy is unreachable</div>
+                                    <div class="setting-desc" data-i18n="voice_assistant.direct_fallback_desc">Hands-free assistant only. If the car's privacy proxy accepts the connection but relays nothing for 5 seconds, the voice session is retried once over the car's own internet connection. The AI provider then sees the car's IP address. Off by default.</div>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="voiceRealtimeDirectFallback" disabled>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="ai-inline-note" data-i18n="voice_assistant.ptt_hint">Prefer a button? In Key Mapping, bind a steering-wheel button to “Talk to OverDrive”.</div>
+                            <div class="ai-actions">
+                                <button class="btn btn-secondary" type="button" onclick="window.location.href='/key-mapping#add'" data-i18n="voice_assistant.open_key_mapping">Open Key Mapping</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section data-tab="privacy">
+                    <div class="card" data-tab="privacy">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <span data-i18n="genai.privacy_title">Privacy and runtime</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ul class="ai-privacy-list">
+                                <li data-i18n="genai.privacy_1">The API key uses the same device-bound encrypted storage path as BYD Cloud credentials and is never returned to this page.</li>
+                                <li data-i18n="genai.privacy_2">Chat history stays only in this WebView's memory and is cleared when the page closes or reloads.</li>
+                                <li data-i18n="genai.privacy_3">Vehicle context is sent only for an explicit grounded action. Context is treated as data, never as provider instructions.</li>
+                                <li data-i18n="genai.privacy_4">Starting voice opens a provider-native realtime session through the daemon. It closes when stopped, when this page leaves the foreground, or after inactivity.</li>
+                                <li data-i18n="genai.privacy_5">When the master switch is off, active calls are cancelled and the provider connection pool and dispatcher are destroyed.</li>
+                                <li data-i18n="genai.privacy_6">Requests re-evaluate the OverDrive proxy route each time. Public providers use the sing-box proxy when it is running, otherwise a direct connection. Tailnet endpoints, and private LAN endpoints while the Tailscale proxy is enabled, go only through Tailscale and fail closed if it is unavailable.</li>
+                            </ul>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-name" data-i18n="genai.routine_learn_title">Learn my routines locally</div>
+                                    <div class="setting-desc" data-i18n="genai.routine_learn_desc">Opt-in. Stores only bounded climate and sunshade action patterns on this vehicle. No provider call is used, and accepted suggestions save as manual-only automations.</div>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="genAiRoutineLearningEnabled">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="ai-runtime-grid">
+                                <div class="ai-runtime-item"><span data-i18n="genai.runtime_parked">Parked availability</span><strong id="genAiParked">—</strong></div>
+                                <div class="ai-runtime-item"><span data-i18n="genai.runtime_transport">Current transport</span><strong id="genAiTransport">—</strong></div>
+                                <div class="ai-runtime-item"><span data-i18n="genai.runtime_proxy">Proxy policy</span><strong id="genAiProxy">—</strong></div>
+                                <div class="ai-runtime-item"><span data-i18n="genai.runtime_active">Active requests</span><strong id="genAiActiveRequests">0</strong></div>
+                            </div>
+                            <div class="ai-actions">
+                                <button class="btn btn-primary" id="genAiRoutineSaveBtn" type="button" onclick="GenAI.saveRoutineSettings()" data-i18n="genai.routine_save_setting">Save routine setting</button>
+                                <button class="btn btn-secondary" id="genAiRoutineResetBtn" type="button" onclick="GenAI.resetRoutineLearning()" data-i18n="genai.routine_reset_btn">Reset learned patterns</button>
+                                <button class="btn btn-danger" type="button" onclick="GenAI.clearCredentials()" data-i18n="genai.clear">Disable and clear API key</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="../shared/auth.js"></script>
+    <script src="../shared/core.js?v=27"></script>
+    <script src="../shared/update-flow.js?v=3"></script>
+    <script src="../shared/genai.js?v=16"></script>
+    <script src="../shared/voice-assistant.js?v=9"></script>
+    <script src="../shared/trip-briefing.js?v=2"></script>
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('show');
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            BYD.i18n.init().then(function () {
+                BYD.core.init();
+                GenAI.init();
+                VoiceAssistantCard.init();
+                TripBriefing.init();
+            });
+        });
+    </script>
+</body>
+</html>
