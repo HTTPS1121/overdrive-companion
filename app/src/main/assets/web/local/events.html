@@ -1,0 +1,1814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title data-i18n="app.events_title">Events - OverDrive</title>
+    <link rel="icon" type="image/webp" href="../shared/app-icon-dark.webp">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="../shared/app-icon-dark.webp">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#00876C">
+    <script src="../shared/theme.js?v=12"></script>
+    <script src="../shared/app-shell.js?v=23"></script>
+    <link rel="stylesheet" href="../shared/styles.css?v=38">
+    <link rel="stylesheet" href="../shared/revamp.css?v=2">
+    <style>
+        /* Events Page Specific Styles */
+
+        /* Flexbox min-width:auto trap fix — the shared .main-content is a
+           flex child of .app-layout; without min-width:0 it refuses to
+           shrink below the intrinsic width of its content. The place
+           chip row (.filter-tabs-row2[data-filter-row="place"]) carries
+           an inline search input + up to 8 chips, whose combined
+           intrinsic width otherwise blows the whole column wider than
+           the viewport — defeating the row's own overflow-x:auto and
+           clipping the pagination Prev/Next on narrow devices. Letting
+           the chain collapse to viewport width is what makes the chip
+           row's horizontal scroller actually engage. Scoped to this
+           page so the shared shell is untouched. */
+        .main-content { min-width: 0; }
+
+        .events-container {
+            display: flex;
+            flex-direction: column;
+            padding: var(--page-pad-y) var(--page-pad-x) 32px;
+            min-width: 0;
+            /* Live --vh (kept fresh across rotation by theme.js) instead of
+               100dvh, which resolves stale on Android WebView after a
+               landscape→portrait flip and left the recordings panel sized to
+               the old taller viewport. 100vh is the pre-theme.js fallback. */
+            min-height: calc(100vh - var(--header-height) - 32px);
+            min-height: calc(var(--vh, 1vh) * 100 - var(--header-height) - 32px);
+        }
+        .events-container > * + * { margin-top: 16px; }
+        @media (max-width: 768px) {
+            .events-container { padding: 12px 16px 24px; }
+            .events-container > * + * { margin-top: 12px; }
+        }
+
+        /* Toolbar (mock .toolbar): date chip and type segments, then the storage meter and Select at the end. Wraps; margins stand in for flex gap. */
+        .events-top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            min-width: 0;
+            margin-right: -8px;
+            margin-bottom: -8px;
+        }
+        .events-top-bar > * { margin: 0 8px 8px 0; }
+        [dir="rtl"] .events-top-bar { margin-right: 0; margin-left: -8px; }
+        [dir="rtl"] .events-top-bar > * { margin: 0 0 8px 8px; }
+        /* Notification hero image (events.js inserts it into this bar): its own line, first. */
+        #eventsHeroBanner { order: -1; flex: 0 0 auto; max-width: calc(100% - 8px); }
+
+        /* Date chip (mock .date-chip) */
+        .calendar-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            min-height: 44px;
+            min-width: 0;
+            max-width: 100%;
+            padding: 0 18px 0 14px;
+            border-radius: var(--radius-full);
+            background-color: var(--well);
+            color: var(--on-surface);
+            font-size: var(--fs-label);
+            font-weight: 600;
+            line-height: 1.25;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
+        }
+        .calendar-toggle svg {
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            color: var(--primary);
+        }
+        .calendar-toggle > span { min-width: 0; overflow-wrap: break-word; }
+        [dir="rtl"] .calendar-toggle { padding: 0 14px 0 18px; text-align: right; }
+        [dir="rtl"] .calendar-toggle svg { margin-right: 0; margin-left: 8px; }
+        .calendar-toggle.has-date { background-color: var(--secondary-container); color: var(--on-secondary-container); }
+        .calendar-toggle.has-date svg { color: inherit; }
+        @media (hover: hover) {
+            .calendar-toggle:hover { background-color: var(--well-2); }
+            .calendar-toggle.has-date:hover { background-color: var(--secondary-container); }
+        }
+
+        .clear-date-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 4px;
+            padding: 2px;
+            border-radius: 50%;
+            background: var(--well-2);
+        }
+
+        /* Calendar Popup */
+        .calendar-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--panel-overlay-bg-deep);
+            z-index: 500;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0;
+        }
+        @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+            .calendar-popup {
+                -webkit-backdrop-filter: blur(4px);
+                backdrop-filter: blur(4px);
+            }
+        }
+
+        .calendar-popup.active {
+            display: flex;
+        }
+
+        .calendar-panel {
+            background: var(--tile-raised);
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            padding: 20px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+            width: 100%;
+            max-width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+        .calendar-panel > * + * { margin-top: 16px; }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @media (min-width: 480px) {
+            .calendar-popup {
+                align-items: center;
+                padding: 20px;
+            }
+            
+            .calendar-panel {
+                border-radius: var(--radius-xl);
+                max-width: 360px;
+                max-height: 100%;
+                padding-bottom: 20px;
+                animation: popIn 0.2s ease;
+            }
+        }
+        
+        @keyframes popIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .calendar-title {
+            min-width: 0;
+            font-size: var(--fs-title);
+            font-weight: 600;
+            overflow-wrap: break-word;
+        }
+
+        .calendar-nav {
+            display: flex;
+            flex-shrink: 0;
+        }
+        .calendar-nav button + button { margin-left: 8px; }
+        [dir="rtl"] .calendar-nav button + button { margin-left: 0; margin-right: 8px; }
+        [dir="rtl"] .calendar-nav svg { -webkit-transform: scaleX(-1); transform: scaleX(-1); }
+
+        .calendar-nav button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--well);
+            color: var(--on-surface-variant);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            grid-gap: 4px;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-size: var(--fs-caption);
+            font-weight: 600;
+            color: var(--on-surface-variant);
+            padding: 8px 0;
+            text-transform: uppercase;
+        }
+
+        .calendar-day {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-full);
+            font-size: var(--fs-label);
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+            color: var(--on-surface);
+            cursor: pointer;
+            position: relative;
+            transition: background-color var(--duration-fast) var(--easing-standard), transform var(--duration-fast) var(--easing-standard);
+            min-height: 40px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .calendar-day:active {
+            background: var(--well-2);
+            transform: scale(0.95);
+        }
+
+        .calendar-day.other-month {
+            color: var(--on-surface-variant);
+            opacity: 0.5;
+        }
+
+        .calendar-day.today {
+            box-shadow: inset 0 0 0 1px var(--primary);
+            font-weight: 700;
+        }
+
+        .calendar-day.selected {
+            background: var(--primary);
+            color: var(--on-primary);
+        }
+
+        .calendar-day.has-recordings::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--tertiary);
+        }
+
+        .calendar-day.has-sentry::after {
+            background: var(--danger);
+            width: 6px;
+            height: 6px;
+        }
+        .calendar-day.selected::after { background: currentColor; }
+
+        .calendar-day.disabled {
+            color: var(--on-surface-variant);
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .calendar-close {
+            min-height: 44px;
+            padding: 0 20px;
+            background: var(--well-2);
+            border-radius: var(--radius-full);
+            color: var(--on-surface);
+            font-size: var(--fs-label);
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+        }
+        @media (hover: hover) {
+            .calendar-nav button:hover { background: var(--well-2); color: var(--on-surface); }
+            .calendar-day:hover { background: var(--well); }
+            .calendar-day.selected:hover { background: var(--primary); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .calendar-panel { animation: none; }
+            .calendar-day { transition: none; }
+            .calendar-day:active { transform: none; }
+        }
+        
+        /* Type filter (mock .seg): segmented pill that scrolls sideways only when it cannot fit. */
+        .filter-tabs {
+            display: flex;
+            min-width: 0;
+        }
+
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .events-top-bar > .filter-tabs {
+            flex: 0 1 auto;
+            max-width: 100%;
+            padding: 3px;
+            border-radius: var(--radius-full);
+            background: var(--well);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .filter-tab {
+            flex: 0 0 auto;
+            min-height: 38px;
+            padding: 0 14px;
+            border-radius: var(--radius-full);
+            font-size: var(--fs-label);
+            font-weight: 600;
+            color: var(--on-surface-variant);
+            text-align: center;
+            white-space: nowrap;
+            transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
+        }
+        .filter-tab + .filter-tab { margin-left: 2px; }
+        [dir="rtl"] .filter-tab + .filter-tab { margin-left: 0; margin-right: 2px; }
+
+        .filter-tab.active {
+            background: var(--secondary-container);
+            color: var(--on-secondary-container);
+        }
+        /* Same check as the shared selected segment (revamp .btn-toggle), so state is not colour-only. */
+        .filter-tab.active::before {
+            content: "";
+            display: inline-block;
+            width: 10px;
+            height: 5px;
+            margin: 0 8px 3px 0;
+            border-bottom: 2px solid currentColor;
+            border-left: 2px solid currentColor;
+            vertical-align: middle;
+            -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+        }
+        [dir="rtl"] .filter-tab.active::before { margin: 0 0 3px 8px; }
+        @media (hover: hover) {
+            .filter-tab:hover { color: var(--on-surface); }
+            .filter-tab.active:hover { color: var(--on-secondary-container); }
+        }
+
+        /* Storage meter: used space, bar, per-type counts (dot colours match the type badges). */
+        .storage-stats {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            min-height: 44px;
+            padding: 6px 16px;
+            background: var(--well);
+            border-radius: var(--radius-full);
+            color: var(--on-surface-variant);
+            font-size: var(--fs-label);
+        }
+        /* Trailing group: pushed to the end of the row and wraps as one. */
+        .events-top-bar > .toolbar-end {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            max-width: 100%;
+            margin: 0 8px 8px auto;
+        }
+        [dir="rtl"] .events-top-bar > .toolbar-end { margin: 0 auto 8px 8px; }
+        .toolbar-end > * + * { margin-left: 8px; }
+        [dir="rtl"] .toolbar-end > * + * { margin-left: 0; margin-right: 8px; }
+
+        .storage-info {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            min-width: 0;
+            color: inherit;
+            font-size: inherit;
+        }
+
+        .storage-value {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            color: var(--on-surface);
+            white-space: nowrap;
+        }
+
+        .storage-bar-mini {
+            flex-shrink: 0;
+            width: 72px;
+            height: 6px;
+            margin-left: 10px;
+            background: var(--well-2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        [dir="rtl"] .storage-bar-mini { margin-left: 0; margin-right: 10px; }
+
+        .storage-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .storage-breakdown {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .storage-breakdown {
+                display: flex;
+                align-items: center;
+                margin-left: 14px;
+            }
+            [dir="rtl"] .storage-breakdown { margin-left: 0; margin-right: 14px; }
+        }
+
+        .storage-item {
+            display: flex;
+            align-items: center;
+            color: var(--on-surface-variant);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .storage-item + .storage-item { margin-left: 12px; }
+        [dir="rtl"] .storage-item + .storage-item { margin-left: 0; margin-right: 12px; }
+
+        .storage-dot {
+            flex-shrink: 0;
+            width: 8px;
+            height: 8px;
+            margin-right: 6px;
+            border-radius: 50%;
+        }
+        [dir="rtl"] .storage-dot { margin-right: 0; margin-left: 6px; }
+
+        .storage-dot.normal { background: var(--primary); }
+        .storage-dot.sentry { background: var(--danger); }
+        .storage-dot.proximity { background: var(--tertiary); }
+        .storage-dot.replay { background: var(--warning); }
+        @media (max-width: 599px) {
+            .storage-stats { padding: 6px 14px; }
+            .storage-bar-mini { width: 48px; }
+        }
+
+        /* Recordings: summary line, then clips grouped by day (mock .list-summary / .day-head / .media-grid). */
+        .recordings-panel {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Summary line: list title, then the count after a dot. */
+        .recordings-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            min-width: 0;
+            margin-bottom: 4px;
+            font-size: var(--fs-label);
+            line-height: 1.4;
+            color: var(--on-surface-variant);
+        }
+
+        .recordings-title {
+            min-width: 0;
+            font-weight: 600;
+            color: var(--on-surface);
+            overflow-wrap: break-word;
+        }
+
+        .recordings-count {
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .recordings-count:not(:empty)::before { content: "\00B7"; margin: 0 6px; }
+
+        /* The page scrolls (no inner scroller), so the day headers can stick under the app bar. */
+        .recordings-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-gap: 12px;
+            align-content: start;
+            flex: 1;
+            min-width: 0;
+            /* 4px of padding, offset by the margin, keeps card rings clear of the column edge. */
+            margin: 0 -4px;
+            padding: 4px;
+            min-height: 0;
+        }
+        .recordings-list > .loading,
+        .recordings-list > .empty-state,
+        .recordings-list > .day-head { grid-column: 1 / -1; }
+        @media (min-width: 1600px) {
+            .recordings-list { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+        }
+        @media (max-width: 599px) {
+            .recordings-list { grid-template-columns: minmax(0, 1fr); }
+        }
+
+        /* Day header (mock .day-head): the clip date, pinned under the app bar while its clips scroll by. */
+        .day-head {
+            position: -webkit-sticky;
+            position: sticky;
+            top: var(--page-header-h, 64px);
+            z-index: 4;
+            margin: 0 -4px;
+            padding: 8px 4px 2px;
+            background: var(--page);
+            font-size: var(--fs-label);
+            font-weight: 700;
+            line-height: 1.35;
+            color: var(--on-surface-variant);
+        }
+        .recordings-list > .day-head ~ .day-head { margin-top: 8px; }
+        /* Phones: tighter so the first clip is on the first screen under the filters. */
+        @media (max-width: 599px) {
+            .recordings-header { margin-bottom: 0; }
+            .recordings-list > .day-head:first-child { padding-top: 4px; }
+        }
+        
+        /* Clip card (mock .clip): 16:9 thumbnail with its badges on top, details below, actions in the last row. */
+        .recording-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background-color: var(--tile);
+            border-radius: var(--radius-tile);
+            box-shadow: var(--tile-shadow);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform var(--duration-fast) var(--easing-standard), box-shadow var(--duration-fast) var(--easing-standard);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @media (hover: hover) {
+            .recording-card:hover {
+                box-shadow: var(--tile-shadow), 0 0 0 2px var(--hairline);
+            }
+        }
+
+        .recording-card:active {
+            transform: scale(0.985);
+        }
+
+        .recording-thumbnail {
+            position: relative;
+            flex: 0 0 auto;
+            width: 100%;
+            height: 0;
+            /* 16:9 ratio box (no aspect-ratio on Chrome 58); every child is positioned inside it. */
+            padding-top: 56.25%;
+            background: var(--well-2);
+            overflow: hidden;
+        }
+
+        .recording-thumbnail img,
+        .recording-thumbnail video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .recording-thumbnail .thumb-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            color: var(--on-surface-variant);
+            font-size: var(--fs-caption);
+            text-align: center;
+        }
+        .recording-thumbnail .thumb-placeholder span { margin-top: 6px; }
+
+        .recording-thumbnail .thumb-placeholder svg {
+            width: 32px;
+            height: 32px;
+            opacity: 0.6;
+        }
+
+        .recording-thumbnail .play-icon {
+            /* Visible on every card, not just on hover: touch screens have no
+               hover, and the tile needs an obvious "tap to play" cue. */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 44px;
+            height: 44px;
+            margin: -22px 0 0 -22px;
+            background: rgba(0, 0, 0, 0.55);
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease-out, box-shadow 0.2s;
+        }
+
+        .recording-thumbnail .play-icon svg {
+            width: 18px;
+            height: 18px;
+            margin-left: 2px; /* nudge so the triangle reads centered */
+        }
+
+        @media (hover: hover) {
+            .recording-card:hover .play-icon {
+                box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+                transform: scale(1.06);
+            }
+        }
+
+        /* Thumbnail badges (mock .clip-type / .clip-dur): dark pills so they read on any frame, in both themes. */
+        .recording-thumbnail .clip-type,
+        .recording-thumbnail .clip-type.proximity {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 1;
+            /* Keeps the top-right corner free for the select-mode checkbox. */
+            max-width: calc(100% - 68px);
+            height: 24px;
+            margin: 0;
+            padding: 0 9px;
+            overflow: hidden;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.62);
+            color: #FFFFFF;
+            box-shadow: none;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 24px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        [dir="rtl"] .recording-thumbnail .clip-type { left: auto; right: 8px; margin: 0; }
+        .recording-thumbnail .clip-type::before {
+            content: "";
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            margin: 0 6px 1px 0;
+            border-radius: 50%;
+            vertical-align: middle;
+            background: #9AA5A0;
+        }
+        [dir="rtl"] .recording-thumbnail .clip-type::before { margin: 0 0 1px 6px; }
+        /* Fixed light dots: the pill is always dark. Same hues as the storage meter in the dark theme. */
+        .recording-thumbnail .clip-type.sentry::before { background: #FF8A7A; }
+        .recording-thumbnail .clip-type.proximity::before { background: #85CFFF; }
+        .recording-thumbnail .clip-type.normal::before { background: #5DDBB6; }
+        .recording-thumbnail .clip-type.replay::before { background: #FFB870; }
+
+        /* Bottom-right: duration (when the server sends one) and file size. */
+        .recording-thumbnail .thumb-meta {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            z-index: 1;
+            max-width: calc(50% - 12px);
+            overflow: hidden;
+            padding: 2px 8px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.66);
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.35;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        [dir="rtl"] .recording-thumbnail .thumb-meta { right: auto; left: 8px; }
+        .thumb-meta > span + span::before { content: "\00B7"; margin: 0 5px; }
+        /* SafeKeep backup state, bottom-left of the thumbnail (hidden while SafeKeep is off). */
+        .recording-thumbnail .sk-badge {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            z-index: 2;
+            max-width: calc(50% - 12px);
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            background: rgba(0, 0, 0, 0.66);
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.35;
+            padding: 2px 9px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        [dir="rtl"] .recording-thumbnail .sk-badge { left: auto; right: 8px; }
+        .recording-thumbnail .sk-badge[hidden] { display: none; }
+        .recording-thumbnail .sk-badge.sk-saved { background: rgba(22, 163, 74, 0.92); }
+        .recording-thumbnail .sk-badge.sk-up { background: rgba(37, 99, 235, 0.92); }
+        .recording-thumbnail .sk-badge.sk-queued,
+        .recording-thumbnail .sk-badge.sk-waiting { background: rgba(217, 119, 6, 0.92); }
+        .recording-thumbnail .sk-badge.sk-failed { background: rgba(220, 38, 38, 0.92); }
+
+        /* In-flight recording placeholder. Pinned at the top of the list when
+           the events page is opened from a notification before the encoder
+           finishes its post-record window (~10–15 s). The card swaps to a
+           normal recording entry the moment the rename completes. */
+        .recording-card-inflight {
+            background-image: linear-gradient(var(--primary-soft), var(--primary-soft));
+            box-shadow: var(--tile-shadow), 0 0 0 2px var(--primary);
+            cursor: default;
+        }
+        .recording-card-inflight:active { transform: none; }
+        .recording-card-inflight .inflight-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            display: inline-flex;
+            align-items: center;
+            background: var(--primary);
+            color: var(--on-primary);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            line-height: 1.35;
+            text-transform: uppercase;
+            padding: 2px 9px;
+            border-radius: 8px;
+        }
+        [dir="rtl"] .recording-card-inflight .inflight-badge { right: auto; left: 8px; }
+        .recording-card-inflight .inflight-dot {
+            width: 6px;
+            height: 6px;
+            margin-right: 6px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: inflight-pulse 1.2s ease-in-out infinite;
+        }
+        [dir="rtl"] .recording-card-inflight .inflight-dot { margin-right: 0; margin-left: 6px; }
+        @keyframes inflight-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%      { opacity: 0.4; transform: scale(0.7); }
+        }
+        .recording-badge.live {
+            background: var(--primary-soft);
+            color: var(--primary);
+        }
+
+        /* Brief post-finalize highlight so the user can see the entry the
+           inflight placeholder just turned into. */
+        .recording-card-just-finalized {
+            animation: recording-just-finalized 1.6s ease-out;
+        }
+        @keyframes recording-just-finalized {
+            0%   { box-shadow: 0 0 0 3px var(--primary); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+        }
+
+        /* Details (mock .clip-body): time and storage, place, chips, then the file name with the clip actions. */
+        .recording-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-width: 0;
+            padding: 12px 14px 14px;
+            /* New clips have a solid grey info panel. Only the info panel
+               changes; thumbnails and trigger/severity tags remain intact. */
+            background-color: rgba(120, 128, 138, 0.16);
+            transition: background-color 160ms ease;
+        }
+        .recording-card.watched .recording-info {
+            background-color: rgba(120, 128, 138, 0.045);
+        }
+        .recording-card.watched .clip-time {
+            color: var(--on-surface-variant);
+            font-weight: 500;
+        }
+
+        .clip-line {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+        }
+        .clip-time {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: hidden;
+            font-size: var(--fs-body);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.35;
+            color: var(--on-surface);
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .clip-line > .storage-chip { flex: 0 0 auto; margin-left: 8px; }
+        [dir="rtl"] .clip-line > .storage-chip { margin-left: 0; margin-right: 8px; }
+
+        .recording-badge {
+            display: inline-block;
+            flex: 0 0 auto;
+            height: 24px;
+            margin: 0 8px 0 0;
+            padding: 0 9px;
+            border-radius: 12px;
+            background: var(--well-2);
+            color: var(--on-surface);
+            box-shadow: none;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 24px;
+            letter-spacing: 0;
+            text-transform: none;
+            white-space: nowrap;
+        }
+        [dir="rtl"] .recording-badge { margin: 0 0 0 8px; }
+
+        /* Place line — populated from sidecar geo.place via the daemon's
+           RecordingsApiHandler. Absent for legacy clips and clips with no
+           resolved place. */
+        .recording-place {
+            margin-top: 2px;
+            font-size: var(--fs-caption);
+            line-height: 1.4;
+            color: var(--on-surface-variant);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .recording-place svg {
+            width: 13px;
+            height: 13px;
+            margin-right: 4px;
+            vertical-align: -2px;
+        }
+        [dir="rtl"] .recording-place svg { margin-right: 0; margin-left: 4px; }
+
+        /* Chips (mock .ctag): actor counts, severity, proximity. */
+        .actor-summary {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 8px -6px -6px 0;
+        }
+        [dir="rtl"] .actor-summary { margin: 8px 0 -6px -6px; }
+        .actor-summary .pill,
+        .actor-summary .recording-badge {
+            display: inline-flex;
+            align-items: center;
+            height: 26px;
+            margin: 0 6px 6px 0;
+            padding: 0 9px;
+            border-radius: 13px;
+            background: var(--well);
+            color: var(--on-surface-variant);
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        [dir="rtl"] .actor-summary .pill,
+        [dir="rtl"] .actor-summary .recording-badge { margin: 0 0 6px 6px; }
+        .actor-summary .pill svg { flex-shrink: 0; width: 14px; height: 14px; margin-right: 4px; }
+        [dir="rtl"] .actor-summary .pill svg { margin-right: 0; margin-left: 4px; }
+        .actor-summary .recording-badge.sev-alert    { background: var(--warning-soft); color: var(--warning); }
+        .actor-summary .recording-badge.sev-critical { background: var(--danger-soft); color: var(--danger); }
+        .actor-summary .prox-VERY_CLOSE { background: var(--danger-soft); color: var(--danger); }
+        .actor-summary .prox-CLOSE      { background: var(--warning-soft); color: var(--warning); }
+
+        /* Last row: file name, then the clip actions. Pinned to the card bottom so a row of cards lines up. */
+        .recording-foot {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            margin-top: auto;
+            padding-top: 10px;
+        }
+        .recording-name {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: hidden;
+            font-size: var(--fs-caption);
+            line-height: 1.4;
+            color: var(--on-surface-variant);
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        /* File names are LTR: keep their order and cut the end in RTL too. */
+        [dir="rtl"] .recording-name { direction: ltr; text-align: right; }
+
+        /* v3 Actor / Severity / Proximity / Storage / Place chip rows (mock .filter-panel + .fchips).
+           One tile; each row is its label then chips that wrap. Margins stand in for flex gap. */
+        .actor-filter-rows {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            padding: 12px 16px 4px;
+            border-radius: var(--radius-tile);
+            background-color: var(--tile);
+            background-image: linear-gradient(180deg, var(--sheen) 0%, rgba(255, 255, 255, 0) 140px);
+            box-shadow: var(--tile-shadow);
+        }
+        .filter-tabs-row2 {
+            flex: 0 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            min-width: 0;
+            margin-right: -8px;
+            padding: 0;
+            background: transparent;
+        }
+        [dir="rtl"] .filter-tabs-row2 { margin-right: 0; margin-left: -8px; }
+        .filter-tabs-row2 + .filter-tabs-row2 {
+            margin-top: 4px;
+            padding-top: 12px;
+            border-top: 1px solid var(--hairline);
+        }
+        .filter-row-label {
+            flex: 0 0 auto;
+            min-width: 88px;
+            max-width: 100%;
+            margin: 0 8px 8px 0;
+            font-size: var(--fs-label);
+            font-weight: 600;
+            color: var(--on-surface-variant);
+            overflow-wrap: break-word;
+        }
+        [dir="rtl"] .filter-row-label { margin: 0 0 8px 8px; }
+        /* Chips: the shared tonal pill (revamp .checkbox-item) with a check on the selected one. */
+        .filter-chip {
+            flex: 0 0 auto;
+            max-width: 100%;
+            min-height: 40px;
+            margin: 0 8px 8px 0;
+            padding: 0 16px;
+            border: 0;
+            border-radius: var(--radius-full);
+            background-color: var(--well);
+            color: var(--on-surface-variant);
+            font-size: var(--fs-label);
+            font-weight: 600;
+            line-height: 1.25;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
+        }
+        [dir="rtl"] .filter-chip { margin: 0 0 8px 8px; }
+        .filter-chip.active {
+            background-color: var(--secondary-container);
+            color: var(--on-secondary-container);
+        }
+        .filter-chip.active::before {
+            content: "";
+            display: inline-block;
+            width: 10px;
+            height: 5px;
+            margin: 0 8px 3px -2px;
+            border-bottom: 2px solid currentColor;
+            border-left: 2px solid currentColor;
+            vertical-align: middle;
+            -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+        }
+        [dir="rtl"] .filter-chip.active::before { margin: 0 -2px 3px 8px; }
+        @media (hover: hover) {
+            .filter-chip:not(.active):hover { background-color: var(--well-2); color: var(--on-surface); }
+        }
+        /* Selected severity and storage chips keep the clip badge colours, so the
+           filter and the badges read as the same vocabulary. */
+        .filter-chip.sev-alert.active    { background-color: var(--warning-soft); color: var(--warning); box-shadow: inset 0 0 0 1px var(--warning); }
+        .filter-chip.sev-critical.active { background-color: var(--danger-soft); color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
+        .filter-chip.storage-sd.active   { background-color: var(--primary-soft); color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+        .filter-chip.storage-usb.active  { background-color: var(--tertiary-soft); color: var(--tertiary); box-shadow: inset 0 0 0 1px var(--tertiary); }
+        /* Phones: one scrolling line per filter group, so the clips start on the first screen. */
+        @media (max-width: 599px) {
+            .actor-filter-rows { padding: 4px 0; }
+            .filter-tabs-row2,
+            [dir="rtl"] .filter-tabs-row2 {
+                flex-wrap: nowrap;
+                margin: 0;
+                padding: 6px 12px 0;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .filter-tabs-row2::-webkit-scrollbar { display: none; }
+            .filter-tabs-row2 + .filter-tabs-row2 { margin-top: 0; padding-top: 6px; }
+            .actor-filter-rows .filter-tabs-row2[data-filter-row] > * { margin-bottom: 6px; }
+            .filter-row-label { min-width: 0; margin-right: 12px; font-size: var(--fs-caption); white-space: nowrap; }
+            [dir="rtl"] .filter-row-label { margin: 0 0 8px 12px; }
+            .filter-tabs-row2 .place-search { flex: 0 0 200px; }
+        }
+        /* Wide screens: What | Severity, Distance | Storage, then Place across both columns. */
+        @media (min-width: 1280px) {
+            .actor-filter-rows {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                grid-column-gap: 32px;
+                align-items: start;
+            }
+            .filter-tabs-row2[data-filter-row="severity"] { margin-top: 0; padding-top: 0; border-top: 0; }
+            .filter-tabs-row2[data-filter-row="place"] { grid-column: 1 / -1; }
+        }
+        @media (min-width: 1024px) {
+            :root[data-android-embed="1"] .actor-filter-rows {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                grid-column-gap: 32px;
+                align-items: start;
+            }
+            :root[data-android-embed="1"] .filter-tabs-row2[data-filter-row="severity"] { margin-top: 0; padding-top: 0; border-top: 0; }
+            :root[data-android-embed="1"] .filter-tabs-row2[data-filter-row="place"] { grid-column: 1 / -1; }
+        }
+
+        /* Place chips can carry user-edited SafeLocation labels and
+           Nominatim strings — both can be arbitrarily long ("Wonderfully
+           Quaint Borough of South-Eastern …"). Cap each chip's width so
+           one rogue label can't push the rest of the row past the
+           horizontal scroller's intended scroll budget; the chip
+           ellipsises individually rather than overflowing the row. */
+        .filter-tabs-row2[data-filter-row="place"] .filter-chip {
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Free-text place search — sits inline as the leading element
+           of the place row so it reads as one continuous control with
+           the chip strip. Pill-shaped to share the chip vocabulary, but
+           with a focus ring + filled background to telegraph "input"
+           rather than "tappable filter". Routes through placeContains
+           on /api/recordings + /api/recordings/places for substring
+           match across short, medium, and displayName place labels. */
+        .place-search {
+            flex: 0 1 260px;
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            max-width: 100%;
+            min-height: 40px;
+            margin: 0 8px 8px 0;
+            padding: 0 6px 0 14px;
+            background: var(--well);
+            border: 0;
+            border-radius: var(--radius-full);
+            box-shadow: inset 0 0 0 1px var(--outline-variant);
+            transition: box-shadow var(--duration-fast) var(--easing-standard);
+        }
+        [dir="rtl"] .place-search { margin: 0 0 8px 8px; padding: 0 14px 0 6px; }
+        .place-search:focus-within {
+            box-shadow: inset 0 0 0 2px var(--primary);
+        }
+        .place-search.has-query {
+            box-shadow: inset 0 0 0 1px var(--outline);
+        }
+        .place-search svg {
+            flex: 0 0 auto;
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            color: var(--on-surface-variant);
+            stroke-width: 2;
+        }
+        [dir="rtl"] .place-search svg { margin-right: 0; margin-left: 8px; }
+        .place-search input {
+            flex: 1 1 auto;
+            width: 100%;
+            min-width: 0;
+            height: 38px;
+            background: transparent;
+            border: 0;
+            color: var(--on-surface);
+            font-size: var(--fs-label);
+            font-family: inherit;
+            padding: 0;
+            line-height: 1.2;
+        }
+        /* The field ring shows focus where :focus-within exists; Chrome 58 keeps the input's own outline. */
+        @supports selector(:focus-within) {
+            .place-search input:focus { outline: none; }
+        }
+        .place-search input::placeholder {
+            color: var(--on-surface-variant);
+            opacity: 1;
+        }
+        .place-search-clear {
+            flex: 0 0 auto;
+            width: 32px;
+            height: 32px;
+            margin-left: 4px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--on-surface-variant);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        [dir="rtl"] .place-search-clear { margin-left: 0; margin-right: 4px; }
+        @media (hover: hover) {
+            .place-search-clear:hover { background: var(--well-2); color: var(--on-surface); }
+        }
+        .place-search.has-query .place-search-clear {
+            display: inline-flex;
+        }
+        .place-search-clear svg,
+        [dir="rtl"] .place-search-clear svg {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            color: inherit;
+        }
+        /* Active-search hint pill at the end of the place row. Mirrors
+           the chip language so the user can see the substring is doing
+           something even when zero chips are visible. */
+        .place-search-hits {
+            flex: 0 0 auto;
+            align-items: center;
+            min-height: 32px;
+            margin: 0 8px 8px 0;
+            padding: 0 12px;
+            border-radius: var(--radius-full);
+            background: var(--well-2);
+            color: var(--on-surface-variant);
+            font-size: var(--fs-caption);
+            white-space: nowrap;
+            display: none;
+        }
+        [dir="rtl"] .place-search-hits { margin: 0 0 8px 8px; }
+        .place-search-hits.visible { display: inline-flex; }
+        @media (max-width: 599px) {
+            .place-search { flex: 1 1 100%; }
+        }
+
+
+        /* Status line of the in-flight card. */
+        .recording-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 4px 0 -4px;
+            font-size: var(--fs-caption);
+            font-variant-numeric: tabular-nums;
+            color: var(--on-surface-variant);
+        }
+        .recording-meta > * { margin: 0 10px 4px 0; }
+        [dir="rtl"] .recording-meta > * { margin: 0 0 4px 10px; }
+
+        /* Per-clip storage tag (INTERNAL / SD_CARD / USB). Makes the silent
+           SD→internal fallback visible per file: the SD card on this BYD
+           fleet is bridged behind the USB power rail, so cutting USB power
+           unmounts the SD and clips fall back to internal storage. The SD/USB
+           variants use the brand accent (external = intended target), while
+           INTERNAL is muted so it reads as the "fell back / default" state and
+           draws the eye to the externals it was supposed to be on. */
+        .storage-chip {
+            display: inline-flex;
+            align-items: center;
+            height: 22px;
+            padding: 0 8px 0 6px;
+            border: 0;
+            border-radius: 11px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        [dir="rtl"] .storage-chip { padding: 0 6px 0 8px; }
+        .storage-chip svg { flex: 0 0 auto; width: 12px; height: 12px; margin-right: 4px; opacity: 0.9; }
+        [dir="rtl"] .storage-chip svg { margin-right: 0; margin-left: 4px; }
+        .storage-chip.storage-internal {
+            background: var(--well-2);
+            color: var(--on-surface-variant);
+        }
+        .storage-chip.storage-sd {
+            background: var(--primary-soft);
+            color: var(--primary);
+        }
+        .storage-chip.storage-usb {
+            background: var(--tertiary-soft);
+            color: var(--tertiary);
+        }
+
+        /* Clip actions: small round tonal buttons at the end of the last row. */
+        .recording-actions {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            margin-left: 8px;
+        }
+        [dir="rtl"] .recording-actions { margin-left: 0; margin-right: 8px; }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--well);
+            color: var(--on-surface-variant);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
+        }
+        .action-btn + .action-btn { margin-left: 6px; }
+        [dir="rtl"] .action-btn + .action-btn { margin-left: 0; margin-right: 6px; }
+        .action-btn svg { width: 16px; height: 16px; }
+        @media (hover: hover) {
+            .action-btn:hover { background: var(--well-2); color: var(--on-surface); }
+            .action-btn.delete:hover { background: var(--danger-soft); color: var(--danger); }
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 0 8px;
+        }
+
+        .pagination-btn {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 18px;
+            background: var(--well-2);
+            border-radius: var(--radius-full);
+            color: var(--on-surface);
+            font-size: var(--fs-label);
+            font-weight: 600;
+        }
+        #prevPageBtn svg { margin-right: 6px; }
+        #nextPageBtn svg { margin-left: 6px; }
+        [dir="rtl"] #prevPageBtn svg { margin-right: 0; margin-left: 6px; }
+        [dir="rtl"] #nextPageBtn svg { margin-left: 0; margin-right: 6px; }
+        [dir="rtl"] .pagination-btn svg { -webkit-transform: scaleX(-1); transform: scaleX(-1); }
+        @media (hover: hover) {
+            .pagination-btn:hover:not(:disabled) { background-image: linear-gradient(var(--state-hover), var(--state-hover)); }
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.38;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            margin: 0 12px;
+            font-size: var(--fs-label);
+            font-variant-numeric: tabular-nums;
+            color: var(--on-surface-variant);
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 20px;
+            text-align: center;
+        }
+        .recordings-list > .empty-state {
+            border-radius: var(--radius-tile);
+            background: var(--tile);
+            box-shadow: var(--tile-shadow);
+        }
+
+        .empty-icon {
+            width: 48px;
+            height: 48px;
+            color: var(--on-surface-variant);
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+
+        .empty-title {
+            font-size: var(--fs-title);
+            font-weight: 600;
+            color: var(--on-surface);
+            margin-bottom: 6px;
+        }
+
+        .empty-text {
+            max-width: 46ch;
+            font-size: var(--fs-label);
+            color: var(--on-surface-variant);
+        }
+        
+    </style>
+    <link rel="stylesheet" href="../shared/video-player.css?v=3">
+    <style>
+        /* Select mode toggle (mock "Select"): round tonal button at the end of the toolbar. */
+        .select-mode-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--well);
+            color: var(--on-surface-variant);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
+            cursor: pointer;
+            border: none;
+        }
+        .select-mode-btn svg { width: 20px; height: 20px; }
+
+        .select-mode-btn.active {
+            background: var(--secondary-container);
+            color: var(--on-secondary-container);
+        }
+
+        /* Selection bar (mock .select-bar): inverse surface after the list, held at the
+           bottom of the screen while the grid scrolls. events.js toggles its display inline. */
+        .select-toolbar {
+            position: -webkit-sticky;
+            position: sticky;
+            bottom: 16px;
+            bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+            z-index: 25;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            padding: 8px 8px 0 18px;
+            background: var(--inverse-surface);
+            color: var(--inverse-on-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+        }
+        [dir="rtl"] .select-toolbar { padding: 8px 18px 0 8px; }
+
+        .selected-count {
+            margin: 0 12px 8px 0;
+            font-size: var(--fs-label);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        [dir="rtl"] .selected-count { margin: 0 0 8px 12px; }
+
+        .select-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .select-action-btn {
+            display: flex;
+            align-items: center;
+            min-height: 40px;
+            margin: 0 0 8px 6px;
+            padding: 0 16px;
+            border: 0;
+            border-radius: var(--radius-full);
+            background: transparent;
+            color: inherit;
+            font-size: var(--fs-label);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        [dir="rtl"] .select-action-btn { margin: 0 6px 8px 0; }
+        .select-action-btn svg { flex-shrink: 0; margin-right: 6px; }
+        [dir="rtl"] .select-action-btn svg { margin-right: 0; margin-left: 6px; }
+
+        .select-action-btn.danger {
+            background: var(--error);
+            color: var(--on-error);
+        }
+
+        .select-action-btn.cancel {
+            background: transparent;
+            color: inherit;
+        }
+        @media (hover: hover) {
+            .select-action-btn:hover { background-image: linear-gradient(rgba(127, 127, 127, 0.16), rgba(127, 127, 127, 0.16)); }
+            .select-mode-btn:hover { background-color: var(--well-2); color: var(--on-surface); }
+            .select-mode-btn.active:hover { background-color: var(--secondary-container); color: var(--on-secondary-container); }
+            .recording-card-inflight:hover { box-shadow: var(--tile-shadow), 0 0 0 2px var(--primary); }
+        }
+
+        /* Checkbox in recording cards: overlays the thumbnail corner (mock .clip-sel). */
+        .select-checkbox-wrap {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border-radius: 50%;
+            background: var(--modal-backdrop);
+            cursor: pointer;
+        }
+        [dir="rtl"] .select-checkbox-wrap { right: auto; left: 8px; }
+
+        .select-checkbox {
+            width: 22px;
+            height: 22px;
+            margin: 0;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .recording-card.selected {
+            background-image: linear-gradient(var(--primary-soft), var(--primary-soft));
+            box-shadow: 0 0 0 3px var(--primary);
+        }
+
+        /* Phones: the selection bar sits above the bottom navigation; the type segments take their own line. */
+        @media (max-width: 768px) {
+            html.has-bottom-nav .select-toolbar {
+                bottom: 88px;
+                bottom: calc(var(--bottom-nav-h) + 12px + env(safe-area-inset-bottom, 0px));
+            }
+            .events-top-bar > .filter-tabs { order: 2; flex: 1 1 100%; }
+            .filter-tab { flex: 1 0 auto; padding: 0 10px; }
+        }
+        @media (max-width: 599px) {
+            .select-action-btn { padding: 0 12px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .recording-card,
+            .recording-thumbnail .play-icon { transition: none; }
+            .recording-card:active { transform: none; }
+            .recording-card-inflight .inflight-dot,
+            .recording-card-just-finalized,
+            .video-container { animation: none; }
+        }
+
+        /* Touch: 44px targets. */
+        @media (pointer: coarse) {
+            .calendar-toggle,
+            .storage-stats { min-height: 48px; }
+            .events-top-bar > .filter-tabs { padding: 2px; }
+            .filter-tab,
+            .filter-chip,
+            .place-search { min-height: 44px; }
+            .place-search input { height: 42px; font-size: 16px; }
+            .place-search-clear { width: 40px; height: 40px; }
+            .action-btn,
+            .calendar-nav button { width: 44px; height: 44px; }
+            .select-mode-btn { width: 48px; height: 48px; }
+            .pagination-btn,
+            .select-action-btn { min-height: 44px; }
+            .calendar-close { min-height: 48px; }
+        }
+
+        /* Car: 56px targets, 15px body text. */
+        :root[data-android-embed="1"] .events-container { padding: 16px 20px 24px; }
+        :root[data-android-embed="1"] .calendar-toggle { min-height: 64px; padding: 0 22px 0 18px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"][dir="rtl"] .calendar-toggle { padding: 0 18px 0 22px; }
+        :root[data-android-embed="1"] .calendar-toggle svg { width: 22px; height: 22px; }
+        :root[data-android-embed="1"] .events-top-bar > .filter-tabs { padding: 4px; }
+        :root[data-android-embed="1"] .filter-tab { min-height: 56px; padding: 0 20px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .storage-stats { min-height: 64px; padding: 8px 22px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .storage-bar-mini { width: 96px; height: 8px; border-radius: 4px; }
+        :root[data-android-embed="1"] .storage-dot { width: 10px; height: 10px; }
+        :root[data-android-embed="1"] .filter-row-label { min-width: 80px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .filter-chip { min-height: 56px; padding: 0 18px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .place-search { min-height: 56px; }
+        :root[data-android-embed="1"] .place-search input { height: 54px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .place-search-clear { width: 48px; height: 48px; }
+        :root[data-android-embed="1"] .place-search-hits { min-height: 40px; font-size: var(--fs-label); }
+        :root[data-android-embed="1"] .recordings-header,
+        :root[data-android-embed="1"] .day-head { font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .select-mode-btn { width: 56px; height: 56px; }
+        :root[data-android-embed="1"] .select-mode-btn svg { width: 22px; height: 22px; }
+        :root[data-android-embed="1"] .recordings-list { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+        :root[data-android-embed="1"] .clip-time { font-size: var(--fs-title); }
+        :root[data-android-embed="1"] .recording-badge { height: 28px; padding: 0 11px; font-size: var(--fs-label); line-height: 28px; }
+        :root[data-android-embed="1"] .recording-meta,
+        :root[data-android-embed="1"] .recording-place,
+        :root[data-android-embed="1"] .recording-name,
+        :root[data-android-embed="1"] .storage-chip { font-size: var(--fs-label); }
+        :root[data-android-embed="1"] .storage-chip { height: 26px; }
+        :root[data-android-embed="1"] .actor-summary .pill,
+        :root[data-android-embed="1"] .actor-summary .recording-badge { height: 32px; padding: 0 12px; font-size: var(--fs-label); }
+        /* 56px actions take their own line under the file name when the card is narrow. */
+        :root[data-android-embed="1"] .recording-foot { flex-wrap: wrap; }
+        :root[data-android-embed="1"] .recording-actions { margin-top: 8px; margin-left: auto; }
+        :root[data-android-embed="1"][dir="rtl"] .recording-actions { margin-left: 0; margin-right: auto; }
+        :root[data-android-embed="1"] .action-btn { width: 56px; height: 56px; }
+        :root[data-android-embed="1"] .action-btn svg { width: 22px; height: 22px; }
+        :root[data-android-embed="1"] .recording-thumbnail .play-icon { width: 60px; height: 60px; margin: -30px 0 0 -30px; }
+        :root[data-android-embed="1"] .recording-thumbnail .play-icon svg { width: 24px; height: 24px; }
+        :root[data-android-embed="1"] .recording-thumbnail .thumb-meta,
+        :root[data-android-embed="1"] .recording-thumbnail .sk-badge { font-size: var(--fs-label); }
+        :root[data-android-embed="1"] .recording-thumbnail .clip-type { height: 28px; padding: 0 11px; font-size: var(--fs-label); line-height: 28px; }
+        :root[data-android-embed="1"] .select-checkbox-wrap { width: 56px; height: 56px; }
+        :root[data-android-embed="1"] .select-checkbox { width: 28px; height: 28px; }
+        :root[data-android-embed="1"] .selected-count { font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .select-action-btn,
+        :root[data-android-embed="1"] .pagination-btn { min-height: 56px; padding: 0 24px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .pagination-info { font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .calendar-panel { max-width: 480px; }
+        :root[data-android-embed="1"] .calendar-title { font-size: var(--fs-headline); }
+        :root[data-android-embed="1"] .calendar-nav button { width: 56px; height: 56px; }
+        :root[data-android-embed="1"] .calendar-weekday { font-size: var(--fs-label); }
+        :root[data-android-embed="1"] .calendar-day { min-height: 56px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .calendar-close { min-height: 56px; font-size: var(--fs-body); }
+        :root[data-android-embed="1"] .empty-title { font-size: var(--fs-headline); }
+        :root[data-android-embed="1"] .empty-text { font-size: var(--fs-body); }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <!-- App shell sidebar (rendered by ../shared/app-shell.js?v=23) -->
+        <div id="app-shell-mount"></div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="mobile-header">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>
+                    </svg>
+                </button>
+                <span style="font-weight:600;" data-i18n="nav.recordings">Recordings</span>
+                <div style="width:40px;"></div>
+            </div>
+            <!-- Page title, named like the nav entry. theme.js docks the theme picker here. -->
+            <header class="page-header">
+                <h1 class="page-title" data-i18n="nav.recordings">Recordings</h1>
+            </header>
+            <div class="events-container">
+                <!-- Toolbar: date chip + type segments, then storage meter + Select at the end -->
+                <div class="events-top-bar">
+                    <button class="calendar-toggle" id="calendarToggle" onclick="BYD.events.toggleCalendar()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        <span id="calendarBtnText" data-i18n="events.select_date">Select Date</span>
+                    </button>
+
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all" onclick="BYD.events.setFilter('all')" data-i18n="events.all">All</button>
+                        <button class="filter-tab" data-filter="sentry" onclick="BYD.events.setFilter('sentry')" data-i18n="events.badge_sentry">Surveillance</button>
+                        <button class="filter-tab" data-filter="normal" onclick="BYD.events.setFilter('normal')" data-i18n="events.badge_normal">Normal</button>
+                        <button class="filter-tab" data-filter="proximity" onclick="BYD.events.setFilter('proximity')" data-i18n="events.badge_proximity">Proximity</button>
+                        <button class="filter-tab" data-filter="replay" onclick="BYD.events.setFilter('replay')" data-i18n="events.tab_replays">Replays</button>
+                    </div>
+
+                    <div class="toolbar-end">
+                        <div class="storage-stats" id="storageStats">
+                            <div class="storage-info">
+                                <span class="storage-value" id="storageUsed">--</span>
+                                <div class="storage-bar-mini">
+                                    <div class="storage-fill" id="storageFill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="storage-breakdown">
+                                <div class="storage-item">
+                                    <span class="storage-dot normal"></span>
+                                    <span id="normalCount">0</span>
+                                </div>
+                                <div class="storage-item">
+                                    <span class="storage-dot sentry"></span>
+                                    <span id="sentryCount">0</span>
+                                </div>
+                                <div class="storage-item">
+                                    <span class="storage-dot proximity"></span>
+                                    <span id="proximityCount">0</span>
+                                </div>
+                                <div class="storage-item">
+                                    <span class="storage-dot replay"></span>
+                                    <span id="replayCount">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="btn btn-secondary" href="/factory-dvr.html" data-i18n="factory_dvr.title">Factory DVR</a>
+                        <button class="select-mode-btn" id="selectModeBtn" onclick="BYD.events.toggleSelectMode()" title="Select multiple" data-i18n-attr="title:events.select_multiple">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 11 12 14 22 4"/>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!--
+                  v3 actor / severity / proximity chip rows. Lives OUTSIDE
+                  .events-top-bar so the desktop horizontal flex layout for
+                  calendar+type-tabs+storage stays uncluttered. Three labelled
+                  rows below, each with its own "Any" to clear that dimension.
+                -->
+                <div class="actor-filter-rows">
+                    <div class="filter-tabs filter-tabs-row2" data-filter-row="class">
+                        <span class="filter-row-label" data-i18n="events.filter_what">What:</span>
+                        <button class="filter-chip active" data-class="" onclick="BYD.events.setActorFilter('class','')" data-i18n="events.actor_any">Any</button>
+                        <button class="filter-chip" data-class="person"  onclick="BYD.events.setActorFilter('class','person')" data-i18n="events.actor_person">Person</button>
+                        <button class="filter-chip" data-class="vehicle" onclick="BYD.events.setActorFilter('class','vehicle')" data-i18n="events.actor_vehicle">Vehicle</button>
+                        <button class="filter-chip" data-class="bike"    onclick="BYD.events.setActorFilter('class','bike')" data-i18n="events.actor_bike">Bike</button>
+                        <button class="filter-chip" data-class="animal"  onclick="BYD.events.setActorFilter('class','animal')" data-i18n="events.actor_animal">Animal</button>
+                    </div>
+                    <div class="filter-tabs filter-tabs-row2" data-filter-row="severity">
+                        <span class="filter-row-label" data-i18n="events.filter_severity">Severity:</span>
+                        <button class="filter-chip active" data-severity="" onclick="BYD.events.setActorFilter('severity','')" data-i18n="events.actor_any">Any</button>
+                        <button class="filter-chip sev-notice"   data-severity="NOTICE"   onclick="BYD.events.setActorFilter('severity','NOTICE')" data-i18n="events.severity_notice">Notice</button>
+                        <button class="filter-chip sev-alert"    data-severity="ALERT"    onclick="BYD.events.setActorFilter('severity','ALERT')" data-i18n="events.severity_alert">Alert</button>
+                        <button class="filter-chip sev-critical" data-severity="CRITICAL" onclick="BYD.events.setActorFilter('severity','CRITICAL')" data-i18n="events.severity_critical">Critical</button>
+                    </div>
+                    <div class="filter-tabs filter-tabs-row2" data-filter-row="proximity">
+                        <span class="filter-row-label" data-i18n="events.filter_distance">Distance:</span>
+                        <button class="filter-chip active" data-proximity="" onclick="BYD.events.setActorFilter('proximity','')" data-i18n="events.actor_any">Any</button>
+                        <button class="filter-chip" data-proximity="VERY_CLOSE" onclick="BYD.events.setActorFilter('proximity','VERY_CLOSE')" data-i18n="events.proximity_very_close">Very close</button>
+                        <button class="filter-chip" data-proximity="CLOSE"      onclick="BYD.events.setActorFilter('proximity','CLOSE')" data-i18n="events.proximity_close">Close</button>
+                        <button class="filter-chip" data-proximity="MID"        onclick="BYD.events.setActorFilter('proximity','MID')" data-i18n="events.proximity_mid">Mid</button>
+                        <button class="filter-chip" data-proximity="FAR"        onclick="BYD.events.setActorFilter('proximity','FAR')" data-i18n="events.proximity_far">Far</button>
+                    </div>
+                    <!--
+                      Storage chip row — narrow the library to one physical
+                      volume. Clips already span internal + SD + USB in the
+                      index; this filters by where each clip actually landed
+                      (the per-clip storage badge shows the same tag). "Any"
+                      is the default and shows every location.
+                    -->
+                    <div class="filter-tabs filter-tabs-row2" data-filter-row="storage">
+                        <span class="filter-row-label" data-i18n="events.filter_storage">Storage:</span>
+                        <button class="filter-chip active" data-storage="" onclick="BYD.events.setStorageFilter('')" data-i18n="events.actor_any">Any</button>
+                        <button class="filter-chip storage-internal" data-storage="INTERNAL" onclick="BYD.events.setStorageFilter('INTERNAL')" data-i18n="events.storage_internal">Internal</button>
+                        <button class="filter-chip storage-sd" data-storage="SD_CARD" onclick="BYD.events.setStorageFilter('SD_CARD')" data-i18n="events.storage_sd_card">SD card</button>
+                        <button class="filter-chip storage-usb" data-storage="USB" onclick="BYD.events.setStorageFilter('USB')" data-i18n="events.storage_usb">USB</button>
+                    </div>
+                    <!--
+                      Place chip row — dynamically populated from
+                      `rec.place.short` of the currently loaded recordings
+                      (descending count, alpha-tiebreak, capped at 8).
+                      Always mounted now so the inline place-search input
+                      is reachable from page load — even on a fresh user
+                      with no resolved places yet, the search affordance
+                      is visible. Data chips ("Any" + N labels) populate
+                      progressively as the index lands.
+                    -->
+                    <div class="filter-tabs filter-tabs-row2" data-filter-row="place" id="placeFilterRow">
+                        <span class="filter-row-label" data-i18n="events.filter_place">Place:</span>
+                        <!--
+                          Free-text place search — substring across short /
+                          medium / displayName labels. Lives inline at the
+                          head of the place row so the user sees one
+                          coherent "Place" control rather than a separate
+                          search bar competing for attention. Visibility is
+                          coupled to the chip row — both appear once the
+                          backend returns at least one indexed place; from
+                          that moment the input remains visible regardless
+                          of whether the active filter narrows the chip
+                          set to zero.
+                        -->
+                        <label class="place-search" id="placeSearchWrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="search" id="placeSearchInput"
+                                   autocomplete="off" autocorrect="off"
+                                   autocapitalize="off" spellcheck="false"
+                                   data-i18n-attr="placeholder:events.place_search_hint;aria-label:events.place_search_hint"
+                                   placeholder="Search places…"
+                                   aria-label="Search places" />
+                            <button type="button" class="place-search-clear"
+                                    id="placeSearchClear"
+                                    data-i18n-attr="aria-label:common.close"
+                                    aria-label="Clear">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </label>
+                        <button class="filter-chip active" data-place="" onclick="BYD.events.setActorFilter('place','')" data-i18n="events.actor_any">Any</button>
+                        <!-- Data chips injected by BYD.events.renderPlaceChips() -->
+                        <span class="place-search-hits" id="placeSearchHits" aria-live="polite"></span>
+                    </div>
+                </div>
+                
+                <!-- Recordings: summary line, clips grouped by day, pagination, selection bar -->
+                <div class="recordings-panel">
+                    <div class="recordings-header">
+                        <span class="recordings-title" id="recordingsTitle" data-i18n="events.all_recordings">All Recordings</span>
+                        <span class="recordings-count" id="recordingsCount" data-i18n="events.videos_count_initial">0 videos</span>
+                    </div>
+                    <div class="recordings-list" id="recordingsList">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                    <div class="pagination" id="pagination" style="display: none;">
+                        <button class="pagination-btn" id="prevPageBtn" onclick="BYD.events.prevPage()" disabled data-i18n="events.prev">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                            Prev
+                        </button>
+                        <span class="pagination-info" id="paginationInfo" data-i18n="events.page_initial">Page 1 of 1</span>
+                        <button class="pagination-btn" id="nextPageBtn" onclick="BYD.events.nextPage()" disabled data-i18n="events.next">
+                            Next
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Multi-select toolbar: after the list so it can hold to the bottom of the screen -->
+                    <div class="select-toolbar" id="selectToolbar" style="display:none;">
+                        <span class="selected-count" id="selectedCount" data-i18n="events.selected_count_initial">0 selected</span>
+                        <div class="select-actions">
+                            <button class="select-action-btn" onclick="BYD.events.selectAll()" data-i18n="common.select_all">Select All</button>
+                            <button class="select-action-btn" onclick="BYD.events.deselectAll()" data-i18n="events.deselect">Deselect</button>
+                            <button class="select-action-btn cancel" onclick="BYD.events.exitSelectMode()" data-i18n="common.cancel">Cancel</button>
+                            <button class="select-action-btn danger" onclick="BYD.events.batchDelete()" data-i18n="common.delete">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="../shared/video-player.js?v=2"></script>
+    <script src="../shared/lens-dewarp.js?v=3"></script>
+    
+    <!-- Calendar Popup -->
+    <div class="calendar-popup" id="calendarPopup">
+        <div class="calendar-panel">
+            <div class="calendar-header">
+                <span class="calendar-title" id="calendarTitle" data-i18n="events.calendar_title_initial">Calendar</span>
+                <div class="calendar-nav">
+                    <button onclick="BYD.events.prevMonth()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <button onclick="BYD.events.nextMonth()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar days will be rendered here -->
+            </div>
+            <button class="calendar-close" onclick="BYD.events.closeCalendar()" data-i18n="common.close">Close</button>
+        </div>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="../shared/auth.js"></script>
+    <script src="../shared/pwa-init.js?v=index1"></script>
+    <script src="../shared/core.js?v=27"></script>
+    <script src="../shared/update-flow.js?v=3"></script>
+    <script src="../shared/safekeep-badges.js?v=4"></script>
+    <script src="../shared/events.js?v=revamp18"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            BYD.i18n.init().then(function () {
+                BYD.core.init();
+                BYD.events.init();
+            });
+        });
+    </script>
+</body>
+</html>

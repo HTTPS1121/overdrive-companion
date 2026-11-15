@@ -1,126 +1,82 @@
-# Overdrive Companion | מלווה Overdrive
+# OverDrive Companion (Android WebView shell)
 
-Flutter Android companion for **Overdrive** (BYD Atto 3 and other BYD models). Talks to the **Overdrive HTTP server on the car** (default port **8080**) over LAN or a tunnel (Zrok, Cloudflare, Tailscale, WireGuard). This is **not** the head-unit app and **not** a WebView wrapper.
+**עברית (תמצית)** | [English](#english)
+
+אפליקציית Android קלה שעוטפת את ממשק ה-Web של OverDrive מהמכונית: WebView מקומי עם נכסי `assets/web/`, הורדות/העלאות native, Material You ותג offline.
+
+- הקוד הראשי ב־`app/`.
+- גרסת Flutter ישנה נשארת ב־[`legacy/flutter/`](legacy/flutter/) (לא מפותחת כאן).
+
+### גרסאות
+
+| מקור | משמעות |
+|------|--------|
+| `app/src/main/assets/WEB_SOURCE.json` | גרסת שחרור ה-head-unit של OverDrive שמוטמעת באפליקציה (`versionName`, `versionCode`) |
+| `app/shell_patch.txt` | מונה תיקונים של המעטפת בלבד (0 = זהה מספרית לשחרור הרכב; 1 → `61.1.1`, 2 → `61.1.2`, …) |
+
+- `versionName` = שם השחרור מהרכב, או `שם.patch` אם רק המעטפת השתנתה.
+- `versionCode` = `upstreamVersionCode * 100 + patch` (חייב לעלות תמיד; מעל ההתקנה הקיימת).
+
+לצפייה בגרסה המחושבת: `tools/print-version.sh`.
+
+### עדכון UI מהמפתח
+
+```bash
+tools/update-web-assets.sh          # השחרור האחרון (לא debug) מ־yash-srivastava/Overdrive-release
+tools/update-web-assets.sh --main     # ענף main של אותו ריפו (נדיר)
+```
+
+אחרי שינוי web בלבד: הגדל את `app/shell_patch.txt` ודחוף ל־`main` (ייבנה שחרור חתום ב־CI).
+
+ב־GitHub Actions: הרץ workflow **Update bundled OverDrive web UI** (`workflow_dispatch` בלבד — **ללא cron**) כדי למשוך שחרור upstream חדש; הוא מאפס את `shell_patch.txt` ל־0 ודוחף, ואז **Release companion APK** מפרסם APK.
+
+### בנייה מקומית
+
+דרוש JDK 17+ ו־Android SDK. חתימת release מקומית (אופציונלי): קבצים תחת `signing/` או משתני סביבה `ANDROID_KEYSTORE_*` (כמו ב־CI).
+
+```bash
+./gradlew :app:assembleRelease
+```
+
+שחרורים חתומים רשמיים מתפרסמים אוטומטית ב־CI עם סודות `ANDROID_KEYSTORE_*` ב־GitHub.
 
 ---
 
 ## English
 
-### Stage 1 (this repo)
+Native Android **WebView shell** for the developer’s OverDrive web UI (same bundled `assets/web/` as the head-unit release APK), plus native download/upload, Material You theming, and an offline indicator.
 
-- Hebrew **RTL** Material 3 UI
-- Onboarding: base URL, device token, connection test, persisted settings
-- **Status**: polled `GET /api/vehicle/state` (+ optional `GET /api/vehicle/cloud-status`, `GET /api/gps` for motion)
-- **Control**: only real Overdrive endpoints (lock, climate, windows, etc.)
-- **Embedded mock** (default) + optional **local HTTP mock** (`dart run tool/mock_server.dart`)
+- Main app: `app/`.
+- Older **Flutter** experiment: [`legacy/flutter/`](legacy/flutter/) (history preserved; not the active app).
 
-### Real Overdrive endpoints wired
+### Versioning
 
-| Method | Path | Use in app |
-|--------|------|------------|
-| GET | `/auth/status` | Connection test (public) |
-| POST | `/auth/token` | `{ "token": "<device-secret>" }` -> JWT (`Authorization: Bearer …`) |
-| GET | `/api/vehicle/state` | Status screen (SOC, range, doors, windows, climate, tyres, …) |
-| GET | `/api/vehicle/cloud-status` | BYD Cloud / local remote-key health |
-| GET | `/api/gps` | `location.canSpeedKmh` -> parked vs driving hint |
-| POST | `/api/vehicle/lock` | Lock |
-| POST | `/api/vehicle/unlock` | Unlock |
-| POST | `/api/vehicle/trunk` | `{ "action": "open"\|"close" }` |
-| POST | `/api/vehicle/window` | `{ "area": 0, "command": 1\|2 }`, `{ "action": "vent" }` |
-| POST | `/api/vehicle/flash` | Flash lights |
-| POST | `/api/vehicle/climate` | `power_on`, `power_off`, `set_temp`, `set_fan`, steering heat actions |
-| POST | `/api/vehicle/lights` | `{ "target": "readingLight", "enable": true\|false }` |
+Companion versions mirror the **bundled OverDrive car release**, not an arbitrary app semver:
 
-Source of truth: [yash-srivastava/Overdrive-release](https://github.com/yash-srivastava/Overdrive-release) (`VehicleControlApiHandler.java`, web `vehicle-control.js`).
+1. `WEB_SOURCE.json` — upstream `versionName` / `versionCode` from the APK you bundled.
+2. `app/shell_patch.txt` — shell-only patch index (`0` = same number as the car build; `1` → `61.1.1`, etc.).
 
-**Not in stage 1** (roadmap): `find-car`, charging schedule, seat memory, streaming `/api/stream/*`, recordings, surveillance, trips, MQTT, push.
+Derived in Gradle:
 
-### Tunnel URL
+- `versionName` = upstream name, or `name.patch` when only the shell changed.
+- `versionCode` = `upstreamVersionCode * 100 + patch` (monotonic; must stay above installed builds).
 
-1. Run Overdrive on the car and enable your tunnel (Zrok / Cloudflared / Tailscale / WireGuard).
-2. In the app **Settings**, set base URL to the tunnel origin, e.g. `https://your-name.trycloudflare.com` or `https://car.example.com` (no trailing slash).
-3. Copy the **device token** from Overdrive on the car and paste it in settings. Remote access via tunnel requires JWT (`POST /auth/token`).
+Run `tools/print-version.sh` to print the effective values.
 
-LAN example: `http://192.168.x.x:8080`
-
-### Build APK
+### Refresh web assets
 
 ```bash
-export PATH="/path/to/flutter/bin:$PATH"
-flutter pub get
-flutter analyze
-flutter test
-flutter build apk --release
+tools/update-web-assets.sh
 ```
 
-APK: `build/app/outputs/flutter-apk/app-release.apk`  
-Package id: `com.https1121.overdrive.companion`
+To pull a newer **GitHub Release** from `yash-srivastava/Overdrive-release`, use the **Update bundled OverDrive web UI** workflow manually (no schedule). It resets `shell_patch.txt` to `0` and pushes; **Release companion APK** on `main` publishes a signed APK and GitHub Release `v<versionName>`.
 
-### Mock server (optional)
+Shell-only fixes: bump `app/shell_patch.txt` and push to `main`.
+
+### Build
 
 ```bash
-dart run tool/mock_server.dart --port 18080
-# optional JWT: dart run tool/mock_server.dart --auth
+./gradlew :app:assembleRelease
 ```
 
-In app: **Settings -> Mock HTTP** or use **Embedded mock** (no server process).
-
-### Project layout
-
-```
-lib/
-  core/config/          AppSettings, ConnectionMode
-  data/api/             OverdriveApiClient
-  data/models/          VehicleState, CloudStatus, GpsSnapshot
-  data/mock/            In-memory + Shelf HTTP mock
-  data/repositories/    VehicleRepository, endpoint catalog
-  features/             onboarding, status, control, shell
-  providers/            Riverpod
-fixtures/               Sample /api/vehicle/state JSON
-tool/mock_server.dart   Standalone mock HTTP server
-```
-
-### Roadmap (later stages)
-
-1. Live cameras + `/api/stream/*`, quality, surround view  
-2. Recordings browser + `/api/recordings`, events  
-3. Surveillance + BYD Cloud deterrent settings  
-4. Trips + `/api/trips`, charging + `/api/charging`  
-5. Automations + push notifications  
-6. iOS polish (project already includes `ios/`)
-
----
-
-## עברית
-
-### מה זה?
-
-אפליקיית Flutter שמתחברת לשרת HTTP של **Overdrive** ברכב (פורט 8080 בדרך כלל), לא WebView.
-
-### הרצה לפיתוח
-
-```bash
-flutter pub get
-flutter run
-```
-
-ברירת מחדל: **דמו מובנה** — עובד בלי רכב.
-
-### חיבור לרכב אמיתי
-
-1. הגדרות -> **רכב / מנהרה**
-2. הזן URL (Wi‑Fi: `http://IP:8080`, מנהרה: `https://…`)
-3. הזן **device token** מהאפליקציה ברכב
-4. **בדיקת חיבור** -> **שמירה**
-
-### בניית APK
-
-```bash
-flutter build apk --release
-```
-
----
-
-## License
-
-Independent companion project; not affiliated with Overdrive upstream. Do not commit secrets (device tokens) to git.
+Official signed releases are built in GitHub Actions (`release.yml` on push to `main`).

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/login_root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:fillViewport="true" android:layoutDirection="rtl" android:background="?attr/colorSurface">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"
+        android:paddingHorizontal="24dp" android:paddingTop="48dp" android:paddingBottom="24dp">
+        <com.google.android.material.card.MaterialCardView android:layout_width="72dp" android:layout_height="72dp"
+            app:cardCornerRadius="24dp" app:strokeWidth="0dp" app:cardBackgroundColor="?attr/colorPrimaryContainer">
+            <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:padding="0dp"
+                android:src="@mipmap/ic_launcher" android:scaleType="centerCrop" android:importantForAccessibility="no"/>
+        </com.google.android.material.card.MaterialCardView>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp"
+            android:text="התחברות לרכב" android:textAppearance="?attr/textAppearanceHeadlineMedium"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
+            android:text="הזן את כתובת המנהרה וקוד הגישה שמוצג באפליקציית OverDrive ברכב."
+            android:textAppearance="?attr/textAppearanceBodyLarge" android:textColor="?attr/colorOnSurfaceVariant"/>
+        <com.google.android.material.textfield.TextInputLayout android:id="@+id/url_layout"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="32dp"
+            android:hint="כתובת השרת" app:startIconDrawable="@drawable/ic_link"
+            app:helperText="למשל &#x2066;https://…share.zrok.io&#x2069; או &#x2066;192.168.x.x:8080&#x2069;">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/url"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:inputType="textUri" android:textDirection="ltr" android:singleLine="true"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout android:id="@+id/code_layout"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp"
+            android:hint="קוד גישה" app:startIconDrawable="@drawable/ic_key" app:endIconMode="password_toggle">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/code"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:inputType="textPassword|textNoSuggestions" android:textDirection="ltr" android:singleLine="true"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.button.MaterialButton android:id="@+id/go"
+            android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="24dp"
+            android:text="התחברות" android:textAppearance="?attr/textAppearanceTitleMedium"/>
+        <com.google.android.material.progressindicator.LinearProgressIndicator android:id="@+id/login_progress"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
+            android:indeterminate="true" android:visibility="invisible"/>
+        <TextView android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?attr/colorError"/>
+        <com.google.android.material.button.MaterialButton android:id="@+id/web_login"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="12dp"
+            android:visibility="gone" android:text="כניסה דרך דף ההתחברות של השרת"/>
+        <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/>
+        <TextView android:id="@+id/version" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="32dp" android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/colorOnSurfaceVariant"/>
+    </LinearLayout>
+</ScrollView>

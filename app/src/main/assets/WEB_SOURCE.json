@@ -1,0 +1,11 @@
+{
+ "source": "release",
+ "tag": "braveheart",
+ "asset": "overdrive-release-braveheart-v61.1.apk",
+ "versionName": "61.1",
+ "versionCode": 208,
+ "uploaded": "2026-11-14T20:29:54Z",
+ "url": "https://github.com/yash-srivastava/Overdrive-release/releases/download/braveheart/overdrive-release-braveheart-v61.1.apk",
+ "apk_sha256": "327c5426f3dd60bcb59ad10b988d92f02b833aa87062378f50bbcb4319327a40",
+ "build_revision": "571cc1dbf30afc8ae448b58e6c089b83fb1931ec"
+}
