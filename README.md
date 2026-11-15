@@ -1,82 +1,189 @@
-# OverDrive Companion (Android WebView shell)
+<div align="center">
 
-**עברית (תמצית)** | [English](#english)
+# OverDrive Companion
 
-אפליקציית Android קלה שעוטפת את ממשק ה-Web של OverDrive מהמכונית: WebView מקומי עם נכסי `assets/web/`, הורדות/העלאות native, Material You ותג offline.
+The developer’s OverDrive web UI on your phone — native Android, not a browser tab.
 
-- הקוד הראשי ב־`app/`.
-- גרסת Flutter ישנה נשארת ב־[`legacy/flutter/`](legacy/flutter/) (לא מפותחת כאן).
+[![Latest release](https://img.shields.io/github/v/release/HTTPS1121/overdrive-companion?label=release)](https://github.com/HTTPS1121/overdrive-companion/releases/latest)
+[![Min SDK](https://img.shields.io/badge/minSdk-29-blue)](app/build.gradle.kts)
+[![Release workflow](https://img.shields.io/github/actions/workflow/status/HTTPS1121/overdrive-companion/release.yml?branch=main&label=release%20CI)](https://github.com/HTTPS1121/overdrive-companion/actions/workflows/release.yml)
 
-### גרסאות
+[**Download latest APK**](https://github.com/HTTPS1121/overdrive-companion/releases/latest)
 
-| מקור | משמעות |
-|------|--------|
-| `app/src/main/assets/WEB_SOURCE.json` | גרסת שחרור ה-head-unit של OverDrive שמוטמעת באפליקציה (`versionName`, `versionCode`) |
-| `app/shell_patch.txt` | מונה תיקונים של המעטפת בלבד (0 = זהה מספרית לשחרור הרכב; 1 → `61.1.1`, 2 → `61.1.2`, …) |
+</div>
 
-- `versionName` = שם השחרור מהרכב, או `שם.patch` אם רק המעטפת השתנתה.
-- `versionCode` = `upstreamVersionCode * 100 + patch` (חייב לעלות תמיד; מעל ההתקנה הקיימת).
+---
 
-לצפייה בגרסה המחושבת: `tools/print-version.sh`.
+<div dir="rtl">
 
-### עדכון UI מהמפתח
+## מה זה?
 
-```bash
-tools/update-web-assets.sh          # השחרור האחרון (לא debug) מ־yash-srivastava/Overdrive-release
-tools/update-web-assets.sh --main     # ענף main של אותו ריפו (נדיר)
-```
+**OverDrive Companion** היא אפליקציית Android שמציגה את **ממשק ה-Web של OverDrive** (לרכבי BYD) כאפליקציה מקומית — בלי תחושת דפדפן, עם מסך מלא וניווט נוח.
 
-אחרי שינוי web בלבד: הגדל את `app/shell_patch.txt` ודחוף ל־`main` (ייבנה שחרור חתום ב־CI).
+- **צבעים מהטלפון** — Material You: גווני הממשק נלקחים מערכת הצבעים של המכשיר (בהיר/כהה).
+- **קבצים בטלפון** — הורדות וצילומי מסך נשמרים באחסון המכשיר, לא רק בתוך ה-WebView.
+- **אותן גרסאות כמו ברכב** — מספר הגרסה של האפליקציה תואם לשחרור OverDrive שמוטמע בה (עם סיומת קטנה אם רק המעטפת השתנתה).
 
-ב־GitHub Actions: הרץ workflow **Update bundled OverDrive web UI** (`workflow_dispatch` בלבד — **ללא cron**) כדי למשוך שחרור upstream חדש; הוא מאפס את `shell_patch.txt` ל־0 ודוחף, ואז **Release companion APK** מפרסם APK.
+### התקנה
 
-### בנייה מקומית
+1. הורד את ה־APK מהקישור למעלה ([שחרורים](https://github.com/HTTPS1121/overdrive-companion/releases/latest)).
+2. אשר התקנה ממקור לא ידוע אם Android מבקש.
+3. פתח את האפליקציה.
+4. הזן את **כתובת שרת הרכב** ואת **קוד ההתחברות** (כמו בממשק הרגיל).
 
-דרוש JDK 17+ ו־Android SDK. חתימת release מקומית (אופציונלי): קבצים תחת `signing/` או משתני סביבה `ANDROID_KEYSTORE_*` (כמו ב־CI).
+### צילומי מסך
 
-```bash
-./gradlew :app:assembleRelease
-```
+<small>הצילומים משרת בדיקות — הנתונים לדוגמה בלבד.</small>
 
-שחרורים חתומים רשמיים מתפרסמים אוטומטית ב־CI עם סודות `ANDROID_KEYSTORE_*` ב־GitHub.
+<table>
+  <tr>
+    <td align="center"><b>לוח בקרה (כהה)</b><br/><img src="docs/screenshots/dashboard-dark.png" alt="לוח בקרה כהה" width="200"/></td>
+    <td align="center"><b>תצוגה חיה (כהה)</b><br/><img src="docs/screenshots/live-dark.png" alt="תצוגה חיה" width="200"/></td>
+    <td align="center"><b>הקלטות (כהה)</b><br/><img src="docs/screenshots/recordings-dark.png" alt="הקלטות" width="200"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>נסיעות (כהה)</b><br/><img src="docs/screenshots/trips-dark.png" alt="נסיעות" width="200"/></td>
+    <td align="center"><b>תפריט (כהה)</b><br/><img src="docs/screenshots/menu-dark.png" alt="תפריט" width="200"/></td>
+    <td align="center"><b>לוח בקרה (בהיר)</b><br/><img src="docs/screenshots/dashboard-light.png" alt="לוח בקרה בהיר" width="200"/></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><b>תג לא מקוון</b><br/><img src="docs/screenshots/offline-pill-dark.png" alt="תג offline" width="200"/></td>
+  </tr>
+</table>
+
+### קרדיט
+
+ממשק ה-Web ו־OverDrive שייכים למפתח ([Overdrive-release](https://github.com/yash-srivastava/Overdrive-release)).  
+פרויקט זה הוא **מלווה לא רשמי** — מעטפת Android נפרדת שמארזת את ה-UI המפורסם.
+
+</div>
 
 ---
 
 ## English
 
-Native Android **WebView shell** for the developer’s OverDrive web UI (same bundled `assets/web/` as the head-unit release APK), plus native download/upload, Material You theming, and an offline indicator.
+**OverDrive Companion** wraps the developer’s **OverDrive web UI** (for BYD vehicles) in a native Android app — full screen, app-like navigation, no “browser chrome” feel.
 
-- Main app: `app/`.
-- Older **Flutter** experiment: [`legacy/flutter/`](legacy/flutter/) (history preserved; not the active app).
+- **Material You** — accent and surface colors follow your phone’s light/dark theme.
+- **Phone-native files** — downloads and screenshots go to device storage.
+- **Car-aligned versions** — the app version matches the bundled OverDrive head-unit release (with an extra patch digit when only the shell changed).
 
-### Versioning
+### Install
 
-Companion versions mirror the **bundled OverDrive car release**, not an arbitrary app semver:
+1. Download the APK from [**Releases**](https://github.com/HTTPS1121/overdrive-companion/releases/latest).
+2. Allow installs from unknown sources if Android prompts you.
+3. Open the app.
+4. Enter your **car server address** and **login code**.
 
-1. `WEB_SOURCE.json` — upstream `versionName` / `versionCode` from the APK you bundled.
-2. `app/shell_patch.txt` — shell-only patch index (`0` = same number as the car build; `1` → `61.1.1`, etc.).
+### Screenshots
 
-Derived in Gradle:
+<small>Screenshots use a test server — sample data only.</small>
 
-- `versionName` = upstream name, or `name.patch` when only the shell changed.
-- `versionCode` = `upstreamVersionCode * 100 + patch` (monotonic; must stay above installed builds).
+<table>
+  <tr>
+    <td align="center"><b>Dashboard (dark)</b><br/><img src="docs/screenshots/dashboard-dark.png" alt="Dashboard dark" width="200"/></td>
+    <td align="center"><b>Live view (dark)</b><br/><img src="docs/screenshots/live-dark.png" alt="Live view" width="200"/></td>
+    <td align="center"><b>Recordings (dark)</b><br/><img src="docs/screenshots/recordings-dark.png" alt="Recordings" width="200"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Trips (dark)</b><br/><img src="docs/screenshots/trips-dark.png" alt="Trips" width="200"/></td>
+    <td align="center"><b>Menu (dark)</b><br/><img src="docs/screenshots/menu-dark.png" alt="Menu" width="200"/></td>
+    <td align="center"><b>Dashboard (light)</b><br/><img src="docs/screenshots/dashboard-light.png" alt="Dashboard light" width="200"/></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><b>Offline pill</b><br/><img src="docs/screenshots/offline-pill-dark.png" alt="Offline indicator" width="200"/></td>
+  </tr>
+</table>
 
-Run `tools/print-version.sh` to print the effective values.
+### Credit
 
-### Refresh web assets
+The web UI and OverDrive are by the developer — see [Overdrive-release](https://github.com/yash-srivastava/Overdrive-release).  
+This repo is an **unofficial companion**: an Android shell that bundles the published web UI.
+
+---
+
+## פיתוח · Development
+
+<div dir="rtl">
+
+<details>
+<summary><strong>מבנה הריפו וגרסאות</strong></summary>
+
+- קוד האפליקציה: `app/`. ניסוי Flutter ישן: `legacy/flutter/`.
+- `app/src/main/assets/WEB_SOURCE.json` — גרסת השחרור מהרכב שמוטמעת כרגע.
+- `app/shell_patch.txt` — מונה תיקוני מעטפת בלבד (`0` = אותו מספר כמו ברכב; `1` → `61.1.1`, …).
+- `versionName` = שם השחרור, או `שם.patch` אם רק המעטפת השתנתה.
+- `versionCode` = `upstreamVersionCode × 100 + patch`.
+
+```bash
+tools/print-version.sh
+```
+
+</details>
+
+<details>
+<summary><strong>עדכון ממשק Web מהמפתח</strong></summary>
 
 ```bash
 tools/update-web-assets.sh
 ```
 
-To pull a newer **GitHub Release** from `yash-srivastava/Overdrive-release`, use the **Update bundled OverDrive web UI** workflow manually (no schedule). It resets `shell_patch.txt` to `0` and pushes; **Release companion APK** on `main` publishes a signed APK and GitHub Release `v<versionName>`.
+Workflow ידני בלבד ב־GitHub Actions: **Update bundled OverDrive web UI** (`workflow_dispatch`, ללא לוח זמנים).  
+אם יש שחרור חדש — מעדכן נכסים, מאפס את `shell_patch.txt` ל־`0` ודוחף; אז **Release companion APK** מפרסם APK חתום.
 
-Shell-only fixes: bump `app/shell_patch.txt` and push to `main`.
+שינוי מעטפת בלבד: הגדל `app/shell_patch.txt` ודחוף ל־`main` (רק שינויי `app/`/`tools/` מפעילים שחרור אוטומטי).
 
-### Build
+</details>
+
+<details>
+<summary><strong>בנייה מקומית</strong></summary>
+
+JDK 17+, Android SDK.
 
 ```bash
 ./gradlew :app:assembleRelease
 ```
 
-Official signed releases are built in GitHub Actions (`release.yml` on push to `main`).
+שחרורים רשמיים נבנים ב־CI (`release.yml`) — push ל־`main` רק כשמשתנים קבצי אפליקציה/כלים, לא לתיעוד בלבד.
+
+</details>
+
+</div>
+
+<details>
+<summary><strong>Repository layout &amp; versioning</strong></summary>
+
+- Active app: `app/`. Archived Flutter experiment: `legacy/flutter/`.
+- `WEB_SOURCE.json` — bundled OverDrive release metadata.
+- `app/shell_patch.txt` — shell-only patch counter.
+- `versionName` / `versionCode` derived in Gradle (`upstreamCode × 100 + patch`).
+
+```bash
+tools/print-version.sh
+```
+
+</details>
+
+<details>
+<summary><strong>Refresh bundled web UI</strong></summary>
+
+```bash
+tools/update-web-assets.sh
+```
+
+Run **Update bundled OverDrive web UI** manually when you want a newer APK from [Overdrive-release](https://github.com/yash-srivastava/Overdrive-release). Resets patch to `0` on upstream bumps.
+
+Shell-only changes: increment `app/shell_patch.txt` and push.
+
+</details>
+
+<details>
+<summary><strong>Local build &amp; CI</strong></summary>
+
+```bash
+./gradlew :app:assembleRelease
+```
+
+**Release companion APK** runs on `workflow_dispatch` and on pushes to `main` that touch `app/`, `tools/`, or Gradle files — not README/docs-only changes.
+
+</details>

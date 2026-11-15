@@ -3,6 +3,15 @@ name: Release companion APK
 on:
   push:
     branches: [main]
+    paths:
+      - "app/**"
+      - "tools/**"
+      - "gradle/**"
+      - "gradlew"
+      - "gradlew.bat"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle.properties"
   workflow_dispatch:
 
 permissions:
