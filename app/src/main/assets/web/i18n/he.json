@@ -5,6 +5,119 @@
     "version": 1,
     "note": "Hebrew UI catalog (fresh review). Brands and protocol terms stay English. hotspot=נקודה חמה, blind spot=שטח מת."
   },
+  "tlview": {
+    "tabList": "רשימה",
+    "tabTimeline": "ציר זמן",
+    "filterAll": "הכול",
+    "filterPeople": "אנשים",
+    "filterVehicles": "כלי רכב",
+    "filterAlerts": "התרעות",
+    "zoomDay": "יום",
+    "zoom6h": "6 שע׳",
+    "zoom1h": "שעה",
+    "zoom10m": "10 דק׳",
+    "moments": "רגעים",
+    "momentsCount": {
+      "one": "רגע {count}",
+      "other": "{count} רגעים"
+    },
+    "playing": "מתנגן",
+    "alert": "התרעה",
+    "critical": "קריטי",
+    "kindPerson": "אדם",
+    "kindVehicle": "רכב",
+    "kindBike": "אופניים/אופנוע",
+    "kindAnimal": "בעל חיים",
+    "kindMotion": "תנועה",
+    "kindDeterrent": "הרתעה",
+    "kindAnd": "{a} ו{b}",
+    "kindEvent": "אירוע",
+    "closePass": "מעבר קרוב",
+    "savedReplay": "הילוך חוזר שמור",
+    "drive": "נסיעה",
+    "roadPothole": "בור",
+    "roadBreaker": "פס האטה",
+    "roadRough": "כביש משובש",
+    "gapNoFootage": "אין הקלטה",
+    "gapFmt": "{duration} · {reason}",
+    "reason": {
+      "user_off": "מצב שומר כבוי",
+      "acc_on": "הרכב מונע",
+      "owner_returned": "הבעלים חזר",
+      "schedule_end": "מחוץ ללוח הזמנים של מצב שומר",
+      "safe_zone": "אזור בטוח",
+      "lease_revoked": "מצב שומר הופעל מחדש",
+      "pipeline_down": "המצלמות לא זמינות",
+      "soc_cutoff": "חיסכון בסוללה",
+      "lv_low": "מצבר 12V חלש",
+      "daemon_stop": "המקליט לא פועל",
+      "storage_unavailable": "האחסון לא זמין",
+      "storage_full": "האחסון מלא",
+      "driving": "בנסיעה, לא הוקלט",
+      "deleted": "נמחק",
+      "overwritten": "נדרס בהקלטה בלולאה",
+      "removed": "הוסר",
+      "unknown": "אין צילום"
+    },
+    "sentry": {
+      "surveillance_off": "מצב שומר כבוי",
+      "vehicle_on_only": "מצב שומר מוגדר לרכב מונע בלבד",
+      "suppressed_safe_zone": "אזור בטוח",
+      "suppressed_schedule": "מחוץ ללוח הזמנים של מצב שומר",
+      "pipeline_down": "המצלמות לא זמינות",
+      "lock_wait": "ממתין לנעילת הרכב"
+    },
+    "armedHint": "מצב שומר דרוך · לא קרה דבר",
+    "unavailableVolume": "ב{volume} (לא מחובר)",
+    "storageSd": "כרטיס SD",
+    "storageUsb": "כונן USB",
+    "storageInternal": "אחסון פנימי",
+    "live": "שידור חי",
+    "speedTitle": "מהירות הפעלה",
+    "speedNote": "במהירות 4× ו-8× הווידאו מתנגן ללא קול",
+    "skipQuiet": "דילוג על נסיעה שקטה",
+    "skipQuietDesc": "נסיעות מוצגות ב-8× ומאטות ל-1× באירועים",
+    "continueNext": "המשך לאירוע הבא",
+    "continueNextDesc": "מדלג על הזמן הריק בין הסרטונים",
+    "sourceMosaic": "360°",
+    "sourceOem": "מצלמת דרך קדמית",
+    "sourceSwitch": "החלפת מקור המצלמה",
+    "nextEventIn": "האירוע הבא בעוד {duration}",
+    "emptyDay": "אין הקלטות ל{day}",
+    "offline": "אין חיבור למקליט",
+    "retry": "נסה שוב",
+    "clipError": "לא ניתן להפעיל את הסרטון הזה",
+    "clipGone": "הקליפ הזה כבר לא זמין",
+    "gapDamaged": "קליפ פגום · לא ניתן להפעיל",
+    "gapIndexing": "עדיין באינדוקס · נסו שוב בעוד רגע",
+    "recordingNow": "מקליט עכשיו · יתנגן אחרי השמירה",
+    "speedAuto": "אוטומטי",
+    "cantPlayHere": "לא ניתן להפעיל את הסרטון הזה בדפדפן הזה",
+    "download": "הורדה",
+    "today": "היום",
+    "yesterday": "אתמול",
+    "camFront": "חזית",
+    "camRight": "ימין",
+    "camRear": "אחור",
+    "camLeft": "שמאל",
+    "camNotInClip": "המצלמה {camera} לא מופיעה בסרטון הזה",
+    "ariaStrip": "ציר הזמן ב-{time}",
+    "ariaStripNearest": "ציר הזמן ב-{time}, הרגע הקרוב: {moment}",
+    "ariaPlay": "הפעל",
+    "ariaPause": "השהה",
+    "ariaPrev": "האירוע הקודם",
+    "ariaNext": "האירוע הבא",
+    "ariaSpeed": "מהירות הפעלה {speed}",
+    "ariaDate": "בחירת תאריך ושעה",
+    "ariaFilter": "סינון",
+    "ariaListView": "תצוגת רשימה",
+    "durHm": "{h} ש׳ {m} דק׳",
+    "durM": "{m} דק׳",
+    "durS": "{s} שנ׳",
+    "watchDrive": "צפייה בנסיעה",
+    "watchSession": "צפייה בחניה",
+    "rewind": "הרצה לאחור"
+  },
   "app": {
     "name": "OverDrive",
     "tagline": "מערכת אבטחה ומעקב",
@@ -2309,6 +2422,9 @@
     "filter_distance": "מרחק:",
     "filter_storage": "אחסון:",
     "filter_place": "מקום:",
+    "filters_toggle": "סנן",
+    "filter_remove": "הסר סינון",
+    "filter_place_search": "חיפוש מקום",
     "place_search_hint": "חפש מקומות…",
     "place_search_hits": {
       "one": "התאמה {count}",
@@ -2707,6 +2823,18 @@
     "impact_sensitivity_low": "נמוכה",
     "impact_sensitivity_medium": "בינונית",
     "impact_sensitivity_high": "גבוהה",
+    "impact_notify_only": "זיהוי פגיעה שולח כרגע התראה בלבד; הוא לא יוצר הקלטה או קליפ אירוע.",
+    "impact_sensor_status": "מצב חיישן התנועה",
+    "impact_status_disabled": "כבוי",
+    "impact_status_registered": "החיישן נרשם; ממתין לאישור שמתקבלות דגימות",
+    "impact_status_sampling": "מתקבלות דגימות מחיישן התאוצה",
+    "impact_status_unavailable": "אין חיישן תאוצה שמיש",
+    "impact_status_stale": "לא התקבל דיווח עדכני מהחיישן — ייתכן שהחיישן במצב שינה בזמן החנייה",
+    "impact_status_inactive": "לא פעיל (הרכב לא נמצא בחלון הניטור של מצב השמירה בחנייה)",
+    "impact_status_waiting": "ממתין לשירות החיישן",
+    "impact_status_unknown": "מצב לא ידוע",
+    "impact_status_samples": "{n} דגימות ב-15 שניות",
+    "impact_status_error": "המצב לא זמין — שירות החיישן לא מדווח",
     "deterrent_silent_option": "שקט (הקלטה בלבד)",
     "deterrent_flash_option": "הבהוב אורות",
     "deterrent_horn_option": "צפירה + אורות",
@@ -3356,7 +3484,54 @@
     "copy_code": "העתק קוד",
     "when_to_send": "שלחו את היומן הזה כאשר: ",
     "component_unavailable": "פרטי הרכיב לא זמינים בגרסה הזו של האפליקציה.",
-    "send_when_unavailable": "שלחו את היומן הזה כשהבעיה קשורה לשירות הזה."
+    "send_when_unavailable": "שלחו את היומן הזה כשהבעיה קשורה לשירות הזה.",
+    "desc": {
+      "camera": {
+        "name": "מצלמה",
+        "component": "שירות הליבה של OverDrive — ממשק Web, HTTP/API, שידורי מצלמה וסטרימינג, ואינטגרציות משותפות לרכב ולאפליקציות.",
+        "sendWhen": "ממשק ה-Web או ה-API נכשלים, שידורי וידאו או מצלמה נכשלים, נתוני רכב חסרים, או שאף שירות אחר לא מתאים בבירור."
+      },
+      "accsentry": {
+        "name": "ACC Sentry",
+        "component": "ניטור מצב ACC ומצב החשמל ברכב — מעברי הצתה, מצב חניה, תיאום מצב Sentry, שליטה במסך/תאורה אחורית והערת MCU.",
+        "sendWhen": "זיהוי ACC/הצתה, מעברי חניה/התעוררות, שליטה במסך/תאורה אחורית או הפעלת מצב Sentry מתנהגים לא נכון."
+      },
+      "sentry": {
+        "name": "Sentry",
+        "component": "שירות השארת המערכת ערה — נעילת ACC, wake lock ורשימת אפליקציות/רשת מורשות.",
+        "sendWhen": "מסך המערכת נרדם באופן בלתי צפוי, OverDrive מושהה בזמן חניה, או שהגישה ברקע או לרשת אבדה."
+      },
+      "telegram": {
+        "name": "בוט טלגרם",
+        "component": "שירות בוט הטלגרם — בדיקת פקודות חדשות, ביצוע פקודות ותשובות/התראות מהבוט.",
+        "sendWhen": "הבוט לא מגיב, פקודות נכשלות, או התראות טלגרם חסרות."
+      },
+      "cloudflared": {
+        "name": "מנהרת Cloudflared",
+        "component": "מנהרת Cloudflare לגישה מרחוק.",
+        "sendWhen": "מנהרת Cloudflare לא עולה, כתובת ה-URL אינה זמינה, או גישה מרחוק דרך Cloudflare נכשלת."
+      },
+      "zrok": {
+        "name": "מנהרת Zrok",
+        "component": "מנהרת שיתוף zrok מרחוק — שיתוף שמור/ציבורי והפעלת פרוקסי.",
+        "sendWhen": "שיתוף או כתובת zrok לא עולים, לא נגישים, או מתנתקים."
+      },
+      "tailscale": {
+        "name": "Tailscale",
+        "component": "שירות VPN/Tailnet של Tailscale — קישוריות מכשירים, מנהרה ונקודות קצה פרוקסי/ADB אופציונליות.",
+        "sendWhen": "הרכב נעלם מה-tailnet, קישוריות Tailscale נכשלת, או נקודת הקצה/פרוקסי שהוגדרה אינה נגישה."
+      },
+      "wireguard": {
+        "name": "WireGuard",
+        "component": "מנהרת WireGuard (wgproxy) — ממשק WireGuard ותעבורת מנהרה.",
+        "sendWhen": "מנהרת WireGuard לא עולה, handshake/קישוריות נכשלים, או תעבורה לא עוברת דרכה."
+      },
+      "singbox": {
+        "name": "פרוקסי Sing-box",
+        "component": "שירות פרוקסי sing-box — תהליך פרוקסי מקומי וניתוב יוצא מוגדר.",
+        "sendWhen": "הפרוקסי לא עולה, ניתוב הפרוקסי שגוי, או אפליקציות לא מגיעות לרשת דרך הפרוקסי."
+      }
+    }
   },
   "vehicle": {
     "model_name_seagull": "BYD Seagull",
@@ -5118,6 +5293,7 @@
     "pack_deleted": "חבילת הראיות נמחקה"
   },
   "storage": {
+    "no_limit": "ללא הגבלה",
     "unit_mb": "{n} MB",
     "unit_gb": "{n} GB",
     "unit_gb_approx": "כ-{n} GB",
@@ -5925,6 +6101,11 @@
     "keyfob_lock_samples_hint": "1 = נעילה בחיפוש הראשון שלא מוצא מפתח בתוך הרכב (הכי מהיר). 2–3 = דורש תוצאות רצופות; מגן מפני מצב שבו קריאה אחת שפוספסה נועלת מפתח שנשאר בפנים.",
     "lock_waits_for_key_absence": "נעילה לפי טלפון ממתינה לחיפוש המפתח",
     "lock_waits_for_key_absence_desc": "כבוי: הנעילה מתבצעת ברגע שכל טלפון פעיל רחוק; מפתח שזוהה בקרבת הרכב או בתוכו עדיין חוסם. פעיל: ממתין גם עד שחיפוש מפתח מאשר שאין מפתח בפנים. מגן מפני מפתח שנשכח ברכב לפני שהחיפוש הבא שלו רץ.",
+    "phone_priority": "טלפון מאושר קודם לשלט המפתח",
+    "phone_priority_desc": "כל עוד טלפון מאושר מזוהה בבירור ליד הרכב, התרחקות השלט לא נועלת אותו. השאירו את זה כבוי אם טלפון נשאר לעיתים קרובות ברכב: אחרת הוא יעצור את הנעילה בהתרחקות עם השלט.",
+    "lock_with_key_inside": "נעילה כשהמפתח נשאר בפנים",
+    "lock_with_key_inside_desc": "התרחקות הטלפון נועלת את הרכב גם כשהמפתח מזוהה בפנים, בלי להמתין לחיפוש המפתח. לאחר מכן המפתח לא יוכל לפתוח את הרכב עד שייפתח בדרך אחרת, למשל כשטלפון מאושר חוזר או בכפתור של המפתח עצמו.",
+    "keyfob_key_inside_locked": "המפתח נשאר בפנים אחרי נעילה לפי טלפון. הוא לא יפתח את הרכב עד שהרכב ייפתח בדרך אחרת, למשל כשטלפון מאושר חוזר.",
     "confirm_with_vehicle": "אשר מול מצב הנעילה של הרכב",
     "confirm_with_vehicle_desc": "אחרי ששולחים פקודת קרבה, קורא מהרכב את מצב הנעילה של דלת הנהג ורושם אם הוא השתנה. זה רץ ברקע ואף פעם לא מעכב את ההחלטה הבאה. כיבוי ההגדרה רושם כל פקודה כנשלחה בלי לבדוק את הרכב, וגם משבית את הגיבוי בענן, שצריך את הבדיקה הזו כדי לדעת מתי הוא נדרש.",
     "cloud_fallback": "גיבוי בענן לפקודות שלא אושרו",
@@ -6370,6 +6551,8 @@
       "keyfob_search_paused_locked": "דלת הנהג כבר נעולה; חיפוש השלט מושהה כשהרכב נעול",
       "phones_must_confirm_away": "כל טלפון Bluetooth פעיל חייב לאשר 'רחוק'; מפתח קרוב מונע נעילה",
       "keyfob_departure_required": "נדרשת התרחקות עדכנית ומאושרת של השלט",
+      "keyfob_lock_phone_near": "טלפון מאושר נמצא ליד הרכב; עדיפות הטלפון חוסמת נעילה לפי השלט",
+      "keyfob_unlock_key_inside": "המפתח נשאר בפנים אחרי נעילה לפי טלפון; פתחו עם טלפון מאושר",
       "newer_signal_revoked": "אות חדש יותר ביטל את המעבר הזה",
       "learning_mode_no_command": "מצב למידה: לא נשלחה פקודה לרכב",
       "approach_expired": "קריאת ההתקרבות פגה לפני הפקודה",
@@ -7208,6 +7391,16 @@
     "empty": "אין עדיין קריאות זמינות. ודאו שהרכב ער ונסו לרענן.",
     "dtc_note": "לכיסוי מלא של קודי התקלה (DTC) ביחידות הבקרה, כולל בלמים, כריות אוויר, היגוי, ADAS וסוללת ההנעה, עדיין נדרש כלי אבחון של מוסך שתומך ב-BYD.",
     "copied": "דוח האבחון הועתק ללוח.",
-    "copy_failed": "לא ניתן להעתיק את הדוח."
+    "copy_failed": "לא ניתן להעתיק את הדוח.",
+    "fallback_module_name": "מודול",
+    "fallback_reading_name": "מדידה",
+    "dashboard_kicker": "מצב הרכב",
+    "dashboard_title": "זוהו תקלות במודולים",
+    "dashboard_summary": "הרכב מדווח על אזהרות אבחון.",
+    "dashboard_details": "הצג פרטי תקלות במודולים",
+    "dashboard_warning_count": {
+      "one": "{count} אזהרת מודול",
+      "other": "{count} אזהרות מודולים"
+    }
   }
 }

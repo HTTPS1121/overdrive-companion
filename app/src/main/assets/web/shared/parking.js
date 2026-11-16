@@ -66,6 +66,7 @@
         'parking.energy_used': 'Energy used', 'parking.soc_charged': 'Charged while parked',
         'trip.filter.days_7': '7 Days', 'trip.filter.days_30': '30 Days'
     };
+    FALLBACK['tlview.watchSession'] = 'Watch this session';
     function fallback(key, vars) {
         var s = FALLBACK[key] || key;
         if (vars) s = s.replace(/\{(\w+)\}/g, function (m, n) { return vars[n] != null ? vars[n] : m; });
@@ -481,6 +482,9 @@
             var maps = mapsUrl(s);
             if (maps) actions += '<a class="detail-back-btn" target="_blank" rel="noopener" href="' + esc(maps) + '">' + ICON.map + esc(t('parking.map')) + '</a>';
             actions += '<a class="detail-back-btn" href="events.html?filter=sentry&parkingSessionId=' + encodeURIComponent(s.sessionId) + '">' + ICON.video + esc(t('parking.open_events')) + '</a>';
+            var tlStart = Number(s.startedMs), tlEnd = Number(s.endedMs);
+            if (isFinite(tlStart) && tlStart > 0) actions += '<a class="detail-back-btn" href="events.html?view=timeline&t=' + tlStart + (isFinite(tlEnd) && tlEnd > tlStart ? '&end=' + tlEnd : '') + '">' +
+                '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>' + esc(t('tlview.watchSession')) + '</a>';
         }
         return '<div class="detail-header">' +
             '<a class="detail-back-btn" href="#/">' + ICON.back + esc(t('parking.back')) + '</a>' +

@@ -136,19 +136,40 @@
             #chargeCustomTab:hover { background: var(--well-2); }
             #chargeCustomTab.active:hover { background: var(--secondary-container); }
         }
-        /* Sessions period bar (7d / 30d / all / custom): pinned under the page
-           header and sticky section tabs while the session list scrolls. */
+        /* Sessions period bar (7d / 30d / all / custom): pinned under the page header and
+           sticky section tabs, compact and opaque. The custom range row sits outside it. */
+        body.charging-page {
+            --ch-sticky-top: calc(var(--page-header-h, 64px) + var(--tabs-h, 48px) + 8px);
+            --ch-sticky-top-tabs: calc(var(--tabs-h, 48px) + 8px);
+        }
         #sessionFilters {
             position: -webkit-sticky;
             position: sticky;
-            top: calc(var(--page-header-h, 64px) + var(--tabs-h, 48px) + 8px);
+            top: var(--ch-sticky-top);
             z-index: 5;
             margin-bottom: 4px;
             padding: 4px 0 8px;
             background: var(--page);
         }
         :root[data-app-shell="1"] #sessionFilters {
-            top: calc(var(--tabs-h, 48px) + 8px);
+            top: var(--ch-sticky-top-tabs);
+        }
+        #sessionFilters > .filter-tabs.charge-segmented-control.charge-period-control {
+            margin-bottom: 4px;
+        }
+        #sessionFilters > .filter-tabs.charge-segmented-control.charge-period-control > * {
+            margin-bottom: 0;
+        }
+        #sessionFilters > .charge-location-filter-row,
+        #sessionFilters > #chargeLocationFilterRow {
+            margin-bottom: 0;
+        }
+        #sessionFilters > .charge-location-filter-row > *,
+        #sessionFilters > #chargeLocationFilterRow > * {
+            margin-bottom: 0;
+        }
+        #sessionFilters > .charge-location-hint {
+            margin-bottom: 4px;
         }
         /* Custom From → To range. Collapsed by default; .open reveals it with a
            height + fade transition (display:none cannot animate). Phones stack
@@ -1421,9 +1442,10 @@
                                 </select>
                             </label>
                         </div>
-                        <!-- Custom date range (hidden until "Custom" is tapped).
-                             Each field opens the shared calendar popup — matches
-                             the events-page date picker look & feel. -->
+                    </div>
+                    <!-- Custom date range (hidden until "Custom" is tapped); outside
+                         #sessionFilters so the sticky shell stays compact. -->
+                    <div data-tab="sessions" id="chargeCustomRangeSlot">
                         <div class="ch-range-row" id="chargeRangeRow">
                             <div class="ch-range-dates">
                                 <button class="calendar-toggle" id="chargeFromToggle" onclick="CHARGING.openCalendar('from')">

@@ -53,6 +53,7 @@ public class LoginActivity extends AppCompatActivity {
         go.setOnClickListener(v -> attempt());
         webLogin.setOnClickListener(v -> openWebLogin());
         code.setOnEditorActionListener((v, a, e) -> { attempt(); return true; });
+        AppUpdater.checkIfNeeded(this);
     }
 
     private void attempt() {

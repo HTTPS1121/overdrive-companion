@@ -3569,6 +3569,31 @@ const TRIPS = {
         return true;
     },
 
+    // Recordings Timeline for this trip's window; ES5 because this page runs in the in-car WebView.
+    _showWatchDrive: function (trip) {
+        var sub = document.getElementById('detailSubtitle');
+        if (!sub || !sub.parentNode) return;
+        var link = document.getElementById('tripWatchDriveLink');
+        var start = new Date(trip.startTime || trip.start_time).getTime();
+        var end = new Date(trip.endTime || trip.end_time || 0).getTime();
+        if (!isFinite(start) || start <= 0) {
+            if (link) link.style.display = 'none';
+            return;
+        }
+        if (!link) {
+            link = document.createElement('a');
+            link.id = 'tripWatchDriveLink';
+            link.className = 'detail-back-btn';
+            link.style.cssText = 'display:inline-flex;margin-top:12px;text-decoration:none;';
+            link.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span></span>';
+            sub.parentNode.insertBefore(link, sub.nextSibling);
+        }
+        var label = (window.BYD && BYD.i18n && BYD.i18n.t) ? BYD.i18n.t('tlview.watchDrive') : null;
+        link.lastChild.textContent = (label && label !== 'tlview.watchDrive') ? label : 'Watch this drive';
+        link.href = 'events.html?view=timeline&t=' + start + (isFinite(end) && end > start ? '&end=' + end : '');
+        link.style.display = 'inline-flex';
+    },
+
     async showDetail(tripId) {
         const detailRequest = this._beginDetailRequest(tripId);
         this._pagerTripId = tripId;
@@ -3576,6 +3601,7 @@ const TRIPS = {
         let summaryBound = false;
         document.getElementById('tripListView').classList.add('hidden');
         document.getElementById('tripDetail').classList.add('active');
+        document.body.classList.add('trip-detail-open');
         window.scrollTo(0, 0);
 
         try {
@@ -3599,6 +3625,7 @@ const TRIPS = {
             this.setEl('detailTitle', start.toLocaleDateString(lang, { weekday: 'long', month: 'long', day: 'numeric' }));
             this.setEl('detailSubtitle', BYD.clock.time(start, lang) +
                 ' – ' + BYD.clock.time(new Date(trip.endTime || trip.end_time), lang));
+            this._showWatchDrive(trip);
             this.setEl('detailDuration', this.formatDuration(trip.durationSeconds || trip.duration_seconds || 0));
             this.setEl('detailSocDelta', socPair ? ((trip.socStart || trip.soc_start || 0) - (trip.socEnd || trip.soc_end || 0)).toFixed(2) + '%' : '--');
             // Show energy kWh or efficiency
@@ -3875,6 +3902,7 @@ const TRIPS = {
         const list = document.getElementById('tripListView');
         if (detail) detail.classList.remove('active');
         if (list) list.classList.remove('hidden');
+        document.body.classList.remove('trip-detail-open');
     },
 
     // ==================== TIMELINE SLIDER ====================

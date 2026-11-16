@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Android SDK packages
         env:
@@ -41,6 +43,13 @@ jobs:
             exit "$code"
           fi
 
+      - name: Snapshot previous bundle
+        if: steps.check.outputs.newer == 'true'
+        run: |
+          cp app/src/main/assets/WEB_SOURCE.json /tmp/prev-web-source.json
+          mkdir -p /tmp/prev-web
+          cp -a app/src/main/assets/web/. /tmp/prev-web/
+
       - name: Refresh web assets
         if: steps.check.outputs.newer == 'true'
         run: |
@@ -51,12 +60,19 @@ jobs:
         if: steps.check.outputs.newer == 'true'
         run: echo 0 > app/shell_patch.txt
 
+      - name: Write bundle change summary
+        if: steps.check.outputs.newer == 'true'
+        run: |
+          chmod +x tools/summarize-bundle-update.sh
+          tools/summarize-bundle-update.sh /tmp/prev-web-source.json /tmp/prev-web | tee /tmp/commit-msg.txt
+
       - name: Commit and push
         if: steps.check.outputs.newer == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add app/src/main/assets/web app/src/main/assets/WEB_SOURCE.json app/shell_patch.txt
-          VERSION="$(python3 -c 'import json; print(json.load(open("app/src/main/assets/WEB_SOURCE.json"))["versionName"])')"
-          git commit -m "chore: bundle OverDrive release ${VERSION}"
+          git add app/src/main/assets/web app/src/main/assets/WEB_SOURCE.json app/shell_patch.txt app/UPSTREAM_BUNDLE_NOTES.md
+          SUBJECT="$(head -1 /tmp/commit-msg.txt)"
+          BODY="$(sed -n '/^---BODY---$/,$p' /tmp/commit-msg.txt | tail -n +2)"
+          git commit -m "$SUBJECT" -m "$BODY"
           git push

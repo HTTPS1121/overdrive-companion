@@ -12,6 +12,16 @@
     <meta name="theme-color" content="#00876C">
     <script src="../shared/theme.js?v=12"></script>
     <script src="../shared/app-shell.js?v=23"></script>
+    <script>
+        // Timeline first (deep link or remembered): the List stays hidden from the first paint; the loader at the end undoes it on failure.
+        // A List-first load is never a return to the Timeline, so a playhead stashed for one (timeline-view.js) is dropped.
+        (function () {
+            try {
+                if (new URLSearchParams(location.search).get('view') === 'timeline' || localStorage.getItem('byd.events.view') === 'timeline') document.documentElement.classList.add('tlv-on');
+                else sessionStorage.removeItem('byd.tlview.resume');
+            } catch (e) { /* storage blocked: List first */ }
+        })();
+    </script>
     <link rel="stylesheet" href="../shared/styles.css?v=38">
     <link rel="stylesheet" href="../shared/revamp.css?v=2">
     <style>
@@ -46,6 +56,130 @@
         @media (max-width: 768px) {
             .events-container { padding: 12px 16px 24px; }
             .events-container > * + * { margin-top: 12px; }
+        }
+
+        body.events-page {
+            --events-sticky-top: calc(var(--page-header-h, 64px) + 8px);
+            --events-sticky-top-shell: 0px;
+        }
+        /* Sticky needs no scrollport between the shell and the viewport: only .page-body
+           (styles.css) has one; body's overflow-x stays hidden (it goes to the viewport). */
+        body.events-page .main-content > .page-body {
+            overflow: visible;
+        }
+        .events-sticky-shell {
+            position: -webkit-sticky;
+            position: sticky;
+            top: var(--events-sticky-top);
+            z-index: 6;
+            margin-bottom: 4px;
+            padding: 4px 0 4px;
+            background: var(--page);
+        }
+        :root[data-app-shell="1"] .events-sticky-shell {
+            top: var(--events-sticky-top-shell);
+            padding-top: 8px;
+        }
+        @media (max-width: 768px) {
+            .events-sticky-shell { position: static; }
+        }
+        .events-sticky-shell .events-top-bar {
+            margin-bottom: 0;
+        }
+        .events-compact-filters-btn {
+            display: -webkit-inline-flex;
+            display: inline-flex;
+            -webkit-align-items: center;
+            align-items: center;
+            min-height: 44px;
+            margin: 0 8px 8px 0;
+            padding: 0 16px;
+            border: 0;
+            border-radius: var(--radius-full);
+            background: var(--well);
+            color: var(--on-surface);
+            font-size: var(--fs-label);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        [dir="rtl"] .events-compact-filters-btn { margin: 0 0 8px 8px; }
+        .events-filter-badge {
+            display: -webkit-inline-flex;
+            display: inline-flex;
+            -webkit-align-items: center;
+            align-items: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            margin-left: 8px;
+            padding: 0 6px;
+            border-radius: var(--radius-full);
+            background: var(--primary);
+            color: var(--on-primary);
+            font-size: var(--fs-caption);
+            font-weight: 700;
+            line-height: 1;
+        }
+        [dir="rtl"] .events-filter-badge { margin-left: 0; margin-right: 8px; }
+        .events-filter-badge[hidden] { display: none; }
+        .events-active-filter-chips {
+            display: -webkit-flex;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            min-width: 0;
+            margin: 0 -6px -6px 0;
+            padding: 0 0 4px;
+        }
+        [dir="rtl"] .events-active-filter-chips { margin: 0 0 -6px -6px; }
+        .events-active-filter-chips[hidden] { display: none; }
+        .events-active-filter-chip {
+            display: -webkit-inline-flex;
+            display: inline-flex;
+            -webkit-align-items: center;
+            align-items: center;
+            max-width: 100%;
+            min-height: 32px;
+            margin: 0 6px 6px 0;
+            padding: 0 6px 0 12px;
+            border: 0;
+            border-radius: var(--radius-full);
+            background: var(--secondary-container);
+            color: var(--on-secondary-container);
+            font-size: var(--fs-caption);
+            font-weight: 600;
+        }
+        [dir="rtl"] .events-active-filter-chip { margin: 0 0 6px 6px; padding: 0 12px 0 6px; }
+        .events-active-filter-chip > span {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .events-active-filter-chip-remove {
+            display: -webkit-inline-flex;
+            display: inline-flex;
+            -webkit-align-items: center;
+            align-items: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            margin-left: 2px;
+            padding: 0;
+            border: 0;
+            border-radius: var(--radius-full);
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
+        }
+        [dir="rtl"] .events-active-filter-chip-remove { margin-left: 0; margin-right: 2px; }
+        .events-active-filter-chip-remove svg { width: 14px; height: 14px; }
+        .actor-filter-panel { display: none; margin-bottom: 12px; }
+        .actor-filter-panel.is-open { display: block; }
+        @media (pointer: coarse) {
+            .events-active-filter-chip { min-height: 44px; }
+            .events-active-filter-chip-remove { width: 40px; height: 40px; }
         }
 
         /* Toolbar (mock .toolbar): date chip and type segments, then the storage meter and Select at the end. Wraps; margins stand in for flex gap. */
@@ -1326,6 +1460,30 @@
         
     </style>
     <link rel="stylesheet" href="../shared/video-player.css?v=3">
+    <link rel="stylesheet" href="../shared/timeline-view.css?v=1">
+    <style>
+        /* Timeline on phones fills the screen exactly: nothing to scroll under the strip, steady under iOS toolbars. */
+        html.tlv-on.tlv-port-on .events-container,
+        html.tlv-on.tlv-short-on .events-container { min-height: 0; padding-bottom: 0; }
+        /* A phone on its side (timeline-view.js sets tlv-short): page chrome folds away and the panel tightens so the player,
+           strip and controls all fit. List, rotation back and wider windows are unaffected. */
+        html.tlv-on.tlv-short-on .page-header,
+        html.tlv-on.tlv-short-on .mobile-header,
+        html.tlv-on.tlv-short-on .app-bottom-nav { display: none; }
+        html.tlv-on.tlv-short-on .main-content { padding-bottom: 0; }
+        html.tlv-on.tlv-short-on .events-container { padding-top: 8px; }
+        html.tlv-on.tlv-short-on .events-container > * + * { margin-top: 8px; }
+        .tlv-root.tlv-short .tlv-stage { column-gap: 12px; row-gap: 8px; }
+        .tlv-root.tlv-short .tlv-panel { padding: 4px 12px 6px; border-radius: 16px; }
+        .tlv-root.tlv-short .tlv-tb { min-height: 26px; margin-bottom: 4px; }
+        .tlv-root.tlv-short .tlv-chip, .tlv-root.tlv-short .tlv-zb { min-height: 26px; padding: 0 10px; font-size: 12.5px; }
+        .tlv-root.tlv-short .tlv-striphost { height: 72px; }
+        .tlv-root.tlv-short .tlv-player { border-radius: 14px; }
+        .tlv-root.tlv-short .tlv-ctl { bottom: 8px; }
+        .tlv-root.tlv-short .tlv-b2 { width: 40px; height: 40px; }
+        .tlv-root.tlv-short .tlv-spd { height: 40px; min-width: 40px; }
+        .tlv-root.tlv-short .tlv-lh { min-height: 26px; }
+    </style>
     <style>
         /* Select mode toggle (mock "Select"): round tonal button at the end of the toolbar. */
         .select-mode-btn {
@@ -1546,7 +1704,7 @@
         :root[data-android-embed="1"] .empty-text { font-size: var(--fs-body); }
     </style>
 </head>
-<body>
+<body class="events-page">
     <div class="app-layout">
         <!-- Sidebar -->
         <!-- App shell sidebar (rendered by ../shared/app-shell.js?v=23) -->
@@ -1567,8 +1725,13 @@
                 <h1 class="page-title" data-i18n="nav.recordings">Recordings</h1>
             </header>
             <div class="events-container">
+                <div class="events-sticky-shell" id="eventsStickyShell">
                 <!-- Toolbar: date chip + type segments, then storage meter + Select at the end -->
                 <div class="events-top-bar">
+                    <div class="tlv-seg" id="tlvModeSwitch" role="group">
+                        <button type="button" class="tlv-seg-btn" data-tlv-mode="list" aria-pressed="true" data-i18n="tlview.tabList">List</button>
+                        <button type="button" class="tlv-seg-btn" data-tlv-mode="timeline" aria-pressed="false" data-i18n="tlview.tabTimeline">Timeline</button>
+                    </div>
                     <button class="calendar-toggle" id="calendarToggle" onclick="BYD.events.toggleCalendar()">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -1622,14 +1785,16 @@
                             </svg>
                         </button>
                     </div>
+                    <button type="button" class="events-compact-filters-btn" id="eventsActorFiltersToggle" onclick="BYD.events.toggleActorFilterPanel()" aria-expanded="false" aria-controls="actorFilterPanel" data-i18n="events.filters_toggle">Filters<span class="events-filter-badge" id="eventsActorFiltersBadge" hidden>0</span></button>
+                </div>
+                <div class="events-active-filter-chips" id="eventsActiveFilterChips" hidden></div>
                 </div>
 
                 <!--
-                  v3 actor / severity / proximity chip rows. Lives OUTSIDE
-                  .events-top-bar so the desktop horizontal flex layout for
-                  calendar+type-tabs+storage stays uncluttered. Three labelled
-                  rows below, each with its own "Any" to clear that dimension.
+                  v3 actor / severity / proximity chip rows. Collapsed behind the
+                  Filters control; default closed to save vertical space.
                 -->
+                <div class="actor-filter-panel" id="actorFilterPanel">
                 <div class="actor-filter-rows">
                     <div class="filter-tabs filter-tabs-row2" data-filter-row="class">
                         <span class="filter-row-label" data-i18n="events.filter_what">What:</span>
@@ -1712,7 +1877,9 @@
                         <span class="place-search-hits" id="placeSearchHits" aria-live="polite"></span>
                     </div>
                 </div>
+                </div>
                 
+                <section id="tlvRoot" class="tlv-root" hidden></section>
                 <!-- Recordings: summary line, clips grouped by day, pagination, selection bar -->
                 <div class="recordings-panel">
                     <div class="recordings-header">
@@ -1796,17 +1963,103 @@
     <script src="../shared/core.js?v=27"></script>
     <script src="../shared/update-flow.js?v=3"></script>
     <script src="../shared/safekeep-badges.js?v=4"></script>
-    <script src="../shared/events.js?v=revamp18"></script>
+    <script src="../shared/events.js?v=revamp20"></script>
     <script>
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('sidebarOverlay').classList.toggle('show');
         }
 
+        // Timeline scripts load on first use (the player fetches hls.js itself when it opens a source), so the List's init
+        // never waits on them. A Timeline-first page starts them now and inits the List after their boot, which claims
+        // ?file= first; if they fail to load, the List shows and works as before.
+        (function () {
+            var html = document.documentElement, root = document.getElementById('tlvRoot');
+            var SRC = ['../shared/timeline-strip.js?v=3', '../shared/timeline-player.js?v=3', '../shared/timeline-view.js?v=3'];
+            var loaded = {}, wait = null, chosen = null, first = html.classList.contains('tlv-on'), listReady = !first, waiters = [];
+            function view() { return window.BYD && BYD.tlview && BYD.tlview.setMode ? BYD.tlview : null; }
+            function paint(mode) {
+                var b = document.querySelectorAll('[data-tlv-mode]');
+                for (var i = 0; i < b.length; i++) b[i].setAttribute('aria-pressed', b[i].getAttribute('data-tlv-mode') === mode ? 'true' : 'false');
+            }
+            function busy(on) {
+                if (!root || view()) return;
+                root.hidden = !on;
+                root.innerHTML = on ? '<div class="loading"><div class="spinner"></div></div>' : '';
+            }
+            function load() {
+                if (wait) return wait;
+                wait = new Promise(function (resolve, reject) {
+                    var left = 0;
+                    function settle() { if (--left > 0) return; if (view()) resolve(); else reject(new Error('timeline unavailable')); }
+                    // In order (async=false); a retry adds back only what failed, never re-runs a script that loaded.
+                    SRC.forEach(function (src) {
+                        if (loaded[src]) return;
+                        left++;
+                        var s = document.createElement('script');
+                        s.src = src;
+                        s.async = false;
+                        s.onload = function () { loaded[src] = true; settle(); };
+                        s.onerror = function () { if (s.parentNode) s.parentNode.removeChild(s); settle(); };
+                        document.body.appendChild(s);
+                    });
+                    if (!left) { left = 1; settle(); }
+                });
+                wait.then(null, function () { wait = null; });
+                return wait;
+            }
+            function releaseList() {
+                if (listReady) return;
+                listReady = true;
+                waiters.splice(0).forEach(function (fn) { fn(); });
+            }
+            function toList() {
+                html.classList.remove('tlv-on');
+                busy(false);
+                paint('list');
+            }
+            window.BYD = window.BYD || {};
+            BYD.tlListReady = function (fn) { if (listReady) fn(); else waiters.push(fn); };
+            if (first) {
+                paint('timeline');
+                busy(true);
+                load().then(releaseList, function () { toList(); releaseList(); });
+            }
+            // Until the view has booted (it then owns these buttons): Timeline loads it, List settles there even mid-load.
+            var sw = document.getElementById('tlvModeSwitch');
+            if (sw) sw.addEventListener('click', function (e) {
+                var b = e.target && e.target.closest ? e.target.closest('[data-tlv-mode]') : null;
+                if (!b || view()) return;
+                chosen = b.getAttribute('data-tlv-mode') === 'timeline' ? 'timeline' : 'list';
+                if (chosen === 'list') {
+                    // Timeline is remembered by the view's setMode once it runs; List is remembered now.
+                    try { localStorage.setItem('byd.events.view', 'list'); } catch (err) { /* private mode */ }
+                    toList();
+                    // As leaving the Timeline does, so a deep link doesn't reopen it when the view boots.
+                    try {
+                        var u = new URL(location.href);
+                        ['view', 't', 'end'].forEach(function (k) { u.searchParams.delete(k); });
+                        history.replaceState(history.state, '', u.toString());
+                    } catch (err) { /* old engines */ }
+                    releaseList();
+                    return;
+                }
+                paint('timeline');
+                html.classList.add('tlv-on');
+                busy(true);
+                load().then(function () { view().setMode(chosen); }, function () {
+                    if (chosen !== 'timeline') return;
+                    toList();
+                    var msg = BYD.i18n && BYD.i18n.t ? BYD.i18n.t('tlview.offline') : '';
+                    if (BYD.core && BYD.core.toast) BYD.core.toast(msg && msg !== 'tlview.offline' ? msg : "Can't reach the recorder", 'error');
+                });
+            });
+        })();
+
         document.addEventListener('DOMContentLoaded', () => {
             BYD.i18n.init().then(function () {
                 BYD.core.init();
-                BYD.events.init();
+                BYD.tlListReady(function () { BYD.events.init(); });
             });
         });
     </script>

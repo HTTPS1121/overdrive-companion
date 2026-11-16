@@ -1,4 +1,12 @@
 {
+  "libraries": [
+    {
+      "name": "hls.js",
+      "version": "1.7.4",
+      "license": "Apache-2.0",
+      "url": "https://github.com/video-dev/hls.js"
+    }
+  ],
   "contributors": [
     {
       "name": "deboiph",

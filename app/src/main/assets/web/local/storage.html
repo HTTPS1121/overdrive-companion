@@ -39,6 +39,9 @@
         /* Section rows. */
         .st-usage-row { padding-bottom: 8px; border-bottom: 0; }
         .st-limit-row { margin-top: 16px; border-bottom: 0; }
+        .st-no-limit { display: flex; align-items: center; margin-top: 8px; color: var(--on-surface-variant); font-size: var(--fs-caption); }
+        .st-no-limit input { margin: 0 6px 0 0; }
+        [dir="rtl"] .st-no-limit input { margin: 0 0 0 6px; }
         .st-limit-row + .slider-range-labels { margin-bottom: 4px; }
         .st-banner { margin-top: 12px; }
         .st-dot-warn { background-color: var(--warning); }
@@ -177,6 +180,7 @@
                                 <div class="slider-control">
                                     <span class="slider-value" id="survLimitValue">500 MB</span>
                                     <input type="range" class="slider" id="survLimitSlider" min="100" max="100000" step="100" value="500" oninput="StoragePage.updateSurvLimit(this.value)" data-i18n-attr="aria-label:recording.storage_limit" aria-label="Storage Limit">
+                                    <label class="st-no-limit"><input type="checkbox" id="surveillanceNoLimit" onchange="StoragePage.setNoLimit('surveillance', this.checked)"><span data-i18n="storage.no_limit">No Limit</span></label>
                                 </div>
                             </div>
                         </div>
@@ -242,6 +246,7 @@
                                 <div class="slider-control">
                                     <span class="slider-value" id="recLimitValue">500 MB</span>
                                     <input type="range" class="slider" id="recLimitSlider" min="100" max="100000" step="100" value="500" oninput="StoragePage.updateRecLimit(this.value)" data-i18n-attr="aria-label:recording.storage_limit" aria-label="Storage Limit">
+                                    <label class="st-no-limit"><input type="checkbox" id="recordingsNoLimit" onchange="StoragePage.setNoLimit('recordings', this.checked)"><span data-i18n="storage.no_limit">No Limit</span></label>
                                 </div>
                             </div>
                         </div>
@@ -445,9 +450,9 @@
     <script src="../shared/pwa-init.js?v=index1"></script>
     <script src="../shared/core.js?v=27"></script>
     <script src="../shared/update-flow.js?v=3"></script>
-    <script src="../shared/storage-budget.js?v=8"></script>
+    <script src="../shared/storage-budget.js?v=9"></script>
     <script src="../shared/settings-hydration.js?v=1"></script>
-    <script src="../shared/storage.js?v=2"></script>
+    <script src="../shared/storage.js?v=3"></script>
     <script>
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');

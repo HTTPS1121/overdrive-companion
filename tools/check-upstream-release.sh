@@ -18,9 +18,13 @@ best = None
 for r in rels:
     for a in r.get("assets", []):
         name = a["name"]
-        if name.endswith(".apk") and "debug" not in name.lower():
-            if best is None or a["updated_at"] > best[1]["updated_at"]:
-                best = (r, a)
+        tag = (r.get("tag_name") or "").lower()
+        if not name.endswith(".apk") or "debug" in name.lower():
+            continue
+        if "alpha" in tag or "alpha" in name.lower():
+            continue
+        if best is None or a["updated_at"] > best[1]["updated_at"]:
+            best = (r, a)
 if not best:
     print("No upstream release APK found", file=sys.stderr)
     sys.exit(1)

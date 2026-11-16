@@ -207,13 +207,49 @@ BYD.surveillance = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body || {})
         });
-        const data = await resp.json();
+        const data = await this._readJsonReply(resp);
         if (!resp.ok || !data || data.success !== true) {
             throw new Error(data && data.error
                 ? data.error
                 : this._survT('surveillance.request_rejected', 'Request rejected'));
         }
         return data;
+    },
+
+    /** Parsed JSON body, or null when the reply is not JSON (proxy error page, empty or cut-off body). */
+    async _readJsonReply(resp) {
+        const text = await resp.text();
+        try {
+            return text ? JSON.parse(text) : null;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    /** The car's saved surveillance switch, or null when it can't be read. */
+    async _readSurveillanceEnabled() {
+        try {
+            const resp = await fetch('/api/surveillance/config', { cache: 'no-store' });
+            const data = await this._readJsonReply(resp);
+            const enabled = data && data.success === true && data.config ? data.config.enabled : null;
+            return typeof enabled === 'boolean' ? enabled : null;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    _applySurveillanceToggle(enabled, deferred) {
+        this.config.enabled = enabled;
+        if (this.savedConfig) this.savedConfig.enabled = enabled;
+        this.updateUI();
+        if (BYD.utils && BYD.utils.toast) {
+            // deferred=true → the vehicle is on, so the preference is stored
+            // but nothing is armed yet. Say that instead of a bare "enabled".
+            const msg = deferred
+                ? BYD.i18n.t(enabled ? 'surveillance.enabled_deferred' : 'surveillance.disabled_deferred')
+                : BYD.i18n.t(enabled ? 'surveillance.enabled' : 'surveillance.disabled');
+            BYD.utils.toast(msg, 'success');
+        }
     },
 
     /** Catalog lookup with an English fallback for when the catalog is not loaded. */
@@ -350,6 +386,12 @@ BYD.surveillance = {
         ]);
         this.savedConfig = JSON.parse(JSON.stringify(this.config));
         this.updateUI();
+        this.refreshImpactSensorStatus();
+        if (!this._impactStatusTimer) {
+            this._impactStatusTimer = setInterval(() => {
+                if (document.visibilityState === 'visible') this.refreshImpactSensorStatus();
+            }, 5000);
+        }
         this._hydrated = true;
         this.updateBluetoothKeepAliveUI();
         this.startClock();
@@ -1651,32 +1693,44 @@ BYD.surveillance = {
         toggle.disabled = true;
         try {
             const body = await this._enqueueWrite(async () => {
-                const res = await fetch(
-                    enabled ? '/api/surveillance/enable' : '/api/surveillance/disable',
-                    { method: 'POST' });
-                const data = await res.json();
-                if (!res.ok || !data || data.success !== true) {
-                    throw new Error((data && data.error)
-                        || BYD.i18n.t('surveillance.toggle_failed'));
+                let res = null;
+                let data = null;
+                try {
+                    // A sized body keeps tunnels from re-framing an empty POST as chunked.
+                    res = await fetch(
+                        enabled ? '/api/surveillance/enable' : '/api/surveillance/disable',
+                        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+                    data = await this._readJsonReply(res);
+                } catch (network) {
+                    data = null;
+                }
+                if (!data) {
+                    // No JSON reply (tunnel error page, dropped connection): the outcome is unknown.
+                    const unconfirmed = new Error(BYD.i18n.t('surveillance.toggle_failed')
+                        + (res && !res.ok ? ' (HTTP ' + res.status + ')' : ''));
+                    unconfirmed.unconfirmed = true;
+                    throw unconfirmed;
+                }
+                if (!res.ok || data.success !== true) {
+                    throw new Error(data.error || BYD.i18n.t('surveillance.toggle_failed'));
                 }
                 return data;
             });
-            this.config.enabled = enabled;
-            if (this.savedConfig) this.savedConfig.enabled = enabled;
-            this.updateUI();
-            if (BYD.utils && BYD.utils.toast) {
-                // deferred=true → the vehicle is on, so the preference is stored
-                // but nothing is armed yet. Say that instead of a bare "enabled".
-                const msg = (body && body.deferred)
-                    ? BYD.i18n.t(enabled ? 'surveillance.enabled_deferred' : 'surveillance.disabled_deferred')
-                    : BYD.i18n.t(enabled ? 'surveillance.enabled' : 'surveillance.disabled');
-                BYD.utils.toast(msg, 'success');
-            }
+            this._applySurveillanceToggle(enabled, !!(body && body.deferred));
         } catch (e) {
-            toggle.checked = !!this.config.enabled;
-            if (BYD.utils && BYD.utils.toast) {
-                BYD.utils.toast((e && e.message)
-                    || BYD.i18n.t('surveillance.toggle_failed'), 'error');
+            const actual = e && e.unconfirmed ? await this._readSurveillanceEnabled() : null;
+            if (actual === enabled) {
+                this._applySurveillanceToggle(enabled, false);
+            } else {
+                if (actual !== null) {
+                    this.config.enabled = actual;
+                    if (this.savedConfig) this.savedConfig.enabled = actual;
+                }
+                toggle.checked = !!this.config.enabled;
+                if (BYD.utils && BYD.utils.toast) {
+                    BYD.utils.toast((e && e.message)
+                        || BYD.i18n.t('surveillance.toggle_failed'), 'error');
+                }
             }
         } finally {
             this._surveillanceTogglePending = false;
@@ -3308,6 +3362,8 @@ BYD.surveillance = {
     _heatmapInterval: null,
     _heatmapCanvas: null,
     _heatmapWasRunning: false,
+    _heatmapPollGeneration: 0,
+    _heatmapRequestInFlight: false,
 
     /**
      * Start the motion heatmap overlay.
@@ -3336,17 +3392,22 @@ BYD.surveillance = {
 
         this._heatmapCanvas.style.display = 'block';
 
-        // Poll at 3 FPS (333ms)
-        this._heatmapInterval = setInterval(() => this._pollHeatmap(), 333);
-        console.log('[Heatmap] Started polling at 3 FPS');
+        // Schedule the next poll only after the previous request has settled.
+        // setInterval(async ...) can overlap requests when the daemon or vehicle
+        // is busy, building a queue of stale heatmap responses.
+        const generation = ++this._heatmapPollGeneration;
+        this._heatmapInterval = setTimeout(() => this._pollHeatmap(generation), 333);
+        console.log('[Heatmap] Started polling at up to 3 FPS');
     },
 
     /**
      * Stop the motion heatmap overlay and clean up.
      */
     stopHeatmap() {
+        // Invalidate any in-flight request as well as the pending timeout.
+        this._heatmapPollGeneration++;
         if (this._heatmapInterval) {
-            clearInterval(this._heatmapInterval);
+            clearTimeout(this._heatmapInterval);
             this._heatmapInterval = null;
         }
 
@@ -3361,12 +3422,24 @@ BYD.surveillance = {
     /**
      * Fetch heatmap data and draw on canvas.
      */
-    async _pollHeatmap() {
-        if (!this._heatmapCanvas) return;
+    async _pollHeatmap(generation) {
+        const canvas = this._heatmapCanvas;
+        if (!canvas || generation !== this._heatmapPollGeneration) return;
+
+        // A request from a stopped session may still be settling. Do not let a
+        // rapid restart overlap it; retry after the normal idle interval.
+        if (this._heatmapRequestInFlight) {
+            this._heatmapInterval = setTimeout(() => this._pollHeatmap(generation), 333);
+            return;
+        }
+        this._heatmapRequestInFlight = true;
 
         try {
             const resp = await fetch('/api/surveillance/heatmap');
             const data = await resp.json();
+            // A stop/restart may happen while fetch is pending. Never paint an
+            // old response onto a removed canvas or a newer heatmap session.
+            if (generation !== this._heatmapPollGeneration || canvas !== this._heatmapCanvas) return;
             if (data && data.quadrants) {
                 // Override viewMode with client-side stream selection if available.
                 // BYD.stream tracks which camera the user selected — use that
@@ -3374,12 +3447,21 @@ BYD.surveillance = {
                 if (typeof BYD !== 'undefined' && BYD.stream && BYD.stream.currentViewMode >= 0) {
                     data.viewMode = BYD.stream.currentViewMode;
                 }
-                this._drawHeatmap(this._heatmapCanvas, data);
+                this._drawHeatmap(canvas, data);
             }
         } catch (e) {
             // Surveillance not running or API error — clear the canvas
-            const ctx = this._heatmapCanvas.getContext('2d');
-            if (ctx) ctx.clearRect(0, 0, this._heatmapCanvas.width, this._heatmapCanvas.height);
+            if (generation === this._heatmapPollGeneration && canvas === this._heatmapCanvas) {
+                const ctx = canvas.getContext('2d');
+                if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        } finally {
+            this._heatmapRequestInFlight = false;
+            // Fixed-delay polling provides backpressure: at most one request is
+            // in flight, with a 333ms idle gap after each completed request.
+            if (generation === this._heatmapPollGeneration && canvas === this._heatmapCanvas) {
+                this._heatmapInterval = setTimeout(() => this._pollHeatmap(generation), 333);
+            }
         }
     },
 
@@ -4447,6 +4529,44 @@ BYD.surveillance = {
             });
     },
 
+    async refreshImpactSensorStatus() {
+        const target = document.getElementById('impactSensorStatus');
+        if (!target) return;
+        const disabled = () => this._survT('surveillance.impact_status_disabled', 'Disabled');
+        if (this.config.impactDetection !== true) {
+            target.textContent = disabled();
+            return;
+        }
+        try {
+            const response = await fetch('/api/surveillance/impact/status', { cache: 'no-store' });
+            const data = await response.json();
+            if (!data.success || !data.status) throw new Error('status unavailable');
+            if (this.config.impactDetection !== true) {
+                target.textContent = disabled();
+                return;
+            }
+            const status = data.status;
+            const fallbacks = {
+                registered: 'Sensor listener registered; waiting for sample confirmation',
+                sampling: 'Receiving accelerometer samples',
+                unavailable: 'No usable accelerometer is available',
+                stale: 'No recent sensor heartbeat — parked sensor may be asleep',
+                inactive: 'Not active (vehicle is not in the parked sentry watch window)',
+                waiting: 'Waiting for sensor service'
+            };
+            const label = fallbacks[status.state]
+                ? this._survT('surveillance.impact_status_' + status.state, fallbacks[status.state])
+                : this._survT('surveillance.impact_status_unknown', 'Status unknown');
+            const samples = status.samples > 0
+                ? ' · ' + this._survT('surveillance.impact_status_samples', status.samples + ' samples/15s', { n: status.samples })
+                : '';
+            target.textContent = label + (status.sensor ? ' · ' + status.sensor : '') + samples;
+        } catch (_) {
+            target.textContent = this._survT('surveillance.impact_status_error',
+                'Status unavailable — the sensor service is not reporting');
+        }
+    },
+
     updateImpactUI() {
         const enabled = this.config.impactDetection === true;
         const toggle = document.getElementById('impactDetection');
@@ -4455,6 +4575,7 @@ BYD.surveillance = {
         if (row) row.style.display = enabled ? '' : 'none';
         const select = document.getElementById('impactSensitivity');
         if (select) select.value = this.config.impactSensitivity || 'medium';
+        this.refreshImpactSensorStatus();
     },
 
     updateDeterrentUI() {

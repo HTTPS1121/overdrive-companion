@@ -26,6 +26,7 @@ var RemoteAccess = (function () {
         'raUnlockOnArrival', 'raLockOnDeparture', 'raKeepBluetoothOn',
         'raNotifyPush', 'raNotifyTelegram', 'raAdvancedMode', 'raUnlockTrigger', 'raKeyFobEnabled', 'raKeyFobLockEnabled',
         'raKeyFobLockSamples', 'raLockWaitsForKeyAbsence',
+        'raPhonePriority', 'raLockWithKeyInside',
         'raKeyFobLockSeconds', 'raRestrictLockSafeZones', 'raRestrictUnlockSafeZones', 'raCloudFallback',
         'raConfirmWithVehicle', 'raRelockGraceSeconds', 'raPostLockQuietSeconds',
         'raKeyFobUnlockNear'
@@ -214,6 +215,8 @@ var RemoteAccess = (function () {
         el('raUnlockTrigger').value = config.unlockTrigger === 'near' ? 'near' : 'away_to_near';
         el('raKeyFobEnabled').checked = config.keyFobEnabled === true;
         el('raKeyFobLockEnabled').checked = config.keyFobEnabled === true && config.keyFobLockEnabled === true;
+        el('raPhonePriority').checked = config.keyFobEnabled === true && config.phonePriority === true;
+        el('raLockWithKeyInside').checked = config.keyFobEnabled === true && config.lockWithKeyInside === true;
         el('raLockOnDeparture').checked = !!config.lockEnabled;
         el('raRestrictLockSafeZones').checked = config.restrictLockToOutsideSafeZones === true;
         el('raRestrictUnlockSafeZones').checked = config.restrictUnlockToOutsideSafeZones === true;
@@ -633,6 +636,9 @@ var RemoteAccess = (function () {
             unlockTrigger: el('raUnlockTrigger').value === 'near' ? 'near' : 'away_to_near',
             keyFobEnabled: el('raKeyFobEnabled').checked,
             keyFobLockEnabled: el('raKeyFobEnabled').checked && el('raKeyFobLockEnabled').checked,
+            phonePriority: el('raKeyFobEnabled').checked && el('raKeyFobLockEnabled').checked &&
+                el('raPhonePriority').checked,
+            lockWithKeyInside: el('raKeyFobEnabled').checked && el('raLockWithKeyInside').checked,
             lockEnabled: el('raLockOnDeparture').checked,
             restrictLockToOutsideSafeZones: el('raRestrictLockSafeZones').checked,
             restrictUnlockToOutsideSafeZones: el('raRestrictUnlockSafeZones').checked,
@@ -740,6 +746,8 @@ var RemoteAccess = (function () {
         el('raKeyFobLockSeconds').disabled = !state.ready || state.saving || !el('raAdvancedMode').checked || !fobLock;
         el('raKeyFobLockSamples').disabled = !state.ready || state.saving || !el('raAdvancedMode').checked || !fobLock;
         el('raLockWaitsForKeyAbsence').disabled = !state.ready || state.saving || !el('raAdvancedMode').checked || !fobLock;
+        el('raPhonePriority').disabled = !state.ready || state.saving || !fobLock && !el('raPhonePriority').checked;
+        el('raLockWithKeyInside').disabled = !state.ready || state.saving || !fob && !el('raLockWithKeyInside').checked;
         // The keyfob trigger is an Advanced switch; normal mode runs the default (unlock on the first fresh detection).
         el('raKeyFobUnlockNear').disabled = !state.ready || state.saving || !el('raAdvancedMode').checked || !fobDraft;
         var fobNear = keyFobUnlocksOnDetection();
@@ -782,7 +790,11 @@ var RemoteAccess = (function () {
             tr('lock_no_active_sources', 'Departure locking is inactive. Enable parked Bluetooth with an approved phone, or enable keyfob departure locking.');
     }
     function toggleKeyFob() {
-        if (!el('raKeyFobEnabled').checked) el('raKeyFobLockEnabled').checked = false;
+        if (!el('raKeyFobEnabled').checked) {
+            el('raKeyFobLockEnabled').checked = false;
+            el('raPhonePriority').checked = false;
+            el('raLockWithKeyInside').checked = false;
+        }
         markDirty();
     }
     // 19 Oct: the keyfob rail's effective trigger — the Advanced switch, or the default (near) in normal mode.
@@ -1022,7 +1034,10 @@ var RemoteAccess = (function () {
         var panel = el('raKeyFobPanel'), view = keyFobView();
         panel.hidden = supports('keyFob') && el('raKeyFobEnabled').checked !== true;
         panel.setAttribute('data-state', view.style);
-        text('raKeyFobState', view.label); text('raKeyFobDetail', view.detail);
+        text('raKeyFobState', view.label);
+        text('raKeyFobDetail', view.fob.keyInsideLocked === true ?
+            tr('keyfob_key_inside_locked', 'The key was left inside after a phone lock. It will not unlock the car until the car is unlocked another way, such as a trusted phone returning.') :
+            view.detail);
         text('raKeyFobMask', finite(view.fob.lastMask) && view.fob.lastMask >= 0 && Math.floor(view.fob.lastMask) === view.fob.lastMask ?
             '0x' + view.fob.lastMask.toString(16).toUpperCase() : '—');
         text('raKeyFobAge', eventAgeText(view.age));
@@ -1754,6 +1769,8 @@ var RemoteAccess = (function () {
             changes.deviceAddress = device.address; changes.deviceName = device.name || '';
             changes.keyFobEnabled = pending.keyFobEnabled;
             changes.keyFobLockEnabled = pending.keyFobLockEnabled;
+            changes.phonePriority = pending.phonePriority;
+            changes.lockWithKeyInside = pending.lockWithKeyInside;
             changes.restrictLockToOutsideSafeZones = pending.restrictLockToOutsideSafeZones;
             changes.restrictUnlockToOutsideSafeZones = pending.restrictUnlockToOutsideSafeZones;
             changes.proximitySafeZoneIds = pending.proximitySafeZoneIds;

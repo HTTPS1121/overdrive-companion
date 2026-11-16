@@ -87,25 +87,45 @@ jobs:
         id: artifact
         run: |
           VERSION="${{ steps.ver.outputs.versionName }}"
+          CODE="${{ steps.ver.outputs.versionCode }}"
           SRC="app/build/outputs/apk/release/app-release.apk"
           OUT="overdrive-companion-v${VERSION}.apk"
+          META="companion-release-v${VERSION}-meta.json"
           cp "$SRC" "$OUT"
           SHA256="$(sha256sum "$OUT" | awk '{print $1}')"
+          printf '{"versionName":"%s","versionCode":%s,"apkSha256":"%s"}\n' "$VERSION" "$CODE" "$SHA256" > "$META"
           echo "apk=$OUT" >> "$GITHUB_OUTPUT"
+          echo "meta=$META" >> "$GITHUB_OUTPUT"
           echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
           echo "## Release v${VERSION}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- versionCode: ${{ steps.ver.outputs.versionCode }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- versionCode: $CODE" >> "$GITHUB_STEP_SUMMARY"
           echo "- SHA-256: \`$SHA256\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prepare release notes
+        id: notes
+        run: |
+          NOTES="$RUNNER_TEMP/release-notes.md"
+          {
+            echo "Signed companion APK for OverDrive head-unit release bundled in this build."
+            echo ""
+            echo "- \`versionCode\`: ${{ steps.ver.outputs.versionCode }}"
+            echo "- SHA-256: \`${{ steps.artifact.outputs.sha256 }}\`"
+            echo ""
+            if [ -f app/UPSTREAM_BUNDLE_NOTES.md ]; then
+              echo "## Bundled web UI changes"
+              echo ""
+              cat app/UPSTREAM_BUNDLE_NOTES.md
+            fi
+          } > "$NOTES"
+          echo "path=$NOTES" >> "$GITHUB_OUTPUT"
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.versionName }}
           name: OverDrive Companion v${{ steps.ver.outputs.versionName }}
-          body: |
-            Signed companion APK for OverDrive head-unit release bundled in this build.
-
-            - `versionCode`: ${{ steps.ver.outputs.versionCode }}
-            - SHA-256: `${{ steps.artifact.outputs.sha256 }}`
-          files: ${{ steps.artifact.outputs.apk }}
+          body_path: ${{ steps.notes.outputs.path }}
+          files: |
+            ${{ steps.artifact.outputs.apk }}
+            ${{ steps.artifact.outputs.meta }}
           fail_on_unmatched_files: true
