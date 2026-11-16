@@ -46,6 +46,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.android.material.color.DynamicColors;
+import com.google.android.material.color.MaterialColors;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -58,8 +59,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -77,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int MAX_CACHE_BYTES = 1024 * 1024;
 
     private WebView web;
-    private View topBar, bottomBar;
+    private View topBar, bottomBar, connectionBar;
     private FrameLayout root;
     private OnBackPressedCallback backCallback;
 
@@ -90,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
     private volatile boolean loggedOut, webLoginMode, bundledLoginFallback;
     private volatile boolean firstFrame;
-    private volatile boolean wasOffline;
+    private ConnectionMonitor connectionMonitor;
 
     // 3.4.2: downloads, file uploads, and the status pill.
     private Pill pill;
@@ -146,9 +145,13 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout col = new LinearLayout(this);
         col.setOrientation(LinearLayout.VERTICAL);
         topBar = new View(this);
+        connectionBar = new View(this);
+        connectionBar.setVisibility(View.GONE);
         bottomBar = new View(this);
         web = new WebView(this);
+        float density = getResources().getDisplayMetrics().density;
         col.addView(topBar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
+        col.addView(connectionBar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Math.round(3 * density)));
         col.addView(web, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         col.addView(bottomBar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
         root.addView(col, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -156,6 +159,16 @@ public class MainActivity extends AppCompatActivity {
         getWindow().getDecorView().setBackgroundColor(pageBg);
         applyBars(topBg, botBg, pageBg);
         pill = new Pill(root);
+        connectionMonitor = new ConnectionMonitor(base, new ConnectionMonitor.Listener() {
+            @Override public void onBar(ConnectionMonitor.LinkState state) {
+                updateConnectionBar(state);
+            }
+            @Override public void onPill(String text, int dotAttr, long durationMs) {
+                showPill(text, dotAttr, durationMs);
+            }
+        });
+        connectionMonitor.start();
+        AppUpdater.checkIfNeeded(MainActivity.this);
         filePicker = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), res -> {
             ValueCallback<Uri[]> cb = fileCallback;
             fileCallback = null;
@@ -244,6 +257,30 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle out) {
         super.onSaveInstanceState(out);
         if (web != null && web.getUrl() != null) out.putString("url", web.getUrl());
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (connectionMonitor != null) connectionMonitor.stop();
+        super.onDestroy();
+    }
+
+    private void updateConnectionBar(ConnectionMonitor.LinkState state) {
+        if (connectionBar == null) return;
+        float density = getResources().getDisplayMetrics().density;
+        int thin = Math.round(3 * density);
+        if (state == ConnectionMonitor.LinkState.CONNECTED) {
+            connectionBar.setVisibility(View.GONE);
+            connectionBar.getLayoutParams().height = 0;
+        } else {
+            connectionBar.setVisibility(View.VISIBLE);
+            connectionBar.getLayoutParams().height = thin;
+            int colorAttr = state == ConnectionMonitor.LinkState.CHECKING
+                    ? com.google.android.material.R.attr.colorTertiary
+                    : androidx.appcompat.R.attr.colorError;
+            connectionBar.setBackgroundColor(MaterialColors.getColor(connectionBar, colorAttr));
+        }
+        connectionBar.requestLayout();
     }
 
     // ---------------------------------------------------------------- system bars
@@ -551,7 +588,7 @@ public class MainActivity extends AppCompatActivity {
             String reason = c.getResponseMessage() == null || c.getResponseMessage().isEmpty() ? "OK" : c.getResponseMessage();
             InputStream body = code >= 400 ? c.getErrorStream() : c.getInputStream();
             if (body == null) body = new ByteArrayInputStream(new byte[0]);
-            markOnline();
+            if (connectionMonitor != null) connectionMonitor.notifyProxySuccess();
             if (isHtml && mimeType.equals("text/html")) {
                 byte[] raw = readAll(body);
                 c.disconnect();
@@ -573,36 +610,17 @@ public class MainActivity extends AppCompatActivity {
             if (!isHtml && cacheFile.exists() && metaFile.exists()) {
                 try {
                     long when = Long.parseLong(new String(readAll(new FileInputStream(metaFile)), StandardCharsets.UTF_8).trim());
-                    markOffline(when);
+                    if (connectionMonitor != null) connectionMonitor.notifyProxyFailure();
                     Map<String, String> h = new HashMap<>();
                     h.put("X-OverDrive-Offline", "1");
                     return new WebResourceResponse("application/json", "utf-8", 200, "OK", h, new FileInputStream(cacheFile));
                 } catch (Exception ignored) { }
             }
-            markOffline(-1);
+            if (connectionMonitor != null) connectionMonitor.notifyProxyFailure();
             byte[] err = "{\"success\":false,\"error\":\"אין חיבור לרכב\"}".getBytes(StandardCharsets.UTF_8);
             return new WebResourceResponse("application/json", "utf-8", 503, "Offline", new HashMap<>(),
                     new ByteArrayInputStream(err));
         }
-    }
-
-    // Offline / reconnected: a rounded native pill just below the page header (3.4.2).
-    // Same triggers and durations as the 3.4.1 snackbar (LENGTH_LONG / LENGTH_SHORT).
-    private void markOnline() {
-        if (!wasOffline) return;
-        wasOffline = false;
-        runOnUiThread(() -> showPill("החיבור לרכב חזר", androidx.appcompat.R.attr.colorPrimary, 1500));
-    }
-
-    private void markOffline(long since) {
-        if (wasOffline) return;
-        wasOffline = true;
-        runOnUiThread(() -> {
-            String msg = since > 0
-                    ? "אין חיבור לרכב · מוצגים הנתונים האחרונים מ־" + new SimpleDateFormat("HH:mm", Locale.ROOT).format(new Date(since))
-                    : "אין חיבור לרכב";
-            showPill(msg, androidx.appcompat.R.attr.colorError, 2750);
-        });
     }
 
     private static final String HEADER_BOTTOM_JS = "(function(){var h=document.querySelector('.mobile-header');"

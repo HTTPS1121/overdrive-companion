@@ -22,9 +22,15 @@ def get(u): return json.load(urllib.request.urlopen(urllib.request.Request(u, he
 rels = [get(f"https://api.github.com/repos/{repo}/releases/tags/{tag}")] if tag else get(f"https://api.github.com/repos/{repo}/releases?per_page=30")
 best = None
 for r in rels:
+    tag = (r.get("tag_name") or "").lower()
     for a in r["assets"]:
-        if a["name"].endswith(".apk") and "debug" not in a["name"]:
-            if best is None or a["updated_at"] > best[1]["updated_at"]: best = (r, a)
+        name = a["name"]
+        if not name.endswith(".apk") or "debug" in name.lower():
+            continue
+        if "alpha" in tag or "alpha" in name.lower():
+            continue
+        if best is None or a["updated_at"] > best[1]["updated_at"]:
+            best = (r, a)
 r, a = best
 print(f"Newest release APK: {a['name']} (tag {r['tag_name']}, uploaded {a['updated_at']})", file=sys.stderr)
 urllib.request.urlretrieve(a["browser_download_url"], f"{work}/release.apk")
