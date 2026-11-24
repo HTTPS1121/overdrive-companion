@@ -77,3 +77,9 @@ jobs:
           BODY="$(sed -n '/^---BODY---$/,$p' /tmp/commit-msg.txt | tail -n +2)"
           git commit -m "$SUBJECT" -m "$BODY"
           git push
+
+      - name: Start release build
+        if: steps.check.outputs.newer == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run release.yml --ref main -R "${{ github.repository }}"
