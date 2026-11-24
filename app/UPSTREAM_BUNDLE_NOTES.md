@@ -1,75 +1,141 @@
-# Bundled OverDrive web UI: 61.1 → 62.1
+# Bundled OverDrive web UI: 62.1 → 64.3
 
-- Previous: `overdrive-release-braveheart-v61.1.apk` (apk_sha256 `327c5426f3dd…`)
-- Current: `overdrive-release-braveheart-v62.1.apk` (apk_sha256 `b09acb997e59…`)
-- Upstream versionCode: **210**
+- Previous: `overdrive-release-braveheart-v62.1.apk` (apk_sha256 `b09acb997e59…`)
+- Current: `overdrive-release-braveheart-v64.3.apk` (apk_sha256 `2b8a5dcc44f8…`)
+- Upstream versionCode: **224**
 
 ## Asset diff
-- Added (8)
-  - `shared/module-faults-dashboard.js`
-  - `shared/timeline-player.js`
-  - `shared/timeline-strip.js`
-  - `shared/timeline-view.css`
-  - `shared/timeline-view.js`
-  - `shared/vendor/NOTICE.txt`
-  - `shared/vendor/hls.js-LICENSE.txt`
-  - `shared/vendor/hls.light.min.js`
+- Added (42)
+  - `i18n/sr-Latn.json`
+  - `i18n/sr.json`
+  - `local/dashboard-builder.html`
+  - `local/service-mode.html`
+  - `shared/dashboard-builder/design.js`
+  - `shared/dashboard-builder/editor.css`
+  - `shared/dashboard-builder/editor.js`
+  - `shared/dashboard-builder/images/album.webp`
+  - `shared/dashboard-builder/images/aurora-day.webp`
+  - `shared/dashboard-builder/images/aurora-night.webp`
+  - `shared/dashboard-builder/images/previews/day/brass-mile.webp`
+  - `shared/dashboard-builder/images/previews/day/cobalt-pair.webp`
+  - `shared/dashboard-builder/images/previews/day/crosscheck.webp`
+  - `shared/dashboard-builder/images/previews/day/cutline.webp`
+  - `shared/dashboard-builder/images/previews/day/flux-ledger.webp`
+  - `shared/dashboard-builder/images/previews/day/ion-trio.webp`
+  - `shared/dashboard-builder/images/previews/day/laneform.webp`
+  - `shared/dashboard-builder/images/previews/day/longhand.webp`
+  - `shared/dashboard-builder/images/previews/day/miler.webp`
+  - `shared/dashboard-builder/images/previews/day/motorcourt.webp`
+  - `shared/dashboard-builder/images/previews/day/navy-quadrant.webp`
+  - `shared/dashboard-builder/images/previews/day/nightwater.webp`
+  - `shared/dashboard-builder/images/previews/day/yawline.webp`
+  - `shared/dashboard-builder/images/previews/night/brass-mile.webp`
+  - `shared/dashboard-builder/images/previews/night/cobalt-pair.webp`
+  - `shared/dashboard-builder/images/previews/night/crosscheck.webp`
+  - `shared/dashboard-builder/images/previews/night/cutline.webp`
+  - `shared/dashboard-builder/images/previews/night/flux-ledger.webp`
+  - `shared/dashboard-builder/images/previews/night/ion-trio.webp`
+  - `shared/dashboard-builder/images/previews/night/laneform.webp`
+  - `shared/dashboard-builder/images/previews/night/longhand.webp`
+  - `shared/dashboard-builder/images/previews/night/miler.webp`
+  - `shared/dashboard-builder/images/previews/night/motorcourt.webp`
+  - `shared/dashboard-builder/images/previews/night/navy-quadrant.webp`
+  - `shared/dashboard-builder/images/previews/night/nightwater.webp`
+  - `shared/dashboard-builder/images/previews/night/yawline.webp`
+  - `shared/dashboard-builder/images/rail-day-bottom.webp`
+  - `shared/dashboard-builder/images/rail-day-top.webp`
+  - `shared/dashboard-builder/images/rail-night-bottom.webp`
+  - `shared/dashboard-builder/images/rail-night-top.webp`
+  - `shared/dashboard-builder/images/vehicle.webp`
+  - `shared/service-mode.js`
 - Removed (0)
-- Changed size (24)
-  - `i18n/en.json` (395664 → 401982 bytes)
-  - `i18n/he.json` (508617 → 519829 bytes)
-  - `local/charging.html` (131632 → 132494 bytes)
-  - `local/credits.json` (6985 → 7151 bytes)
-  - `local/events.html` (80317 → 93320 bytes)
-  - `local/index.html` (249626 → 252258 bytes)
-  - `local/live-view.html` (157552 → 158429 bytes)
-  - `local/recording.html` (72275 → 72256 bytes)
-  - `local/remote-access.html` (45566 → 47946 bytes)
-  - `local/storage.html` (35807 → 36525 bytes)
-  - `local/surveillance.html` (152182 → 152834 bytes)
-  - `local/trips.html` (149932 → 151604 bytes)
-  - `shared/events.js` (177191 → 184750 bytes)
-  - `shared/module-faults.js` (7492 → 7557 bytes)
-  - `shared/parking.js` (50708 → 51264 bytes)
-  - `shared/remote-access.js` (130708 → 131960 bytes)
-  - `shared/revamp.css` (61645 → 62370 bytes)
-  - `shared/search.js` (38043 → 38463 bytes)
-  - `shared/send-logs.js` (12776 → 12905 bytes)
-  - `shared/storage-budget.js` (30104 → 30807 bytes)
-  - `shared/storage.js` (57075 → 59320 bytes)
-  - `shared/stream.js` (52923 → 53065 bytes)
-  - `shared/surveillance.js` (320175 → 326232 bytes)
-  - `shared/trips.js` (288439 → 290029 bytes)
+- Changed size (46)
+  - `i18n/ar.json` (249051 → 543695 bytes)
+  - `i18n/de.json` (204065 → 204067 bytes)
+  - `i18n/en.json` (401982 → 422451 bytes)
+  - `i18n/es.json` (380924 → 380970 bytes)
+  - `i18n/fr.json` (212764 → 212766 bytes)
+  - `i18n/he.json` (519829 → 546928 bytes)
+  - `i18n/hi.json` (324854 → 324848 bytes)
+  - `i18n/it.json` (202575 → 202578 bytes)
+  - `i18n/ja.json` (225101 → 225097 bytes)
+  - `i18n/ko.json` (201122 → 201125 bytes)
+  - `i18n/nb.json` (189937 → 189939 bytes)
+  - `i18n/nl.json` (196776 → 451064 bytes)
+  - `i18n/pt-BR.json` (207427 → 207429 bytes)
+  - `i18n/ru.json` (460236 → 460253 bytes)
+  - `i18n/th.json` (468708 → 468710 bytes)
+  - `i18n/tr.json` (274283 → 274321 bytes)
+  - `i18n/vi.json` (296345 → 296401 bytes)
+  - `i18n/zh-CN.json` (176561 → 176563 bytes)
+  - `i18n/zh-TW.json` (176235 → 176237 bytes)
+  - `local/about.html` (43989 → 46294 bytes)
+  - `local/charging.html` (132494 → 132953 bytes)
+  - `local/credits.json` (7151 → 7566 bytes)
+  - `local/events.html` (93320 → 94962 bytes)
+  - `local/index.html` (252258 → 267948 bytes)
+  - `local/live-view.html` (158429 → 175779 bytes)
+  - `local/notifications.html` (188336 → 188974 bytes)
+  - `local/remote-access.html` (47946 → 48801 bytes)
+  - `local/storage.html` (36525 → 39106 bytes)
+  - `local/telegram.html` (33564 → 36606 bytes)
+  - `local/widgets.html` (23971 → 24119 bytes)
+  - `shared/Player.js` (8909 → 12649 bytes)
+  - `shared/YUVCanvas.js` (17722 → 24437 bytes)
+  - `shared/app-collapse.js` (7435 → 7637 bytes)
+  - `shared/app-shell.js` (106172 → 106837 bytes)
+  - `shared/automations.css` (61136 → 61196 bytes)
+  - `shared/charging.js` (210898 → 214767 bytes)
+  - `shared/events.js` (184750 → 191528 bytes)
+  - `shared/lens-dewarp.js` (12351 → 13052 bytes)
+  - `shared/models/manifest.json` (9859 → 10237 bytes)
+  - `shared/parking.js` (51264 → 51307 bytes)
+  - `shared/remote-access.js` (131960 → 135513 bytes)
+  - `shared/storage.js` (59320 → 72079 bytes)
+  - `shared/stream.js` (53065 → 55050 bytes)
+  - `shared/timeline-player.js` (116215 → 116265 bytes)
+  - `shared/trips.js` (290029 → 291402 bytes)
+  - `shared/update-flow.js` (59551 → 63398 bytes)
 
 ## Upstream release notes (`braveheart`)
 
-## 🇴🇩 Overdrive Update v62.0: Recordings Timeline, DiLink 5 Fixes & More
+## 🇴🇩 Overdrive Update v64.0: Pick Your Dashboard or Build Your Own
+## [Update v64.3]
 
 ### ✨ New Features
 
-- **Recordings Timeline** — Your whole day on one strip, in the car app and the browser. Drag to any moment and hit play; clips run back to back with no gaps, and notifications open right at the clip.
-- **Know why it's empty** — Grey gaps tell you why nothing was recorded: Sentry off, low battery, safe zone, deleted, or no card.
-- **Follow the live edge** — Playback picks up each new clip the moment it's saved.
-- **Up to 8× speed** — Skim fast, or let Skip quiet driving race through drives and slow down for events.
-- **Both cameras, one timeline** — 360 and factory dashcam together; switch at the same second, with lens correction on the fly.
-- **Instant streaming** — The browser streams clips in small pieces, so long days start right away.
-- **Impact sensor status** — See at a glance whether the parked impact sensor is working.
-- **Phone priority** — Optional: a trusted phone near the car stops the key fob from locking it; the fob still works when no phone is around.
-- **Lock with the key inside** — Optional: walk away with your phone and the car locks even with the key left inside, and that key can't reopen it.
-- **Module faults on the Dashboard** — A warning card shows when the car reports a module fault, with a link to the details.
-- **No Limit storage** — Recordings and Surveillance can use the whole card; the oldest clips go only when it's nearly full.
+- **Studio** — A light ring on the floor carries drive power in warm white and regen in mint, with flowing beads and floor dashes at road speed. The indicators, blind-spot warnings and lamps light the floor. Parked, open doors glow amber, and the tyre card no longer covers the car.
+- **Polar Light** — The aurora speeds up and brightens with power and turns teal under regen. Stars twinkle and the lake ripples.
+- **Originals move like their previews:**
+  - Ironworks has its glowing needle back.
+  - Chevron's power ladder counts kW, instead of lighting a third of the ladder at idle.
+  - Wayfarer's ring shows power.
+  - Sector Split's arch tapers and glows at its tip.
+  - Approach, Route Dial, Apex GT, Redline Touring, Flight Deck, Copper Coach and Data Grid get their missing arcs, needles and bars.
+  - Regen shows in mint in every layout.
+- **Car lights** — Indicators now blink amber and brake lights glow red; both were white. In Studio, the brake lights now sit on the tail light bar instead of above it.
 
 ### ⚡ Optimizations & Fixes
 
-- **DiLink 5** — Vehicle commands work again, and the trunk opens while the car is locked (experimental).
-- **Recording** — New clips go to the SD card you chose, with cabin audio in sync.
-- **Sharper alerts** — Better-quality alert photos in Telegram and web push.
-- **Live View** — Works again through proxies and tunnels.
-- **Quick commands** — Lock, Unlock, Flash and Find work again over Cloudflare tunnels.
-- **Check for Updates** — Now on the Module Faults and Factory DVR pages too.
-- **Garage signs** — Reads the small level and bay placards it used to miss.
-- **Tidier pages** — Recordings filters fold behind a Filters button, Trips and Charging keep their date bar pinned, and search results show each page's icon.
-- **Automations** — One stuck vehicle reading no longer holds up other automations.
-- **Under the hood** — Steadier service restarts, lighter performance monitoring and motion heatmap, and translated module fault names.
+- **No restart at drive start** — A slow SD card write no longer restarts OverDrive, which used to drop Custom Layouts, blind spot and recording for about 30 s.
+- **Smoother drive start** — The road model now runs only for layouts that draw the road, and starts 45 s into the drive.
+- **Garage and tunnel from the camera** — Custom Layouts switch to the garage or tunnel scene at night and when a drive starts indoors.
+- **Front doors on right-hand-drive cars** — The driver's door no longer shows as the front-left door. This affected Custom Layouts, the web Dashboard, the walk-away lock and door automations.
+- **Tyre warning** — Custom Layouts highlights the tyre that is actually low.
+- **Light and dark follow the car** — In Auto, Custom Layouts switch with the car's own cluster theme. Until OverDrive learns the car's signal, they follow the headlights and the light sensor. Dark layouts still show a day or night sky.
+- **Power on plug-in hybrids** — Custom Layouts show live power on DiLink 3/4 plug-in hybrids instead of "–".
+- **Parking pillar codes** — Signage reads stacked codes such as "B2 · Bay T15".
+- **Record on strong motion** — With the option on, a large, close moving object now starts a recording even when the AI can't identify it.
+- **Web app on slow connections** — The Dashboard and Live View no longer show half-built pages, such as a giant car outline, while they load.
 
 ---
+### ✨ New Features
+
+- **87 driver-display layouts** — Preview each layout by day and night before choosing from 6 standard layouts, 13 OverDrive Originals and 68 more presets.
+- **Dashboard Builder** — Build from an Original in the web app. Choose instruments, scenery and blind-spot camera positions. Share or rate community designs, then select a saved dashboard on the car.
+- **SD card and USB on DiLink 100** — Atto 3 EVO, Sealion 8 and New E2 can record, play back and keep trips on the SD card or a USB stick.
+- **Trusted phone proximity in Automations** — A new trigger and condition for when your trusted phones are Near, Away or Unknown. It never locks or powers off the car by itself.
+- **SD card formatting** — Format the SD card from the Storage page, with a preview and a confirmation. Built-in SD slots only; experimental.
+- **More Service Mode pauses** — Service Mode can also pause Proxi
+
+… (truncated)

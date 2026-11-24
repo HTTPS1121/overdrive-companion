@@ -656,6 +656,7 @@
     line-height: 1.45;
 }
 .signal-hint:empty { display: none; }
+.form-grid .row .inputs > .step-reading { flex: 0 0 100%; }
 .signal-hint-now { display: flex; align-items: baseline; }
 .signal-hint-label {
     text-transform: uppercase;

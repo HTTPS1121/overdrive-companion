@@ -29,7 +29,7 @@
         return (v == null || v === key) ? fallback(key, vars) : v;
     }
     var FALLBACK = {
-        'parking.now_parked': 'Parked now', 'parking.parked_for': 'Parked for {d}', 'parking.stat_parked_for': 'Parked for',
+        'parking.now_parked': 'Parked now', 'parking.live_tag': 'LIVE', 'parking.parked_for': 'Parked for {d}', 'parking.stat_parked_for': 'Parked for',
         'parking.no_sessions_title': 'No parking sessions yet', 'parking.no_sessions': 'The first one is created the next time the car is switched off.',
         'parking.no_sessions_range': 'No parking sessions in this range.', 'parking.disabled_title': 'Parking Intelligence is off',
         'parking.disabled_body': 'When on, every switch-off opens a parking session: where the car is, a four-camera still after you walk away, which vehicles arrived or left next to you while sentry watched, and a "Back at car" summary when you return.',
@@ -245,7 +245,7 @@
         $('pkHeroSub').textContent = fmtDay(cur.startedMs) + ' · ' + fmtTime(cur.startedMs)
             + ' · ' + t('parking.gps_' + gpsQuality(cur).toLowerCase()) + ' · ' + t('parking.sentry_' + (cur.sentryState || 'unknown'))
             + (hasEnergy(cur) ? ' · ' + fmtEnergy(cur) : '');
-        $('pkHeroTag').textContent = 'LIVE';
+        $('pkHeroTag').textContent = t('parking.live_tag');
         $('pkHeroDuration').textContent = fmtDur(Date.now() - cur.startedMs);
         $('pkHeroEvents').textContent = String(cur.eventCount || 0);
         $('pkHeroNeighbours').textContent = String(cur.neighbourCount || 0);
